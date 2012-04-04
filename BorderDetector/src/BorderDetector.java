@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 
 
 /**
+ * Detecta colores en imágenes.
  * @author fscasserra
  */
 public class BorderDetector {
@@ -139,7 +140,7 @@ public class BorderDetector {
 				for (int col=0;col<=(TAMANO_BLOQUE-1);col++){
 					bloque = new Bloque(row, col);
 					bloques.add(bloque);
-					/*
+					/* solo para el borde
 					if (row==0||row==(TAMANO_BLOQUE-1)||col==0||col==(TAMANO_BLOQUE-1)){
 						bloque = new Bloque(row, col);
 						bloques.add(bloque);
@@ -174,9 +175,9 @@ public class BorderDetector {
 				matriz[blo.col][blo.row] = blo.status;
 			}
 					
+			//Imprime el archivo de ejemplo
 			StringBuilder bu = new StringBuilder(); 
 			bu.append("<html><body><table>");
-			//imprime la matriz de ejemplo
 			for (String[] strings : matriz) {
 				bu.append("<tr>");
 				for (String pos : strings) {
