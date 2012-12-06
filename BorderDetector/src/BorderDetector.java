@@ -17,16 +17,17 @@ import javax.imageio.ImageIO;
  */
 public class BorderDetector {
 
-	private static final int TAMANO_BLOQUE = 64;
+	private static final int TAMANO_BLOQUE = 32; //1024 bloques, si lo pongo en una red neural, tendria 1024 neuronas de entrada, esta ok
 
 	public static void main(String[] args) {
 
 		BorderDetector border = new BorderDetector();
 		try {
-			border.detectWhiteBorder("http://t1.gstatic.com/images?q=tbn:ANd9GcSX9WxSNWT8wVu1zdTPluxV0866L2PFP1DMFi7gWxGCbbmiL881cw",true,false);
+			border.detectWhiteBorder("http://upload.wikimedia.org/wikipedia/commons/c/c1/American-Eskimo-dog.jpg",true,false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("Fin.");
 		System.exit(0);
 	}
 	
@@ -44,6 +45,9 @@ public class BorderDetector {
 		
 		public void verificar() {
 			
+			//status="<td bgcolor=\"rgb("+red+","+green+","+blue+")\">#</td>";
+			status="<td style=\"background-color: rgb("+red+","+green+","+blue+"); color: rgb("+red+","+green+","+blue+")\">#</td>";
+			/*
 			//Detecta Blanco
 			if (red>=230 && green>=230 && blue>=230){
 				status="<td style=\"background-color: white; color: white\">#</td>";
@@ -83,6 +87,8 @@ public class BorderDetector {
 
 			else 
 				status="<td style=\"background-color: white; color: white\">#</td>";
+			
+			*/
 		}
 	}
 
@@ -108,7 +114,7 @@ public class BorderDetector {
 		int blue=0;
 		
 		ArrayList<Bloque> bloques = new ArrayList<Bloque>();
-		String[][] matriz = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
+		String[][] matriz = new String[(int)TAMANO_BLOQUE][(int)TAMANO_BLOQUE];
 
 		//limpia la matriz
 		for (int i=0;i<TAMANO_BLOQUE;i++)
@@ -131,8 +137,22 @@ public class BorderDetector {
 			int ancho = image.getWidth();
 			int alto = image.getHeight();
 			
+			System.out.println(ancho+" - "+alto);
+			
+			/*
+			 * Existe un problema al calcular el ancho del bloque, si la division es con coma,
+			 * lo que pasa es que se van haciendo bloquecitos chicos que al final no calcular la foto total
+			 * porque no llegan al final cuando se va avanzando.
+			 * Lo que termina pasando es que la imagen final es una imagen cuadrada pero que quizas le faltan los ultimos cuadros 
+			 * cuando menos sean los bloques, menos pasa, porque la parte decimal influye menos. :D
+			 * 
+			 */
+			
 			int anchoBloque = ancho/TAMANO_BLOQUE;
 			int altoBloque = alto/TAMANO_BLOQUE;
+			
+			System.out.println("anchobloque: "+anchoBloque);
+			System.out.println("altobloque: "+altoBloque);
 			
 			//Llena la lista de bloques
 			Bloque bloque;
@@ -156,8 +176,8 @@ public class BorderDetector {
 				green=0;
 				blue=0;				
 				//obtiene el color de cada pixel y acumula las cantidades
-				for (int x=anchoBloque*blo.row; x<((anchoBloque*blo.row)+anchoBloque);x++){
-					for (int y=altoBloque*blo.col; y<((altoBloque*blo.col)+altoBloque);y++){
+				for (int x=(anchoBloque*blo.row); x<((anchoBloque*blo.row)+anchoBloque);x++){
+					for (int y=(altoBloque*blo.col); y<((altoBloque*blo.col)+altoBloque);y++){
 						c = image.getRGB(x,y);
 						red = red + ((c & 0x00ff0000) >> 16);
 						green = green + ((c & 0x0000ff00) >> 8);
@@ -165,7 +185,7 @@ public class BorderDetector {
 					}
 				}
 				//guarda el promedio de colores
-				int superficieBloque = (anchoBloque*altoBloque);
+				int superficieBloque = anchoBloque*altoBloque;
 				blo.red=red/superficieBloque;
 				blo.green=green/superficieBloque;
 				blo.blue=blue/superficieBloque;
@@ -173,11 +193,18 @@ public class BorderDetector {
 				blo.verificar();		
 				//Guarda el blque en la matriz
 				matriz[blo.col][blo.row] = blo.status;
+				
 			}
 					
 			//Imprime el archivo de ejemplo
 			StringBuilder bu = new StringBuilder(); 
-			bu.append("<html><body><table>");
+			bu.append("<!DOCTYPE html>");
+			bu.append("<html>");
+			bu.append("<head>");
+			bu.append("<title>Title of the document</title>");
+			bu.append("</head>");
+			bu.append("<body>");
+			bu.append("<table style=\"border:0;\">");
 			for (String[] strings : matriz) {
 				bu.append("<tr>");
 				for (String pos : strings) {
@@ -185,10 +212,12 @@ public class BorderDetector {
 				}
 				bu.append("</tr>");
 			}
-			bu.append("</table></body></html>");
-			
+			bu.append("</table>");
+			bu.append("</body>");
+			bu.append("</html>");
+						
 			Writer output = null;
-			File file = new File("/home/ubuntu6500/workspace/BorderDetector/src/imagen.html");
+			File file = new File("/home/fersca/imagen.html");
 			output = new BufferedWriter(new FileWriter(file));
 			output.write(bu.toString());
 			output.close();
