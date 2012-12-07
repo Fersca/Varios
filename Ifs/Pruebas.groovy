@@ -173,7 +173,7 @@ abstract class Estrategia {
 	}
 }
 
-class Jardin {
+class Jardin extends Estrategia{
 	def condicionOK(edad){
 		return edad<6
 	}
