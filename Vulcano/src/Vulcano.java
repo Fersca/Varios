@@ -75,11 +75,12 @@ public class Vulcano {
 			int b = p1y-(int)(tan*p1x);
 			
 			//Con la tangente se calcula el punto que debería tener el tercer planeta
+			//Si b=0 quiere decir que pasa por el origen, o sea, está alineado al sol
 			if (b!=0){
 				
 				int y2 = (int)(tan*p3x)+b; //y=mx+b
 				
-				//Si es igual al que tiene, están alineados, excluye al sol (b=0)
+				//Si es igual al que tiene, están alineados.
 				if ((y2==p3y)){
 					alineadoSinSon++;
 				}				
