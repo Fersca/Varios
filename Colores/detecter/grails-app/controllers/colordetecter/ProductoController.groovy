@@ -1,6 +1,6 @@
 package colordetecter
 
-class ItemController {
+class ProductController {
 
 	static scaffold = true
 		

@@ -2,7 +2,7 @@
 quartz {
 
 //	if (System.env.JOB_ACTIVE?.equals("true")){
-		autoStartup = true
+		autoStartup = false
 //	  } else {
 //		autoStartup = false
 //	  }
