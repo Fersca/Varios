@@ -1,36 +1,202 @@
-<html>
+<!doctype html>
+<!--[if IE 7]>    <html class="no-js lt-ie10 lt-ie9 lt-ie8 ie7" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie10 lt-ie9 ie8" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js lt-ie10 ie9" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
 <head>
-</head>
-<body bgcolor="lightgrey">
-
-<center><h1>Busqueda por Colores</h1>
-
-<table border="0">
-<tr>
-	<td style="background-color: black; color: black"><a href="index?color=negro">###</a></td>
-	<td style="background-color: white; color: white"><a href="index?color=blanco">###</a></td>
-	<td style="background-color: red; color: red"><a href="index?color=rojo">###</a></td>
-	<td style="background-color: blue; color: blue"><a href="index?color=azul">###</a></td>
-	<td style="background-color: green; color: green"><a href="index?color=verde">###</a></td>
-	<td style="background-color: yellow; color: yellow"><a href="index?color=amarillo">###</a></td>
-</tr>
-<tr>
-	<td style="background-color: grey; color: grey"><a href="index?color=gris">###</a></td>
-	<td style="background-color: violet; color: violet"><a href="index?color=violeta">###</a></td>
-	<td style="background-color: pink; color: pink"><a href="index?color=rosa">###</a></td>
-	<td style="background-color: brown; color: brown"><a href="index?color=marron">###</a></td>
-	<td style="background-color: orange; color: orange"><a href="index?color=naranja">###</a></td>
-	<td style="background-color: skyblue; color: skyblue"><a href="index?color=celeste">###</a></td>
-</tr>
-</table>
-</center>
-
-<br>
-<g:each in="${listado}">
-
-	<img src="${it.imagen}" height="200" width="200">
+	<!-- Avoid script blocking -->
+	<script></script>
+	<meta charset="utf-8">
+	<title>Detectar Colores</title>
  
-</g:each>
+	<!-- Chico UI Core stylesheet -->
+	<link rel="stylesheet" href="../css/chico-0.13.1.css">
+	
+	<style type="text/css">
+	
+	body {
+	    background: url("../assets/piedrarosa.jpg") no-repeat scroll 0 0 #E8BA89;
+	    color: #524D4D;
+	    font-family: "Helvetica Neue",Helvetica,Arial,"MS Trebuchet",sans-serif;
+	    font-size: 14px;
+	    line-height: 1.231em;
+	    max-width: none;
+	    min-width: 0;
+	    padding: 0;
+	    background-size: 100%;
+	}	
+	
+	#colorchart td {
+	    height: 50px;
+	    width: 50px;
+	}
+	
+	#colorchart {
+	    border-collapse: collapse;
+	}
+	
+	h2,h1,h3 {
+	color: white;
+	}
+	
+	.cs-logo {
+	    font-size: 10em;
+	    margin-bottom: 0.2em;
+	}
+	.cs-logo {
+	    color: #AD335C;
+	    font-family: "Lobster Two",cursive;
+	    font-size: 6em;
+	    font-style: italic;
+	    font-weight: bold;
+	    line-height: 1.5em;
+	    text-align: center;
+	    text-shadow: 0 -2px #520029, 0 1px rgba(255, 255, 255, 0.2);
+	}	
+	
+	.cs-logo2 {
+	    color: #004700;
+	    font-family: "Lobster Two",cursive;
+	    font-size: 3em;
+	    font-style: italic;
+	    font-weight: bold;
+	    line-height: 1.5em;
+	    text-align: center;
+	    text-shadow: 0 -2px #003300, 0 1px rgba(255, 255, 255, 0.2);
+	}		
+	
+	.cs-btn-container {
+	    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.3);
+	    border-radius: 6px 6px 6px 6px;
+	    box-shadow: 0 1px rgba(255, 255, 255, 0.2), 0 0 6px rgba(0, 0, 0, 0.08) inset;
+	    display: inline-block;
+	    text-align: center;
+	}
+	
+	@font-face {
+	    font-family: "Lobster Two";
+	    font-style: italic;
+	    font-weight: 400;
+	    src: local("Lobster Two Italic"), local("LobsterTwo-Italic"), url("https://themes.googleusercontent.com/static/fonts/lobstertwo/v4/Ul_16MSbfayQv1I4QhLEoNkZXW4sYc4BjuAIFc1SXII.woff") format("woff");
+	}
 
+	</style>	
+	
+</head>
+<body>
+
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) {return;}
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=169747283118913";
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
+
+	<div align="center">	
+
+			<h1 class="cs-logo">Detectar Colores</h1>
+			<h2>Elija el color de su remera en <a href="www.mercadolibre.com.ar">MercadoLibre</a></h2>
+			<table id="colorchart">
+			<tbody>
+			<tr>
+				<td style="background-color: black; color: black" onclick="cambiarColor('negro');" onmouseover="cambiarNombreColor('negro');"></td>
+				<td style="background-color: white; color: white" onclick="cambiarColor('blanco');" onmouseover="cambiarNombreColor('blanco');"></td>
+				<td style="background-color: red; color: red" onclick="cambiarColor('rojo');" onmouseover="cambiarNombreColor('rojo');"></td>
+				<td style="background-color: blue; color: blue" onclick="cambiarColor('azul');" onmouseover="cambiarNombreColor('azul');"></td>	
+				<td style="background-color: green; color: green" onclick="cambiarColor('verde');" onmouseover="cambiarNombreColor('verde');"></td>
+				<td style="background-color: yellow; color: yellow" onclick="cambiarColor('amarillo');" onmouseover="cambiarNombreColor('amarillo');"></td>
+				<td style="background-color: grey; color: grey" onclick="cambiarColor('gris');" onmouseover="cambiarNombreColor('gris');"></td>
+				<td style="background-color: violet; color: violet" onclick="cambiarColor('violeta');" onmouseover="cambiarNombreColor('violeta');"></td>
+				<td style="background-color: pink; color: pink" onclick="cambiarColor('rosa');" onmouseover="cambiarNombreColor('rosa');"></td>
+				<td style="background-color: brown; color: brown" onclick="cambiarColor('marron');" onmouseover="cambiarNombreColor('marron');"></td>
+				<td style="background-color: orange; color: orange" onclick="cambiarColor('naranja');" onmouseover="cambiarNombreColor('naranja');"></td>
+				<td style="background-color: skyblue; color: skyblue" onclick="cambiarColor('celeste');" onmouseover="cambiarNombreColor('celeste');"></td>
+			</tr>
+			</tbody>
+			</table>
+
+			<div id="nombrecolor" class="cs-logo2">
+			${params.color.toUpperCase()}
+			</div>
+
+	</div>
+
+	<br>
+
+	<div class="examplecarru ch-carousel">
+		<ul>
+		<g:each in="${listado}">
+			<li>
+					<div class="cs-btn-container">
+					<br>
+					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
+					- <img class="imagen" src="${it.imagen}" height="200" width="200" title="${it.titulo} - Precio: ${it.precio}"> -
+					<br>
+					-
+					</a>
+					</div>
+			</li>
+		</g:each>
+		</ul>
+	</div>	
+ 	<div align="center">
+ 	<table>
+ 	<tr>
+ 	<td><div class="fb-like" data-href="http://xchange.vg" data-send="false" data-width="450" data-show-faces="true"></div></td>
+ 	<td style="text-align: center;vertical-align: middle;">
+ 		<h3>Utilice nuestra API para analizar imágenes</h3>
+		<form action="/detecter/home/contact/1">										
+			<input id="contactar" class="ch-btn-skin ch-btn-small" type="submit" value="Contactar" style="cursor: pointer;"/>								
+		</form>	 		
+ 	</td>
+	</tr>
+	</table>
+	</div>
+	<script src="../js/jquery.js"></script>
+	<script src="../js/chico-0.13.1.js"></script>
+	<script>
+
+	var foo1 = $(".examplecarru").carousel();
+	var foo2 = $(".imagen").tooltip();
+	var foo3 = $("#contactar").modal();
+	
+	cambiarNombreColor('${params.color.toLowerCase()}');
+	
+	function cambiarColor(color) {
+		window.location.href = "index?color="+color;
+	}
+	
+	function cambiarNombreColor(color) {
+		var o = document.getElementById("nombrecolor");
+		o.innerHTML=color.toUpperCase();
+		if (color=='rojo')
+			o.style.color="red";
+		else if (color=="blanco")
+			o.style.color="white";
+		else if (color=="negro")
+			o.style.color="black";
+		else if (color=="verde")
+			o.style.color="green";
+		else if (color=="amarillo")
+			o.style.color="yellow";
+		else if (color=="azul")
+			o.style.color="blue";
+		else if (color=="gris")
+			o.style.color="grey";
+		else if (color=="marron")
+			o.style.color="brown";
+		else if (color=="violeta")
+			o.style.color="violet";
+		else if (color=="rosa")
+			o.style.color="pink";
+		else if (color=="naranja")
+			o.style.color="orange";
+		else if (color=="celeste")
+			o.style.color="skyblue";
+		
+	}	
+	</script> 
 </body>
 </html>

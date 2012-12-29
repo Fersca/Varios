@@ -8,9 +8,17 @@ class HomeController {
 		
 		def color =  params.color
 		
-		def lista = Producto.findAll("from Producto a where ${color} > 40 order by ${color} desc",[max:72])
+		if (!color) {
+			color = "rosa"
+			params.color = "rosa"
+		}
+		def lista = Producto.findAll("from Producto a where ${color} > 40 order by ${color} desc",[max:100])
 		
 		return [listado: lista]
+		
+	}
+	
+	def contact = {
 		
 	}
 }

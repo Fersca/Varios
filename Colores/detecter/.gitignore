@@ -1,0 +1,12 @@
+target/
+.project
+.settings/
+stacktrace.log
+.project
+.idea
+*.iml
+cobertura.ser
+*.sublime*
+.classpath
+target-eclipse/
+bin/
