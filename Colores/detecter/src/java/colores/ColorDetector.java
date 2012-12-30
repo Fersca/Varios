@@ -21,7 +21,7 @@ public class ColorDetector {
 
 	private static final int TAMANO_BLOQUE = 40;
 	
-	public ArrayList<ColorDetected> detectColors(String foto, Boolean isURL, Boolean createFiles) throws Exception {
+	public ArrayList<Object> detectColors(String foto, Boolean isURL, Boolean createFiles) throws Exception {
 					
 		int c;
 		int red=0;
@@ -109,7 +109,20 @@ public class ColorDetector {
 			Map<String, Integer> colores = cuentaColores(matrizColoAproxColor);
 			
 			//Filtra los colores y deja solo los que aparecen mas
-			ArrayList<ColorDetected> detectados = detectar(colores);
+			ArrayList<Object> detectados = new ArrayList<Object>(); 
+			
+			//se agrega el ancho y el alto
+			Integer ancho1 = ancho;
+			Integer alto1 = alto;
+			
+			detectados.add(ancho1);
+			detectados.add(alto1);
+			
+			//se agrega los colores
+			ArrayList<ColorDetected> coloresDetectados = detectar(colores);
+			
+			detectados.addAll(coloresDetectados);
+			//ArrayList<ColorDetected> detectados = detectar(colores);
 			
 			if (createFiles){
 				
@@ -119,7 +132,7 @@ public class ColorDetector {
 				System.out.println("altobloque: "+altoBloque);
 				
 				//Crea el HTML de ejemplo
-				FileHelper.createFile(matriz, matrizColoAprox, matrizColoAproxColor, matrizColoAproxColorNum, colores, detectados);
+				FileHelper.createFile(matriz, matrizColoAprox, matrizColoAproxColor, matrizColoAproxColorNum, colores, coloresDetectados);
 				
 				//Crea la imagen en el disco de ejemplo
 				FileHelper.createImgage(matrizColo, TAMANO_BLOQUE);

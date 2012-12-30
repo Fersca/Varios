@@ -7,7 +7,7 @@
 	<!-- Avoid script blocking -->
 	<script></script>
 	<meta charset="utf-8">
-	<title>Detectar Colores</title>
+	<title>Ropa de Colores</title>
  
 	<!-- Chico UI Core stylesheet -->
 	<link rel="stylesheet" href="../css/chico-0.13.1.css">
@@ -15,7 +15,7 @@
 	<style type="text/css">
 	
 	body {
-	    background: url("../assets/piedrarosa.jpg") no-repeat scroll 0 0 #E8BA89;
+	    background: url("../assets/piedrarosa.jpg") repeat scroll 0 0 #E8BA89;
 	    color: #524D4D;
 	    font-family: "Helvetica Neue",Helvetica,Arial,"MS Trebuchet",sans-serif;
 	    font-size: 14px;
@@ -27,8 +27,8 @@
 	}	
 	
 	#colorchart td {
-	    height: 50px;
-	    width: 50px;
+	    height: 40px;
+	    width: 40px;
 	}
 	
 	#colorchart {
@@ -46,7 +46,7 @@
 	.cs-logo {
 	    color: #AD335C;
 	    font-family: "Lobster Two",cursive;
-	    font-size: 6em;
+	    font-size: 4em;
 	    font-style: italic;
 	    font-weight: bold;
 	    line-height: 1.5em;
@@ -55,9 +55,9 @@
 	}	
 	
 	.cs-logo2 {
-	    color: #004700;
+	    color: #FFFFFF;
 	    font-family: "Lobster Two",cursive;
-	    font-size: 3em;
+	    font-size: 2em;
 	    font-style: italic;
 	    font-weight: bold;
 	    line-height: 1.5em;
@@ -96,8 +96,8 @@
 
 	<div align="center">	
 
-			<h1 class="cs-logo">Detectar Colores</h1>
-			<h2>Elija el color de su remera en <a href="www.mercadolibre.com.ar">MercadoLibre</a></h2>
+			<h1 class="cs-logo">Ropa de Colores</h1>
+			<!-- <h2>Elija el color de su ropa en <a href="http://www.mercadolibre.com.ar" target="_blank">MercadoLibre</a></h2> -->
 			<table id="colorchart">
 			<tbody>
 			<tr>
@@ -124,7 +124,10 @@
 	</div>
 
 	<br>
-
+	<div id="nombrecolor" class="cs-logo2">
+	Remeras
+	</div>
+	<hr>
 	<div class="examplecarru ch-carousel">
 		<ul>
 		<g:each in="${listado}">
@@ -132,7 +135,27 @@
 					<div class="cs-btn-container">
 					<br>
 					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
-					- <img class="imagen" src="${it.imagen}" height="200" width="200" title="${it.titulo} - Precio: ${it.precio}"> -
+					- <img class="imagen" src="${it.imagen}" height="100" width="100" title="${it.titulo} - Precio: ${it.precio}"> -
+					<br>
+					-
+					</a>
+					</div>					
+			</li>
+		</g:each>
+		</ul>
+	</div>
+	<div id="nombrecolor" class="cs-logo2">
+	Carteras
+	</div>		
+	<hr>
+	<div class="examplecarru ch-carousel">
+		<ul>
+		<g:each in="${listado}">
+			<li>
+					<div class="cs-btn-container">
+					<br>
+					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
+					- <img class="imagen" src="${it.imagen}" height="100" width="100" title="${it.titulo} - Precio: ${it.precio}"> -
 					<br>
 					-
 					</a>
@@ -140,19 +163,74 @@
 			</li>
 		</g:each>
 		</ul>
-	</div>	
+	</div>
+	<div id="nombrecolor" class="cs-logo2">
+	Zapatos
+	</div>		
+	<hr>
+	<div class="examplecarru ch-carousel">
+		<ul>
+		<g:each in="${listado}">
+			<li>
+					<div class="cs-btn-container">
+					<br>
+					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
+					- <img class="imagen" src="${it.imagen}" height="100" width="100" title="${it.titulo} - Precio: ${it.precio}"> -
+					<br>
+					-
+					</a>
+					</div>
+			</li>
+		</g:each>
+		</ul>
+	</div>		
+	<div id="nombrecolor" class="cs-logo2">
+	</div>		
+	<hr>	
+	<br>
  	<div align="center">
+ 	<div class="fb-like" data-href="http://xchange.vg" data-send="false" data-width="200" data-show-faces="true"></div>
+ 	<br><br><br><br>
+ 	
+ 	<div>
  	<table>
  	<tr>
- 	<td><div class="fb-like" data-href="http://xchange.vg" data-send="false" data-width="450" data-show-faces="true"></div></td>
- 	<td style="text-align: center;vertical-align: middle;">
- 		<h3>Utilice nuestra API para analizar imágenes</h3>
+ 	<td  width="40%" style="text-align: center;vertical-align: middle;">
+	 	<div id="nombrecolor" class="cs-logo2">
+		Pruebe nuestra API para analizar imágenes
+		</div>	
+ 	</td>
+ 	<td  width="40%" style="text-align: center;vertical-align: middle;">
+ 		<div id="nombrecolor" class="cs-logo2">
+		¿Desea utilizar la API para su sitio?
+		</div>	
+ 	</td>
+ 	</tr>
+ 	<tr>
+ 	<td width="20%">
+ 	</td>
+ 	<td width="20%">
+ 	</td> 	
+ 	</tr>
+ 	<tr>
+ 	<td  width="40%" style="text-align: center;vertical-align: middle;">
+		<form method="POST" action="/detecter/home/analizar/1">
+			<p class="ch-form-row">
+				<input name="foto" type="text" size="50" value="http://www.montagneoutdoors.com.ar/1102-2768-thickbox/remera-de-ninos-exploring.jpg">
+				<input id="analizar" class="ch-btn-skin ch-btn-small" name="send" type="submit" value="Analizar">
+			</p>
+		</form>		
+		
+ 	</td>
+ 	<td  width="40%" style="text-align: center;vertical-align: middle;">
 		<form action="/detecter/home/contact/1">										
 			<input id="contactar" class="ch-btn-skin ch-btn-small" type="submit" value="Contactar" style="cursor: pointer;"/>								
 		</form>	 		
  	</td>
-	</tr>
-	</table>
+ 	</tr>
+ 	</table>
+ 	</div>
+						
 	</div>
 	<script src="../js/jquery.js"></script>
 	<script src="../js/chico-0.13.1.js"></script>
@@ -160,7 +238,10 @@
 
 	var foo1 = $(".examplecarru").carousel();
 	var foo2 = $(".imagen").tooltip();
-	var foo3 = $("#contactar").modal();
+	var foo3 = $("#contactar").modal({
+		width: "650px",
+		height: "580px"
+	});
 	
 	cambiarNombreColor('${params.color.toLowerCase()}');
 	
