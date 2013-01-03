@@ -21,7 +21,7 @@ public class ColorDetector {
 
 	private static final int TAMANO_BLOQUE = 40;
 	
-	public ArrayList<Object> detectColors(String foto, Boolean isURL, Boolean createFiles) throws Exception {
+	public ImageInfo detectColors(String foto, Boolean isURL, Boolean createFiles) throws Exception {
 					
 		int c;
 		int red=0;
@@ -35,7 +35,9 @@ public class ColorDetector {
 		String[][] matrizColoAprox = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
 		String[][] matrizColoAproxColor = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
 		String[][] matrizColoAproxColorNum = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
-
+		String[][] matrizColorBorde = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
+		String[][] matrizColorCentro = new String[TAMANO_BLOQUE][TAMANO_BLOQUE];
+		
 		//limpia la matriz
 		for (int i=0;i<TAMANO_BLOQUE;i++)
 			for (int j=0;j<TAMANO_BLOQUE;j++)
@@ -103,26 +105,30 @@ public class ColorDetector {
 				
 				//Esta matriz se necesita si o si
 				matrizColoAproxColor[blo.col][blo.row] = blo.colorAprox.nombre;
+				
+				if (blo.col<=1 || blo.row<=1 || blo.col>=38 || blo.row>=38){
+					matrizColorBorde[blo.col][blo.row] = blo.colorAprox.nombre;
+				} else {
+					if (blo.col<=4 || blo.row<=4 || blo.col>=35 || blo.row>=35) { // no hace nada con esta franja
+					} else {
+						matrizColorCentro[blo.col][blo.row] = blo.colorAprox.nombre;
+					}
+				}
 			}
 					
 			//Cuenta la cantidad de colores 
-			Map<String, Integer> colores = cuentaColores(matrizColoAproxColor);
+			Map<String, Integer> colores 		= cuentaColores(matrizColoAproxColor);
+			Map<String, Integer> coloresBorde 	= cuentaColores(matrizColorBorde);
+			Map<String, Integer> coloresCentro 	= cuentaColores(matrizColorCentro);
 			
-			//Filtra los colores y deja solo los que aparecen mas
-			ArrayList<Object> detectados = new ArrayList<Object>(); 
+			ImageInfo imageInfo = new ImageInfo();
+			imageInfo.alto=alto;
+			imageInfo.ancho=ancho;
 			
-			//se agrega el ancho y el alto
-			Integer ancho1 = ancho;
-			Integer alto1 = alto;
-			
-			detectados.add(ancho1);
-			detectados.add(alto1);
-			
-			//se agrega los colores
-			ArrayList<ColorDetected> coloresDetectados = detectar(colores);
-			
-			detectados.addAll(coloresDetectados);
-			//ArrayList<ColorDetected> detectados = detectar(colores);
+			//Filtra los colores y deja solo los que aparecen mas			
+			ArrayList<ColorDetected> detectados 		= detectar(colores, TAMANO_BLOQUE*TAMANO_BLOQUE);
+			ArrayList<ColorDetected> detectadosBorde 	= detectar(coloresBorde, 304); //576 = (40x40)-(36x36)
+			ArrayList<ColorDetected> detectadosCentro 	= detectar(coloresCentro, 900); //30x30 del centro
 			
 			if (createFiles){
 				
@@ -132,21 +138,26 @@ public class ColorDetector {
 				System.out.println("altobloque: "+altoBloque);
 				
 				//Crea el HTML de ejemplo
-				FileHelper.createFile(matriz, matrizColoAprox, matrizColoAproxColor, matrizColoAproxColorNum, colores, coloresDetectados);
+				FileHelper.createFile(matriz, matrizColoAprox, matrizColoAproxColor, matrizColoAproxColorNum, colores, detectados);
 				
 				//Crea la imagen en el disco de ejemplo
 				FileHelper.createImgage(matrizColo, TAMANO_BLOQUE);
 			}
 
-			return detectados;
+			imageInfo.detectados=detectados;
+			imageInfo.detectadosBorde=detectadosBorde;
+			imageInfo.detectadosCentro=detectadosCentro;
+			
+			return imageInfo;
 		} catch (Exception e){
 			throw e;
 		}
 	}
 
-	private ArrayList<ColorDetected> detectar(Map<String, Integer> colores) {
+	private ArrayList<ColorDetected> detectar(Map<String, Integer> colores, int cant) {
 
-		double tamanio = TAMANO_BLOQUE*TAMANO_BLOQUE;
+		//double tamanio = TAMANO_BLOQUE*TAMANO_BLOQUE;
+		double tamanio = (double)cant;
 		
 		ArrayList<ColorDetected> array = new ArrayList<ColorDetected>();
 		
@@ -154,13 +165,16 @@ public class ColorDetector {
 	    while (it.hasNext()) {
 	        Map.Entry<String, Integer> pairs = (Map.Entry<String, Integer>)it.next();
 
-	        double porc = (double)pairs.getValue()/tamanio;
-	        
-	        //if (porc>0.15){
+	        if (pairs.getKey()!=null){
+
+		        double porc = (double)pairs.getValue()/tamanio;
+		        //System.out.println(cant+"--> "+pairs.getKey()+" - "+pairs.getValue());		        
 	        	porc = porc * 100;
 	        	ColorDetected col = new ColorDetected(pairs.getKey(),(int)porc,0);
 	        	array.add(col);
-	        //}
+	        		        	
+	        }
+	        
 	    }
 		
 	    Collections.sort(array);
@@ -175,17 +189,21 @@ public class ColorDetector {
 
 	private HashMap<String, Integer> cuentaColores(String[][] matrizColoAprox) {
 		
+		int cant=0;
 		HashMap<String, Integer> tabla = new HashMap<String, Integer>();
 		
 		for (String[] s1 : matrizColoAprox) {
 			for (String s2 : s1){
-				if (tabla.containsKey(s2))
-					tabla.put(s2, tabla.get(s2)+1);
-				else
-					tabla.put(s2, 1);
+				if (s2!=null){
+					cant++;
+					if (tabla.containsKey(s2))
+						tabla.put(s2, tabla.get(s2)+1);
+					else
+						tabla.put(s2, 1);
+				}
 			}
 		}
-		
+		//System.out.println("cant: "+cant);
 		return tabla;
 	}
 

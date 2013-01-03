@@ -1,19 +1,6 @@
 <html>
   <head>
-  
-  	<style type="text/css">
-		pre, code {
-		    background-color: #F8F8F8;
-		    border: 1px solid #CCCCCC;
-		    border-radius: 3px 3px 3px 3px;
-		    color: #333333;
-		    font-family: Monaco,"Courier New",monospace;
-		    font-size: 12px;
-		    margin: 10px 0;
-		    padding: 7px 10px;
-		}
-	</style>
-
+  	<meta name="layout" content="web">
   </head>
   <body>
   
@@ -41,6 +28,7 @@
 		"percentage":<b>23</b>
 	},
 	"background":"<b>white</b>",
+	"center":"<b>blue</b>"
 	"width":<b>500</b>,
 	"height":<b>400</b>
 }
