@@ -8,6 +8,13 @@
 		<title><g:layoutTitle default="Ropa de Colores" /></title>
         <meta name="description" content="Ropa de Colores - Encuentra la ropa en Mercadolibre buscando por colores" >
 
+		<meta property="og:title" content="Ropa de Colores" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://www.ropadecolores.com" />
+		<meta property="og:image" content="http://ec2-174-129-96-72.compute-1.amazonaws.com/detecter/images/remera.jpg" />
+		<meta property="og:site_name" content="Ropa de Colores" />
+		<meta property="fb:admins" content="527564609" />	
+
 		<!-- Chico UI Core stylesheet -->
 		<link rel="stylesheet" href="${resource(dir:'/css',file:'chico-0.13.1.css')}">
 		

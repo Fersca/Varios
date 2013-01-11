@@ -129,6 +129,7 @@ public class ColorDetector {
 			ArrayList<ColorDetected> detectados 		= detectar(colores, TAMANO_BLOQUE*TAMANO_BLOQUE);
 			ArrayList<ColorDetected> detectadosBorde 	= detectar(coloresBorde, 304); //576 = (40x40)-(36x36)
 			ArrayList<ColorDetected> detectadosCentro 	= detectar(coloresCentro, 900); //30x30 del centro
+			ArrayList<ColorDetected> detectadosProducto   = detectarProducto(detectadosBorde,detectadosCentro);
 			
 			if (createFiles){
 				
@@ -147,11 +148,69 @@ public class ColorDetector {
 			imageInfo.detectados=detectados;
 			imageInfo.detectadosBorde=detectadosBorde;
 			imageInfo.detectadosCentro=detectadosCentro;
+			imageInfo.detectadosProducto=detectadosProducto;
 			
 			return imageInfo;
 		} catch (Exception e){
 			throw e;
 		}
+	}
+
+	private ArrayList<ColorDetected> detectarProducto(
+			ArrayList<ColorDetected> detectadosBorde,
+			ArrayList<ColorDetected> detectadosCentro) {
+
+		ArrayList<ColorDetected> detectadosProducto = new ArrayList<ColorDetected>(); 
+			
+		int queda = 100;
+		
+		//busca el color del centro que sea igual al maximo del borde:
+		for (ColorDetected colorDetected : detectadosCentro) {
+			if(colorDetected.nombre.equals(detectadosBorde.get(0).nombre)){
+				queda = 100 - colorDetected.porcentage;  
+			}
+		}
+	
+		System.out.println("Color Borde: "+detectadosBorde.get(0).nombre+", queda: "+queda);
+		
+		//el 90% del centro es del mismo color del borde, debe ser un objeto grande, no sacar este color
+		if (queda<=10){
+
+			//Se copian los colores del centro al del producto
+			for (ColorDetected colorDetected : detectadosCentro) {
+				detectadosProducto.add(colorDetected);
+				System.out.println("El centro es igual al borde");
+			}
+			
+		} else {
+
+			ColorDetected color;
+			int canti;
+			for (ColorDetected colorDetected : detectadosCentro) {
+				
+				//si encuentro el mismo color del borde
+				if(colorDetected.nombre.equals(detectadosBorde.get(0).nombre)){
+					//Le descuento el total al color que voy a sacar
+					color = new ColorDetected(colorDetected.nombre,0,0);
+				} else {
+					//recalcula el nuevo porcentaje
+					canti = (colorDetected.porcentage*100) / queda;							
+					color = new ColorDetected(colorDetected.nombre,canti,0);
+				}
+
+				detectadosProducto.add(color);
+			}
+			
+		}
+		
+		Collections.sort(detectadosProducto);
+		
+		for (ColorDetected colorDetected : detectadosProducto) {
+			System.out.println(colorDetected.nombre +" - " +colorDetected.porcentage);
+		}
+		
+		return detectadosProducto;
+
 	}
 
 	private ArrayList<ColorDetected> detectar(Map<String, Integer> colores, int cant) {
@@ -189,13 +248,11 @@ public class ColorDetector {
 
 	private HashMap<String, Integer> cuentaColores(String[][] matrizColoAprox) {
 		
-		int cant=0;
 		HashMap<String, Integer> tabla = new HashMap<String, Integer>();
 		
 		for (String[] s1 : matrizColoAprox) {
 			for (String s2 : s1){
 				if (s2!=null){
-					cant++;
 					if (tabla.containsKey(s2))
 						tabla.put(s2, tabla.get(s2)+1);
 					else
@@ -203,7 +260,7 @@ public class ColorDetector {
 				}
 			}
 		}
-		//System.out.println("cant: "+cant);
+
 		return tabla;
 	}
 

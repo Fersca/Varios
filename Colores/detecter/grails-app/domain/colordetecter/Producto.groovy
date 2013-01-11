@@ -49,6 +49,20 @@ class Producto implements Serializable {
 	Integer rosaCentro=0
 	Integer marronCentro=0
 
+	Integer negroProducto=0
+	Integer blancoProducto=0
+	Integer rojoProducto=0
+	Integer verdeProducto=0
+	Integer azulProducto=0
+	Integer naranjaProducto=0
+	Integer violetaProducto=0
+	Integer amarilloProducto=0
+	Integer grisProducto=0
+	Integer celesteProducto=0
+	Integer rosaProducto=0
+	Integer marronProducto=0
+	
+	String estado
 
 	static constraints = {
 		negro(nullable:true)
@@ -87,7 +101,20 @@ class Producto implements Serializable {
 		celesteCentro(nullable:true)
 		rosaCentro(nullable:true)
 		marronCentro(nullable:true)
-    	}
+		negroProducto(nullable:true)
+		blancoProducto(nullable:true)
+		rojoProducto(nullable:true)
+		verdeProducto(nullable:true)
+		azulProducto(nullable:true)
+		naranjaProducto(nullable:true)
+		violetaProducto(nullable:true)
+		amarilloProducto(nullable:true)
+		grisProducto(nullable:true)
+		celesteProducto(nullable:true)
+		rosaProducto(nullable:true)
+		marronProducto(nullable:true)
+		estado(nullable:true)
+		}
 
 	static mapping = {
 		version false

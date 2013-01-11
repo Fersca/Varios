@@ -1,15 +1,16 @@
 <html>
 <head>
-	<meta name="layout" content="web">	
+	<meta name="layout" content="web">		
 </head>
 <body>
+
 
 	<div id="fb-root"></div>
 	<script>(function(d, s, id) {
 	  var js, fjs = d.getElementsByTagName(s)[0];
 	  if (d.getElementById(id)) return;
 	  js = d.createElement(s); js.id = id;
-	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=530295160319582";
+	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=303105376477193";
 	  fjs.parentNode.insertBefore(js, fjs);
 	}(document, 'script', 'facebook-jssdk'));</script>
 
@@ -47,16 +48,16 @@
 	Remeras
 	</div>
 	<hr>
-	<div class="examplecarru ch-carousel">
+	<div class="fer1carru ch-carousel">
 		<ul>
 		<g:each in="${remeras}">
 			<li>
 					<div class="cs-btn-container">
 					<br>
 					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
-					- <img class="imagen" src="${it.imagen}" height="150" width="150" title="${it.titulo} - Precio: ${it.precio}"> -
+					- <img class="imagen" src="${it.imagen}" height="150" width="150"> -
 					<br>
-					-
+					<h3>${'$ '+it.precio}</h3>
 					</a>
 					</div>					
 			</li>
@@ -67,16 +68,16 @@
 	Carteras
 	</div>		
 	<hr>
-	<div class="examplecarru ch-carousel">
+	<div class="fer2carru ch-carousel">
 		<ul>
 		<g:each in="${carteras}">
 			<li>
 					<div class="cs-btn-container">
 					<br>
 					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
-					- <img class="imagen" src="${it.imagen}" height="150" width="150" title="${it.titulo} - Precio: ${it.precio}"> -
+					- <img class="imagen" src="${it.imagen}" height="150" width="150"> -
 					<br>
-					-
+					<h3>${'$ '+it.precio}</h3>
 					</a>
 					</div>
 			</li>
@@ -87,16 +88,16 @@
 	Zapatos
 	</div>		
 	<hr>
-	<div class="examplecarru ch-carousel">
+	<div class="fer3carru ch-carousel">
 		<ul>
 		<g:each in="${zapatos}">
 			<li>
 					<div class="cs-btn-container">
 					<br>
 					<a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">
-					- <img class="imagen" src="${it.imagen}" height="150" width="150" title="${it.titulo} - Precio: ${it.precio}"> -
+					- <img class="imagen" src="${it.imagen}" height="150" width="150"> -
 					<br>
-					-
+					<h3>${'$ '+it.precio}</h3>
 					</a>
 					</div>
 			</li>
@@ -155,8 +156,36 @@
 	<script src="${resource(dir:'/js',file:'chico-0.13.1.js')}"></script>
 	<script>
 
-	var foo1 = $(".examplecarru").carousel();
-	var foo2 = $(".imagen").tooltip();
+	var foo01 = $(".fer1carru").carousel(
+			{
+				asyncData: [
+				    		<g:each in="${otrasRemeras}">
+				    		'<div class="cs-btn-container"><br><a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">- <img class="imagen" src="${it.imagen}" height="150" width="150"> -<br><h3>${'$ '+it.precio}</h3></a></div>',					
+							</g:each>
+				]
+			}
+	);
+
+	var foo02 = $(".fer2carru").carousel(
+			{
+				asyncData: [
+				    		<g:each in="${otrasCarteras}">
+				    		'<div class="cs-btn-container"><br><a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">- <img class="imagen" src="${it.imagen}" height="150" width="150"> -<br><h3>${'$ '+it.precio}</h3></a></div>',					
+							</g:each>
+				]
+			}
+	);	
+
+	var foo03 = $(".fer3carru").carousel(
+			{
+				asyncData: [
+				    		<g:each in="${otrosZapatos}">
+				    		'<div class="cs-btn-container"><br><a href="http://www.mercadolibre.com.ar/jm/item?site=MLA&id=${it.itemId.substring(3)}" target="_blank">- <img class="imagen" src="${it.imagen}" height="150" width="150"> -<br><h3>${'$ '+it.precio}</h3></a></div>',					
+							</g:each>
+				]
+			}
+	);	
+	
 	var foo3 = $("#contactar").modal({
 		width: "650px",
 		height: "600px"

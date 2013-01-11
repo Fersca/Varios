@@ -25,7 +25,7 @@
 		"percentage":<b>${cantSecundario}</b>
 	},
 	"background":"<b>${borde}</b>",
-	"center":"<b>${centro}</b>",
+	"product":"<b>${produ}</b>",
 	"width":<b>${ancho}</b>,
 	"height":<b>${alto}</b>
 }

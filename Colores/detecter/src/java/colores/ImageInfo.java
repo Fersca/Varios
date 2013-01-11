@@ -9,4 +9,5 @@ public class ImageInfo {
 	ArrayList<ColorDetected> detectados;
 	ArrayList<ColorDetected> detectadosBorde;
 	ArrayList<ColorDetected> detectadosCentro;
+	ArrayList<ColorDetected> detectadosProducto;
 }
