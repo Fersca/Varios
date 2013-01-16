@@ -9,16 +9,19 @@ import java.util.ArrayList;
  */
 public class BFSEngine {
 
+	public boolean guardaHistoria = true;
+	public boolean printResult = true;
+	
 	//Esto se puede mejorar, poniendo un mapa, para no recorrer todo el array cuando se hace el contains.
-	private static ArrayList<Node> procesados = new ArrayList<Node>();
+	private ArrayList<Node> procesados = new ArrayList<Node>();
 	
 	/**
 	 * Procesa el arbol desde el nodo raiz
 	 * @param raiz
 	 * @param nivel
 	 */
-	public static void procesar(Node raiz, int nivel) {
-
+	public void procesar(Node raiz, int nivel) {
+		
 		//Creo la lista de nodos vacia
 		ArrayList<Node> nodos = new ArrayList<Node>(); 
 		nodos.add(raiz);
@@ -27,7 +30,7 @@ public class BFSEngine {
 		for(int i=0;i<nivel;i++){
 
 			//Verifica los nodos de los niveles y ademas devuelve el nuevo nivel al mismo tiempo
-			nodos = BFSEngine.verificarYGenerarNivel(nodos);
+			nodos = verificarYGenerarNivel(nodos);
 			if (nodos.size()==0)
 				break;
 		}
@@ -39,7 +42,7 @@ public class BFSEngine {
 	 * @param nodos
 	 * @return
 	 */
-	public static ArrayList<Node> verificarYGenerarNivel(ArrayList<Node> nodos) {
+	public ArrayList<Node> verificarYGenerarNivel(ArrayList<Node> nodos) {
 
 		//para ir guardando los nodos hijos de todo este nivel
 		ArrayList<Node> nuevos = new ArrayList<Node>();
@@ -56,18 +59,27 @@ public class BFSEngine {
 			
 			//Proceso cada uno de ellos
 			for (Node nuevo : nuevos) {
-
+				
+				//si esta seteago para guarda, hace la copia de la historia
+				if (guardaHistoria){
+					nuevo.setHistorial(nodo);
+				}
+				
 				//Verifico si el nodo es valido, sino lo descarto
 				if (nuevo.valido() && !procesados.contains(nuevo)){
 					
 					//Verifico si es una solucion valida
-					nuevo.solucion();
+					if (nuevo.solucion() && printResult){
+						nuevo.print();
+					} else {
 
-					//Verifico que no se haya procesado ya ese nodo, sino se entra en un looop
-					procesados.add(nuevo);
-					
-					//Agrego el nodo a los nodos del nivel para seguir recorriendo a partir de el.
-					proximoNivel.add(nuevo);
+						//Verifico que no se haya procesado ya ese nodo, sino se entra en un looop
+						procesados.add(nuevo);
+						
+						//Agrego el nodo a los nodos del nivel para seguir recorriendo a partir de el.
+						proximoNivel.add(nuevo);
+						
+					}
 				}				
 				
 			}					

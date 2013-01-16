@@ -1,16 +1,13 @@
+package rubik;
+
 import engine.BFSEngine;
 import engine.Node;
 
-/**
- * Fersca implementation of Breaf - First - Search Algorithm
- * 
- */
-public class BreadthFirstSearch {
-
+public class RubikCubeSolver {
 
 	public static void main(String[] args) {
 
-		BreadthFirstSearch bfs = new BreadthFirstSearch();
+		RubikCubeSolver bfs = new RubikCubeSolver();
 		bfs.run();
 		
 	}
@@ -18,13 +15,11 @@ public class BreadthFirstSearch {
 	private void run() {
 	
 		//Agrego el primer nodo a la lista
-		Node raiz = new Nodo(0,0);
+		Node raiz = new Cube();
 		raiz.init();
 		BFSEngine engine = new BFSEngine();
 		engine.procesar(raiz, 6);
 		
 	}
 
-
-	
 }

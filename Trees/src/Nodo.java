@@ -1,8 +1,9 @@
 import java.util.ArrayList;
 
+import engine.AbstractNode;
 import engine.Node;
 
-class Nodo implements Node{
+class Nodo extends AbstractNode implements Node{
 	
 	//Creo un mapa de 5x5
 	static String[][] mapa;
@@ -70,5 +71,22 @@ class Nodo implements Node{
 		mapa[4][4] = "X";
 		mapa[4][1] = "X";
 					
+	}
+
+	@Override
+	public void printNode() {
+
+		for(int i = 0;i<5;i++){
+			for(int j = 0;j<5;j++){
+				if (i==x && j==y){
+					System.out.print("*");
+				} else {
+					System.out.print("-");
+				}
+			}			
+			System.out.println("");
+		}
+
+		System.out.println("--------------------");
 	}
 }

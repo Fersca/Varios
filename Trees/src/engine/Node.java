@@ -2,7 +2,11 @@ package engine;
 import java.util.ArrayList;
 
 public interface Node {
-
+	
+	//devuelve el historial de nodos
+	public void setHistorial(Node nodo);
+	public ArrayList<Node> getHistorial();
+	
 	//Verifica si es un nodo valido
 	public boolean valido();
 	
@@ -18,5 +22,9 @@ public interface Node {
 
 	//Inicializa el nodo, por ejemplo los datos para saber si es solucion.
 	public void init();
+
+	//Imprime al nodo
+	public void print();
+	public void printNode();
 	
 }
