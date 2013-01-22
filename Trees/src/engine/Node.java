@@ -26,5 +26,7 @@ public interface Node {
 	//Imprime al nodo
 	public void print();
 	public void printNode();
-	
+	public int costoTotal();
+	public int getCosto();
+	public void setCosto(int c);
 }

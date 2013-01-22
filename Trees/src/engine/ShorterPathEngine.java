@@ -7,11 +7,9 @@ import java.util.ArrayList;
  * @author fersca
  *
  */
-public class BFSEngine {
+public class ShorterPathEngine {
 
-	public boolean guardaHistoria = true;
-	public boolean printResult = true;
-	public boolean finEnPrimeraSolucion = true;
+	public Node mejorSolucion;
 	
 	//Esto se puede mejorar, poniendo un mapa, para no recorrer todo el array cuando se hace el contains.
 	private ArrayList<Node> procesados = new ArrayList<Node>();
@@ -26,6 +24,7 @@ public class BFSEngine {
 		//Creo la lista de nodos vacia
 		ArrayList<Node> nodos = new ArrayList<Node>(); 
 		nodos.add(raiz);
+		procesados.add(raiz); //se marca como procesado para que no vuelva sobre el
 		
 		//Voy recorriendo cada uno de los niveles y chequeando los nodos de esos niveles
 		for(int i=0;i<nivel;i++){
@@ -62,9 +61,7 @@ public class BFSEngine {
 			for (Node nuevo : nuevos) {
 				
 				//si esta seteago para guarda, hace la copia de la historia
-				if (guardaHistoria){
-					nuevo.setHistorial(nodo);
-				}
+				nuevo.setHistorial(nodo);
 				
 				//Verifico si el nodo es valido, sino lo descarto
 				if (nuevo.valido() && !procesados.contains(nuevo)){
@@ -72,12 +69,14 @@ public class BFSEngine {
 					//Verifico si es una solucion valida
 					if (nuevo.solucion()){
 						
-						if (printResult)
-							nuevo.print();
-			
-						if (finEnPrimeraSolucion)
-							return new ArrayList<Node>();
-						
+						if (mejorSolucion==null){
+							mejorSolucion = nuevo;
+						} else {
+							if (nuevo.costoTotal()<mejorSolucion.costoTotal()){
+								mejorSolucion = nuevo;
+							}
+						}
+									
 					} else {
 
 						//Verifico que no se haya procesado ya ese nodo, sino se entra en un looop

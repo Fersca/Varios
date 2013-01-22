@@ -1,16 +1,17 @@
+package maps;
 import java.util.ArrayList;
 
 import engine.AbstractNode;
 import engine.Node;
 
-class Nodo extends AbstractNode implements Node{
+class BFSNodo extends AbstractNode implements Node{
 	
 	//Creo un mapa de 5x5
 	static String[][] mapa;
 	
 	int x;
 	int y;
-	public Nodo(int x, int y){
+	public BFSNodo(int x, int y){
 		this.x=x;
 		this.y=y;
 	}
@@ -40,7 +41,7 @@ class Nodo extends AbstractNode implements Node{
 	//Se implementa para comparar contra los que ya estan procesados
 	public boolean equals(Object obj) {
 
-		Nodo otro = (Nodo)obj;
+		BFSNodo otro = (BFSNodo)obj;
 		if (this.x==otro.x && this.y==otro.y) return true; else return false;
 		
 	}
@@ -50,9 +51,9 @@ class Nodo extends AbstractNode implements Node{
 		
 		ArrayList<Node> nuevos = new ArrayList<Node>(); 
 		
-		Nodo h1 = new Nodo(x+1,y);
-		Nodo h2 = new Nodo(x+1,y+1);
-		Nodo h3 = new Nodo(x,y+1);
+		BFSNodo h1 = new BFSNodo(x+1,y);
+		BFSNodo h2 = new BFSNodo(x+1,y+1);
+		BFSNodo h3 = new BFSNodo(x,y+1);
 		
 		nuevos.add(h1);
 		nuevos.add(h2);

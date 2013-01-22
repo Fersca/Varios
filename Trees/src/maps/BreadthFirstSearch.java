@@ -1,3 +1,4 @@
+package maps;
 import engine.BFSEngine;
 import engine.Node;
 
@@ -18,7 +19,7 @@ public class BreadthFirstSearch {
 	private void run() {
 	
 		//Agrego el primer nodo a la lista
-		Node raiz = new Nodo(0,0);
+		Node raiz = new BFSNodo(0,0);
 		raiz.init();
 		BFSEngine engine = new BFSEngine();
 		engine.procesar(raiz, 6);
