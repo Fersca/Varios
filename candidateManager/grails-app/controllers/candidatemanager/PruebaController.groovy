@@ -73,10 +73,6 @@ class PruebaController {
 	
 	public void getXmlStream(String ver, rt)
 	{
-		String accessTokenKey=""
-		String accessTokenSecret=""
-	
-		String jsonString =""
 		OAuthService service=new ServiceBuilder()
 							.provider(LinkedInApi.class)
 							.apiKey(apiKey)
@@ -86,18 +82,26 @@ class PruebaController {
 		Verifier v = new Verifier(ver);
 	
 		Token accessToken = service.getAccessToken(rt, v);
-		accessTokenSecret = accessToken.secret
-		accessTokenKey = accessToken.token
 	
+		session['ACCESS_TOKEN'] = accessToken
+			
+		render obtenerURL(apiUrl)
+
+	}
 	
-		OAuthRequest request = new OAuthRequest(Verb.GET, apiUrl);
+	def obtenerURL(def URL){
+		OAuthRequest request = new OAuthRequest(Verb.GET, URL);
+		
+		OAuthService service=new ServiceBuilder()
+		.provider(LinkedInApi.class)
+		.apiKey(apiKey)
+		.apiSecret(apiSecret)
+		.build();
+		Token accessToken = session['ACCESS_TOKEN']
 		service.signRequest(accessToken, request); // the access token from step 4
 		Response response = request.send();
-		jsonString = response.getBody();
-		def jsonObject = jsonString as JSON
-
-		render jsonObject
-
+		String jsonString = response.getBody();
+		def jsonObject = JSON.parse(jsonString)
 	}
 	
 }
