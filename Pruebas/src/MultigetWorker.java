@@ -21,10 +21,13 @@ public class MultigetWorker implements Runnable {
 
 	public void run() {
 		
+		//base de items
+		int num = 157714877;
+		
 		//Genera las 50 claves a buscar
 		ArrayList<String> keys = new ArrayList<String>();
 		for (int i = 0; i < cantItems; i++) {
-			keys.add("MLA"+r.nextInt(1000000));
+			keys.add("MLA"+(num+r.nextInt(1000000)));
 		}
 			
 		long antes = System.currentTimeMillis();
@@ -32,11 +35,13 @@ public class MultigetWorker implements Runnable {
 		//hace el multiget
 		Map<String, Object> mapa = mem.getBulk(keys);
 		//hace un size solo para hace algo
-		mapa.size();
+		int tamanio=0;
+		if (mapa!=null)
+			tamanio = mapa.size();
 		
 		long despues = System.currentTimeMillis();
 				
-		stats.calculateMaxMin(despues-antes);
+		stats.calculateMaxMin(despues-antes, tamanio);
 			
 	}
 	
