@@ -4,6 +4,8 @@ public class Stats {
 	
 	private ArrayList<Long> tiempos = new ArrayList<Long>(); 
 	private long terminados = 0;
+	public long init = 0;
+	public long end = 0;
 
 	public synchronized void calculateMaxMin(long time){
 		
@@ -52,12 +54,14 @@ public class Stats {
 		
 		//calcula el promedio
 		promedio = promedio / terminados;
-	    System.out.println("Promedio de tiempos: " + promedio);
+		double terminadosDouble = (double)terminados;
+		
+		System.out.println("Tiempo Total de la prueba: " + (end-init) + "ms");
+		System.out.println("Cantidad de Operaciones por ms: " + terminadosDouble/(double)(end-init));
+		System.out.println("Promedio de tiempos de respuesta: " + promedio + "ms");
 	    
 		//Calculo m‡ximos y m’nimos
-	    System.out.println("Min Time: "+min+", Max Time: "+max);
-	    
-	    double terminadosDouble = (double)terminados;
+	    System.out.println("Min Time: "+min+"ms, Max Time: "+max+"ms");
 	    
 	    //Imprime las stats de tiempo:
 	    System.out.println("Menos de 1ms:  " + 100*more0ms/terminadosDouble + "% - " + more0ms);
@@ -70,6 +74,7 @@ public class Stats {
 	    System.out.println("Mas de 500ms:  " + 100*more500ms/terminadosDouble + "% - " + more500ms);
 	    System.out.println("Mas de 1000ms: " + 100*more1000ms/terminadosDouble + "% - " + more1000ms);
 	   
+	    
 	}
 
 }

@@ -36,8 +36,10 @@ public class PruebaMemcached {
 		MemcachedClient mem = new MemcachedClient(new KetamaConnectionFactory(), AddrUtil.getAddresses(servers));
 					
 		//Crea los workers y los ejecuta
+		stats.init = System.currentTimeMillis();
 		createWorkers(threads, multigets, stats, mem);
-	    
+		stats.end = System.currentTimeMillis();
+		
 	    //Imprime stats
 	    stats.printStats();
 	    
