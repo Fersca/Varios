@@ -1,0 +1,450 @@
+{
+      "host": "read-141.melidynamic.com",
+      "port": 2000,
+      "size": 2560
+    },
+    {
+      "host": "read-142.melidynamic.com",
+      "port": 2001,
+      "size": 2560
+    },
+    {
+      "host": "read-143.melidynamic.com",
+      "port": 2002,
+      "size": 2560
+    },
+    {
+      "host": "read-144.melidynamic.com",
+      "port": 2003,
+      "size": 2560
+    },
+    {
+      "host": "read-145.melidynamic.com",
+      "port": 2004,
+      "size": 2560
+    },
+    {
+      "host": "read-146.melidynamic.com",
+      "port": 2005,
+      "size": 2560
+    },
+    {
+      "host": "read-252.melidynamic.com",
+      "port": 2006,
+      "size": 2560
+    },
+    {
+      "host": "read-253.melidynamic.com",
+      "port": 2007,
+      "size": 2560
+    },
+    {
+      "host": "read-274.melidynamic.com",
+      "port": 2008,
+      "size": 2560
+    },
+    {
+      "host": "read-275.melidynamic.com",
+      "port": 2009,
+      "size": 2560
+    },
+    {
+      "host": "read-286.melidynamic.com",
+      "port": 2010,
+      "size": 2560
+    },
+    {
+      "host": "read-287.melidynamic.com",
+      "port": 2011,
+      "size": 2560
+    },
+    {
+      "host": "read-288.melidynamic.com",
+      "port": 2012,
+      "size": 2560
+    },
+    {
+      "host": "read-289.melidynamic.com",
+      "port": 2013,
+      "size": 2560
+    },
+    {
+      "host": "read-290.melidynamic.com",
+      "port": 2014,
+      "size": 2560
+    },
+    {
+      "host": "read-291.melidynamic.com",
+      "port": 2015,
+      "size": 2560
+    },
+    {
+      "host": "read-292.melidynamic.com",
+      "port": 2016,
+      "size": 2560
+    },
+    {
+      "host": "read-293.melidynamic.com",
+      "port": 2017,
+      "size": 2560
+    },
+    {
+      "host": "read-294.melidynamic.com",
+      "port": 2018,
+      "size": 2560
+    },
+    {
+      "host": "read-295.melidynamic.com",
+      "port": 2019,
+      "size": 2560
+    },
+    {
+      "host": "read-296.melidynamic.com",
+      "port": 2020,
+      "size": 2560
+    },
+    {
+      "host": "read-297.melidynamic.com",
+      "port": 2021,
+      "size": 2560
+    },
+    {
+      "host": "read-298.melidynamic.com",
+      "port": 2022,
+      "size": 2560
+    },
+    {
+      "host": "read-299.melidynamic.com",
+      "port": 2023,
+      "size": 2560
+    },
+    {
+      "host": "read-300.melidynamic.com",
+      "port": 2024,
+      "size": 2560
+    },
+    {
+      "host": "read-301.melidynamic.com",
+      "port": 2025,
+      "size": 2560
+    },
+    {
+      "host": "read-302.melidynamic.com",
+      "port": 2026,
+      "size": 2560
+    },
+    {
+      "host": "read-303.melidynamic.com",
+      "port": 2027,
+      "size": 2560
+    },
+    {
+      "host": "read-304.melidynamic.com",
+      "port": 2028,
+      "size": 2560
+    },
+    {
+      "host": "read-305.melidynamic.com",
+      "port": 2029,
+      "size": 2560
+    },
+    {
+      "host": "read-306.melidynamic.com",
+      "port": 2030,
+      "size": 2560
+    },
+    {
+      "host": "read-307.melidynamic.com",
+      "port": 2031,
+      "size": 2560
+    },
+    {
+      "host": "read-308.melidynamic.com",
+      "port": 2032,
+      "size": 2560
+    },
+    {
+      "host": "read-309.melidynamic.com",
+      "port": 2033,
+      "size": 2560
+    },
+    {
+      "host": "read-310.melidynamic.com",
+      "port": 2034,
+      "size": 2560
+    },
+    {
+      "host": "read-311.melidynamic.com",
+      "port": 2035,
+      "size": 2560
+    },
+    {
+      "host": "read-312.melidynamic.com",
+      "port": 2036,
+      "size": 2560
+    },
+    {
+      "host": "read-313.melidynamic.com",
+      "port": 2037,
+      "size": 2560
+    },
+    {
+      "host": "read-314.melidynamic.com",
+      "port": 2038,
+      "size": 2560
+    },
+    {
+      "host": "read-315.melidynamic.com",
+      "port": 2039,
+      "size": 2560
+    },
+    {
+      "host": "read-316.melidynamic.com",
+      "port": 2040,
+      "size": 2560
+    },
+    {
+      "host": "read-317.melidynamic.com",
+      "port": 2041,
+      "size": 2560
+    },
+    {
+      "host": "read-318.melidynamic.com",
+      "port": 2042,
+      "size": 2560
+    },
+    {
+      "host": "read-319.melidynamic.com",
+      "port": 2043,
+      "size": 2560
+    },
+    {
+      "host": "read-320.melidynamic.com",
+      "port": 2044,
+      "size": 2560
+    },
+    {
+      "host": "read-321.melidynamic.com",
+      "port": 2045,
+      "size": 2560
+    },
+    {
+      "host": "read-322.melidynamic.com",
+      "port": 2046,
+      "size": 2560
+    },
+    {
+      "host": "read-323.melidynamic.com",
+      "port": 2047,
+      "size": 2560
+    },
+    {
+      "host": "read-324.melidynamic.com",
+      "port": 2048,
+      "size": 2560
+    },
+    {
+      "host": "read-325.melidynamic.com",
+      "port": 2049,
+      "size": 2560
+    },
+    {
+      "host": "read-326.melidynamic.com",
+      "port": 2050,
+      "size": 2560
+    },
+    {
+      "host": "read-327.melidynamic.com",
+      "port": 2051,
+      "size": 2560
+    },
+    {
+      "host": "read-328.melidynamic.com",
+      "port": 2052,
+      "size": 2560
+    },
+    {
+      "host": "read-329.melidynamic.com",
+      "port": 2053,
+      "size": 2560
+    },
+    {
+      "host": "read-330.melidynamic.com",
+      "port": 2054,
+      "size": 2560
+    },
+    {
+      "host": "read-331.melidynamic.com",
+      "port": 2055,
+      "size": 2560
+    },
+    {
+      "host": "read-332.melidynamic.com",
+      "port": 2056,
+      "size": 2560
+    },
+    {
+      "host": "read-333.melidynamic.com",
+      "port": 2057,
+      "size": 2560
+    },
+    {
+      "host": "read-334.melidynamic.com",
+      "port": 2058,
+      "size": 2560
+    },
+    {
+      "host": "read-335.melidynamic.com",
+      "port": 2059,
+      "size": 2560
+    },
+    {
+      "host": "read-336.melidynamic.com",
+      "port": 2060,
+      "size": 2560
+    },
+    {
+      "host": "read-337.melidynamic.com",
+      "port": 2061,
+      "size": 2560
+    },
+    {
+      "host": "read-338.melidynamic.com",
+      "port": 2062,
+      "size": 2560
+    },
+    {
+      "host": "read-339.melidynamic.com",
+      "port": 2063,
+      "size": 2560
+    },
+    {
+      "host": "read-340.melidynamic.com",
+      "port": 2064,
+      "size": 2560
+    },
+    {
+      "host": "read-341.melidynamic.com",
+      "port": 2065,
+      "size": 2560
+    },
+    {
+      "host": "read-422.melidynamic.com",
+      "port": 2066,
+      "size": 2560
+    },
+    {
+      "host": "read-423.melidynamic.com",
+      "port": 2067,
+      "size": 2560
+    },
+    {
+      "host": "read-424.melidynamic.com",
+      "port": 2068,
+      "size": 2560
+    },
+    {
+      "host": "read-425.melidynamic.com",
+      "port": 2069,
+      "size": 2560
+    },
+    {
+      "host": "read-426.melidynamic.com",
+      "port": 2070,
+      "size": 2560
+    },
+    {
+      "host": "read-427.melidynamic.com",
+      "port": 2071,
+      "size": 2560
+    },
+    {
+      "host": "read-428.melidynamic.com",
+      "port": 2072,
+      "size": 2560
+    },
+    {
+      "host": "read-429.melidynamic.com",
+      "port": 2073,
+      "size": 2560
+    },
+    {
+      "host": "read-435.melidynamic.com",
+      "port": 2074,
+      "size": 2560
+    },
+    {
+      "host": "read-436.melidynamic.com",
+      "port": 2075,
+      "size": 2560
+    },
+    {
+      "host": "read-452.melidynamic.com",
+      "port": 2076,
+      "size": 2560
+    },
+    {
+      "host": "read-454.melidynamic.com",
+      "port": 2078,
+      "size": 2560
+    },
+    {
+      "host": "read-456.melidynamic.com",
+      "port": 2080,
+      "size": 2560
+    },
+    {
+      "host": "read-458.melidynamic.com",
+      "port": 2082,
+      "size": 2560
+    },
+    {
+      "host": "read-460.melidynamic.com",
+      "port": 2084,
+      "size": 2560
+    },
+    {
+      "host": "read-462.melidynamic.com",
+      "port": 2086,
+      "size": 2560
+    },
+    {
+      "host": "read-464.melidynamic.com",
+      "port": 2088,
+      "size": 2560
+    },
+    {
+      "host": "read-466.melidynamic.com",
+      "port": 2090,
+      "size": 2560
+    },
+    {
+      "host": "read-468.melidynamic.com",
+      "port": 2092,
+      "size": 2560
+    },
+    {
+      "host": "read-470.melidynamic.com",
+      "port": 2094,
+      "size": 2560
+    },
+    {
+      "host": "read-472.melidynamic.com",
+      "port": 2096,
+      "size": 2560
+    },
+    {
+      "host": "read-474.melidynamic.com",
+      "port": 2098,
+      "size": 2560
+    },
+    {
+      "host": "read-476.melidynamic.com",
+      "port": 2100,
+      "size": 2560
+    },
+    {
+      "host": "read-477.melidynamic.com",
+      "port": 2101,
+      "size": 2560
+    }
