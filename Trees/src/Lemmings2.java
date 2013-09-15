@@ -39,15 +39,19 @@ public class Lemmings2 {
 		int[] usadas = new int[tam];
 
 		//llena el tablero
-		for (int i = 0; i < tam; i++) {
-		    tablero[i] = i+1;
-		}
+		llenaTablero(tablero);
 		
 		//recorre el grafo
 		recorre(tablero, usadas);
 		
 		System.out.println("Cantidad de movimientos lado "+this.lado+": "+ this.cant);
 		
+	}
+
+	private void llenaTablero(int[] tablero) {
+		for (int i = 0; i < tam; i++) {
+		    tablero[i] = i+1;
+		}
 	}
 
 	private void recorre(int[] tablero, int[] usadas) {
@@ -58,45 +62,14 @@ public class Lemmings2 {
 			//si en la posicion hay ficha
 	        if (tablero[i] > 0) {
 	        	
-	            //mueve derecha, si no esta en el borde y la pos futura está vacia y (es el primero o no intercabia con otro)
-	            if ((i % lado < lado - 1) && (usadas[i + 1] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] + 1))) {
-	                //usa ficha
-	            	usadas[i + 1] = tablero[i];
-	                //blanquea
-	            	tablero[i] = 0;
-	                //proxima ficha
-	                recorre(tablero, usadas);
-	                //revierte
-	                tablero[i] = usadas[i + 1];
-	                usadas[i + 1] = 0;
-	            }
+	        	//intenta mover la ficha
+	            derecha(tablero, usadas, i);
 	            
-	            //lo mismo para izq
-	            if ((i % lado > 0) && (usadas[i - 1] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] - 1))) {
-	                usadas[i - 1] = tablero[i];
-	                tablero[i] = 0;
-	                recorre(tablero, usadas);
-	                tablero[i] = usadas[i - 1];
-	                usadas[i - 1] = 0;
-	            }
+	            izquierda(tablero, usadas, i);
 	            
-	            //arriba
-	            if ((i >= lado) && (usadas[i - lado] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] - lado))) {
-	                usadas[i - lado] = tablero[i]; //resto lado porque esta en el otro renglon
-	                tablero[i] = 0;
-	                recorre(tablero, usadas);
-	                tablero[i] = usadas[i - lado];
-	                usadas[i - lado] = 0;
-	            }
+	            arriba(tablero, usadas, i);
 	            
-	            //abajo
-	            if ((i < tam - lado) && (usadas[i + lado] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] + lado))) {
-	                usadas[i + lado] = tablero[i];
-	                tablero[i] = 0;
-	                recorre(tablero, usadas);
-	                tablero[i] = usadas[i + lado];
-	                usadas[i + lado] = 0;
-	            }
+	            abajo(tablero, usadas, i);
 	            
 	            break;
 	        }
@@ -112,5 +85,52 @@ public class Lemmings2 {
 	    this.cant++;
 	}
 
+	private void derecha(int[] tablero, int[] usadas, int i) {
+		//mueve derecha, si no esta en el borde y la pos futura está vacia y (es el primero o no intercabia con otro)
+		if ((i % lado < lado - 1) && (usadas[i + 1] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] + 1))) {
+		    //usa ficha
+			usadas[i + 1] = tablero[i];
+		    //blanquea
+			tablero[i] = 0;
+		    //proxima ficha
+		    recorre(tablero, usadas);
+		    //revierte
+		    tablero[i] = usadas[i + 1];
+		    usadas[i + 1] = 0;
+		}
+	}
+
+	private void abajo(int[] tablero, int[] usadas, int i) {
+		//abajo
+		if ((i < tam - lado) && (usadas[i + lado] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] + lado))) {
+		    usadas[i + lado] = tablero[i];
+		    tablero[i] = 0;
+		    recorre(tablero, usadas);
+		    tablero[i] = usadas[i + lado];
+		    usadas[i + lado] = 0;
+		}
+	}
+
+	private void arriba(int[] tablero, int[] usadas, int i) {
+		//arriba
+		if ((i >= lado) && (usadas[i - lado] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] - lado))) {
+		    usadas[i - lado] = tablero[i]; //resto lado porque esta en el otro renglon
+		    tablero[i] = 0;
+		    recorre(tablero, usadas);
+		    tablero[i] = usadas[i - lado];
+		    usadas[i - lado] = 0;
+		}
+	}
+
+	private void izquierda(int[] tablero, int[] usadas, int i) {
+		//lo mismo para izq
+		if ((i % lado > 0) && (usadas[i - 1] == 0) && ((usadas[i] == 0) || (usadas[i] != tablero[i] - 1))) {
+		    usadas[i - 1] = tablero[i];
+		    tablero[i] = 0;
+		    recorre(tablero, usadas);
+		    tablero[i] = usadas[i - 1];
+		    usadas[i - 1] = 0;
+		}
+	}
 	
 }
