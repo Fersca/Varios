@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -104,12 +105,45 @@ public class FileHelper {
 		bu.append("</html>");
 					
 		Writer output = null;
-		File file = new File("c:\\Users\\Fersca\\Pictures\\Colores\\result.html");
+		File file = new File("/home/fersca/result.html");
 		output = new BufferedWriter(new FileWriter(file));
 		output.write(bu.toString());
 		output.close();
 		
 	}
+
+	public static void createSummary(ArrayList<ImageInfo> imagenes, String file) throws IOException{
+		
+		StringBuilder bu = new StringBuilder(); 
+		bu.append("<!DOCTYPE html>");
+		bu.append("<html>");
+		bu.append("<head>");
+		bu.append("<title>Title of the document</title>");
+		bu.append("</head>");
+		bu.append("<body>");
+		bu.append("<table style=\"border:0;\">");
+		
+		for (ImageInfo foto : imagenes) {
+			bu.append("<tr>");
+			bu.append("<td>");
+			bu.append("<img src=\""+foto.foto+"\" height=\"250\" width=\"250\">");
+			bu.append("</td>");
+			bu.append("<td>"+foto.detectadosProducto.get(0).nombre+"</td>");
+			bu.append("</tr>");
+		}
+		
+		bu.append("</table>");
+		bu.append("</body>");
+		bu.append("</html>");
+					
+		Writer output = null;
+		File file1 = new File(file);
+		output = new BufferedWriter(new FileWriter(file1));
+		output.write(bu.toString());
+		output.close();
+		
+	}
+	
 	
 	public static void createImgage(int[][] matriz, int TAMANO_BLOQUE) throws IOException {
 
@@ -127,7 +161,7 @@ public class FileHelper {
 				off_Image.setRGB(i, j, matriz[j][i]);
 			}
 		}
-	    File outputfile = new File("c:\\Users\\Fersca\\Pictures\\Colores\\prueba4.png");
+	    File outputfile = new File("/home/fersca/prueba4.png");
 	    ImageIO.write(off_Image, "png", outputfile);
 		
 	}

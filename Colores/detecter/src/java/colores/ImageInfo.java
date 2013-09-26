@@ -6,6 +6,7 @@ public class ImageInfo {
 
 	Integer ancho;
 	Integer alto;
+	String foto;
 	ArrayList<ColorDetected> detectados;
 	ArrayList<ColorDetected> detectadosBorde;
 	ArrayList<ColorDetected> detectadosCentro;

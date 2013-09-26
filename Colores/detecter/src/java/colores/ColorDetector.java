@@ -19,7 +19,9 @@ import javax.imageio.ImageIO;
  */
 public class ColorDetector {
 
-	private static final int TAMANO_BLOQUE = 40;
+	private static final int TAMANO_BLOQUE = 80;
+	private static final double PORC_BORDE = 0.1;//0.05;
+	private static final double PORC_CENTRO = 0.2;//0.125;
 	
 	public ImageInfo detectColors(String foto, Boolean isURL, Boolean createFiles) throws Exception {
 					
@@ -106,10 +108,10 @@ public class ColorDetector {
 				//Esta matriz se necesita si o si
 				matrizColoAproxColor[blo.col][blo.row] = blo.colorAprox.nombre;
 				
-				if (blo.col<=1 || blo.row<=1 || blo.col>=38 || blo.row>=38){
+				if (blo.col<(TAMANO_BLOQUE*PORC_BORDE) || blo.row<(TAMANO_BLOQUE*PORC_BORDE) || blo.col>=(TAMANO_BLOQUE*(1-PORC_BORDE)) || blo.row>=(TAMANO_BLOQUE*(1-PORC_BORDE))){
 					matrizColorBorde[blo.col][blo.row] = blo.colorAprox.nombre;
 				} else {
-					if (blo.col<=4 || blo.row<=4 || blo.col>=35 || blo.row>=35) { // no hace nada con esta franja
+					if (blo.col<(TAMANO_BLOQUE*PORC_CENTRO) || blo.row<(TAMANO_BLOQUE*PORC_CENTRO) || blo.col>=(TAMANO_BLOQUE*(1-PORC_CENTRO)) || blo.row>=(TAMANO_BLOQUE*(1-PORC_CENTRO))) { // no hace nada con esta franja
 					} else {
 						matrizColorCentro[blo.col][blo.row] = blo.colorAprox.nombre;
 					}
@@ -124,11 +126,12 @@ public class ColorDetector {
 			ImageInfo imageInfo = new ImageInfo();
 			imageInfo.alto=alto;
 			imageInfo.ancho=ancho;
+			imageInfo.foto=foto;
 			
 			//Filtra los colores y deja solo los que aparecen mas			
 			ArrayList<ColorDetected> detectados 		= detectar(colores, TAMANO_BLOQUE*TAMANO_BLOQUE);
-			ArrayList<ColorDetected> detectadosBorde 	= detectar(coloresBorde, 304); //576 = (40x40)-(36x36)
-			ArrayList<ColorDetected> detectadosCentro 	= detectar(coloresCentro, 900); //30x30 del centro
+			ArrayList<ColorDetected> detectadosBorde 	= detectar(coloresBorde, (int)(TAMANO_BLOQUE*TAMANO_BLOQUE)-(int)(TAMANO_BLOQUE*(1-(PORC_BORDE*2))*TAMANO_BLOQUE*(1-(PORC_BORDE*2)))); //576 = (40x40)-(36x36)
+			ArrayList<ColorDetected> detectadosCentro 	= detectar(coloresCentro, (int)(TAMANO_BLOQUE*(1-(PORC_CENTRO*2))*TAMANO_BLOQUE*(1-(PORC_CENTRO*2)))); //30x30 del centro
 			ArrayList<ColorDetected> detectadosProducto   = detectarProducto(detectadosBorde,detectadosCentro);
 			
 			if (createFiles){
@@ -168,18 +171,20 @@ public class ColorDetector {
 		for (ColorDetected colorDetected : detectadosCentro) {
 			if(colorDetected.nombre.equals(detectadosBorde.get(0).nombre)){
 				queda = 100 - colorDetected.porcentage;  
+				break;
 			}
 		}
 	
 		System.out.println("Color Borde: "+detectadosBorde.get(0).nombre+", queda: "+queda);
 		
-		//el 90% del centro es del mismo color del borde, debe ser un objeto grande, no sacar este color
-		if (queda<=10){
+		//el 50% del centro es del mismo color del borde, debe ser un objeto grande, no sacar este color
+		if (queda<=60){
 
+			System.out.println("El centro es igual al borde");
+			
 			//Se copian los colores del centro al del producto
 			for (ColorDetected colorDetected : detectadosCentro) {
-				detectadosProducto.add(colorDetected);
-				System.out.println("El centro es igual al borde");
+				detectadosProducto.add(colorDetected);	
 			}
 			
 		} else {
@@ -270,11 +275,78 @@ public class ColorDetector {
 		try {
 			//border.detectWhiteBorder("c:\\Users\\Fersca\\Pictures\\Colores\\prueba1.jpg",false,false);
 			//border.detectWhiteBorder("http://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/GermanShep1_wb.jpg/250px-GermanShep1_wb.jpg",true,false);
-			border.detectColors("http://bimg2.mlstatic.com/miralas-hermosisimas-musculosas-y-remerones-largos_MLA-F-3096619678_092012.jpg",true, true);
+			
+			ImageInfo img1 = border.detectColors("http://bimg2.mlstatic.com/miralas-hermosisimas-musculosas-y-remerones-largos_MLA-F-3096619678_092012.jpg",true, false);
+			ImageInfo img2 = border.detectColors("http://www.todohumor.com/UserFiles/Image/fondos/2010/Mayo/automoderno.jpg",true,true);
+			ImageInfo img3 = border.detectColors("http://www.motorexperience.es/images/cars/ferrari458600.jpg",true,false);
+			ImageInfo img4 = border.detectColors("http://www.w7swall.com/wp-content/wallpapers/cars/porche-carrera-porsche-510283.jpg",true,false);
+			ImageInfo img5 = border.detectColors("http://img1.mlstatic.com/mini-cooper-s-hot-pepper-16-turbo-tomo-cuatri-parrillero_MLA-O-4656120149_072013.jpg",true,false);
+			ImageInfo img6 = border.detectColors("http://img1.mlstatic.com/bmw-series-3-335i-m-sport-biturbo-steptronic_MLA-O-5085301356_092013.jpg",true,false);
+			ImageInfo img7 = border.detectColors("http://bimg1.mlstatic.com/bmw-330-i-265cv-automatico-2010-impecable-idem-a-okm-permuto_MLA-F-4464781334_062013.jpg",true,false);
+			ImageInfo img8 = border.detectColors("http://bimg2.mlstatic.com/bmw-335i-biturbo-sedan_MLA-F-5096800211_092013.jpg",true,false);
+			ImageInfo img9 = border.detectColors("http://bimg1.mlstatic.com/fiat-uno-no-147-128-duna-palio-corsa-gol_MLA-F-5052769320_092013.jpg",true,false);
+			ImageInfo img10 = border.detectColors("http://bimg2.mlstatic.com/hilux-sr-30-4x4-dc-ano-2008-oportunidad-_MLA-F-5075976690_092013.jpg",true,false);
+			ImageInfo img11 = border.detectColors("http://bimg2.mlstatic.com/corsa-classic-16-n-super-vendo-o-permuto-_MLA-F-5053040292_092013.jpg",true,false);
+			ImageInfo img12 = border.detectColors("http://bimg2.mlstatic.com/chrysler-pt-cruiser-24-classic_MLA-F-5045159418_092013.jpg",true,false);
+			
+			System.out.println("--------------------------------------------------------------------");
+			System.out.println("--NARANJA-----------------------------------------------------------");
+			System.out.println("--------------------------------------------------------------------");
+			System.out.print(img1.detectadosBorde.get(0).nombre+" - "+img1.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img1.detectadosProducto.get(0).nombre.equals("NA"));
+			System.out.println("--------------------------------------------------------------------");
+			System.out.println("--ROJO--------------------------------------------------------------");
+			System.out.println("--------------------------------------------------------------------");
+			System.out.print(img2.detectadosBorde.get(0).nombre+" - "+img2.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img2.detectadosProducto.get(0).nombre.equals("RO"));
+			System.out.print(img3.detectadosBorde.get(0).nombre+" - "+img3.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img3.detectadosProducto.get(0).nombre.equals("RO"));
+			System.out.print(img4.detectadosBorde.get(0).nombre+" - "+img4.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img4.detectadosProducto.get(0).nombre.equals("RO"));
+			System.out.print(img9.detectadosBorde.get(0).nombre+" - "+img9.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img9.detectadosProducto.get(0).nombre.equals("RO"));
+			System.out.println("--------------------------------------------------------------------");
+			System.out.println("--GRIS--------------------------------------------------------------");
+			System.out.println("--------------------------------------------------------------------");
+			System.out.print(img5.detectadosBorde.get(0).nombre+" - "+img5.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img5.detectadosProducto.get(0).nombre.equals("GR"));
+			System.out.print(img10.detectadosBorde.get(0).nombre+" - "+img10.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img10.detectadosProducto.get(0).nombre.equals("GR"));
+			System.out.print(img11.detectadosBorde.get(0).nombre+" - "+img11.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img11.detectadosProducto.get(0).nombre.equals("GR"));			
+			System.out.println("--------------------------------------------------------------------");
+			System.out.println("--NEGRO-------------------------------------------------------------");
+			System.out.println("--------------------------------------------------------------------");
+			System.out.print(img6.detectadosBorde.get(0).nombre+" - "+img6.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img6.detectadosProducto.get(0).nombre.equals("NE"));
+			System.out.print(img7.detectadosBorde.get(0).nombre+" - "+img7.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img7.detectadosProducto.get(0).nombre.equals("NE"));
+			System.out.print(img8.detectadosBorde.get(0).nombre+" - "+img8.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img8.detectadosProducto.get(0).nombre.equals("NE"));
+			System.out.println("--------------------------------------------------------------------");
+			System.out.println("--BLANCO------------------------------------------------------------");
+			System.out.println("--------------------------------------------------------------------");
+			System.out.print(img12.detectadosBorde.get(0).nombre+" - "+img12.detectadosProducto.get(0).nombre);
+			System.out.println(" - "+img12.detectadosProducto.get(0).nombre.equals("BL"));
+
+			ArrayList<ImageInfo> imagenes = new ArrayList<ImageInfo>();
+			imagenes.add(img1);
+			imagenes.add(img2);
+			imagenes.add(img3);
+			imagenes.add(img4);
+			imagenes.add(img5);
+			imagenes.add(img6);
+			imagenes.add(img7);
+			imagenes.add(img8);
+			imagenes.add(img9);
+			imagenes.add(img10);
+			imagenes.add(img11);
+			imagenes.add(img12);
+			FileHelper.createSummary(imagenes, "/home/fersca/summary.html");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Fin.");
 		System.exit(0);
 	}
 	

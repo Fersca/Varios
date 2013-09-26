@@ -137,11 +137,11 @@ class HomeController {
 		def produ = cambiarColor(resultado.detectadosProducto[0])
 		def cantProdu = resultado.detectadosProducto[0]?.porcentage
 		
-		if (cantBorde<=35){
+		if (cantBorde<=25){
 			borde = "multicolor";
 		}
 		
-		if (cantCentro<=35){
+		if (cantCentro<=25){
 			produ="multicolor";
 		}
 		 

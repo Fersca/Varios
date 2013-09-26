@@ -250,8 +250,8 @@ public class Colors {
 		Color col225 = new Color(168,168,42,VE,225);
 		Color col226 = new Color(168,168,84,VE,226);
 		Color col227 = new Color(168,168,126,VE,227);
-		Color col228 = new Color(168,168,168,GR,228);
-		Color col229 = new Color(168,168,210,VI,229);
+		Color col228 = new Color(168,168,168,GR,228); 
+		Color col229 = new Color(168,168,210,GR,229); //Lo pongo como gris, pero antes era violeta
 		Color col230 = new Color(168,168,252,VI,230);
 		Color col231 = new Color(168,210,0,VE,231);
 		Color col232 = new Color(168,210,42,VE,232);
