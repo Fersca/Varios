@@ -144,8 +144,8 @@ public class FileHelper {
 		
 	}
 	
-	
-	public static void createImgage(int[][] matriz, int TAMANO_BLOQUE) throws IOException {
+	public static StringBuilder sb = new StringBuilder();
+	public static void createImgage(int[][] matriz, int TAMANO_BLOQUE,String[][] matrizColorNet, String result) throws IOException {
 
 		BufferedImage off_Image =new BufferedImage(TAMANO_BLOQUE, TAMANO_BLOQUE, BufferedImage.TYPE_INT_RGB);
 		//El formato a continuacion es 0xTTRRGGBB, tt es transparency, va en FF, el resto son los colores
@@ -163,7 +163,20 @@ public class FileHelper {
 		}
 	    File outputfile = new File("/home/fersca/prueba4.png");
 	    ImageIO.write(off_Image, "png", outputfile);
-		
+
+	    String colores="";
+		for (int i=0;i<TAMANO_BLOQUE;i++){
+			for (int j=0;j<TAMANO_BLOQUE;j++){
+				
+				if (i>=5 && i<=14 && j>=5 && j<=14 )
+					colores = colores + matrizColorNet[j][i]+",";
+				
+			}
+		}
+		colores= colores + result;
+
+		FileHelper.sb.append(colores+"\n");
+	    
 	}
 	
 
