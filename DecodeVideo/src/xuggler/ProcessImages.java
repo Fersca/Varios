@@ -19,7 +19,7 @@ public class ProcessImages {
 	private void run() throws Exception{
 		
 		//obtiene los archivos de imagenes.
-		File folder = new File("/home/fersca/peliculas/starwars");
+		File folder = new File("/home/fersca/pelis/monster/mini/mini2");
 		File[] files = folder.listFiles(); 		 
 
 		ArrayList<ImageInfo> array = new ArrayList<ImageInfo>();
@@ -30,14 +30,14 @@ public class ProcessImages {
 		//para cada uno de ellos detecta los colores
 		for (File file : files) {
 			
-			ImageInfo image = cd.detectColors(file);
+			ImageInfo image = cd.detectColors(file,null);
 			array.add(image);
 			cont++;
 			System.out.println("Listo: "+cont+" - "+file.getName());
 		}
 						
 		//guarda el array en disco
-		ArraySerialization.serialiceArray(array, "/home/fersca/peliculas/starwars.ser");
+		ArraySerialization.serialiceArray(array, "/home/fersca/pelis/monster.ser");
 		
 	}
 	

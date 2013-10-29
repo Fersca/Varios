@@ -322,7 +322,8 @@ public class ColorDetector {
 			//rojo
 			//desalineada
 			//ImageInfo imgR1 = border.detectColors("http://www.todohumor.com/UserFiles/Image/fondos/2010/Mayo/automoderno.jpg",true,true,"0,1,0,0,0,0,0");
-			
+
+			/*
 			ImageInfo imgR1 = border.detectColors("http://mla-s2-p.mlstatic.com/renault-18-break-4x4-muy-buena-con-gnc-5493-MLA4964073436_092013-F.jpg",true,true,"0,1,0,0,0,0,0");
 			ImageInfo imgR2 = border.detectColors("http://www.motorexperience.es/images/cars/ferrari458600.jpg",true,true,"0,1,0,0,0,0,0");
 			ImageInfo imgR3 = border.detectColors("http://www.w7swall.com/wp-content/wallpapers/cars/porche-carrera-porsche-510283.jpg",true,true,"0,1,0,0,0,0,0");
@@ -335,8 +336,15 @@ public class ColorDetector {
 			ImageInfo imgR10 = border.detectColors("http://mla-s1-p.mlstatic.com/saveiro-16-cab-ext-130-hp-7150km-impecable-7526-MLA5237171831_102013-F.jpg",true,true,"0,1,0,0,0,0,0");
 			ImageInfo imgR11 = border.detectColors("http://mla-s2-p.mlstatic.com/ambulancia-mercedes-benz-mb180-bomberos-vende-7557-MLA5241821228_102013-F.jpg",true,true,"0,1,0,0,0,0,0");	
 			ImageInfo imgR12 = border.detectColors("http://mla-s1-p.mlstatic.com/cupe-taunus-gt-con-aa-y-asientos-de-cuero-5338-MLA4373884433_052013-F.jpg",true,true,"0,1,0,0,0,0,0");
-			
+			*/
+			ImageInfo imgR13 = border.detectColors("http://www.pitheringabout.com/wp-content/uploads/2009/07/dscf1875.JPG",true,true,"0,1,0,0,0,0,0");
+			ImageInfo imgR14 = border.detectColors("http://www.ghulmil.com/wp-content/uploads/awesome-red-car-beautiful-hd-wallpapers1.jpg",true,true,"0,1,0,0,0,0,0");
+			ImageInfo imgR15 = border.detectColors("http://es.best-wallpaper.net/wallpaper/1920x1080/1106/Ferrari-red-car_1920x1080.jpg",true,true,"0,1,0,0,0,0,0");
+			ImageInfo imgR16 = border.detectColors("http://upload.wikimedia.org/wikipedia/en/9/91/Award_Winning_Red_Car.jpg",true,true,"0,1,0,0,0,0,0");
+			ImageInfo imgR17 = border.detectColors("http://www.pressportal.com.au/tpllib/img.php?im=2008/10/img_327_3536_3568.jpeg&w=750&h=500",true,true,"0,1,0,0,0,0,0");
+					
 			//gris
+			/*
 			ImageInfo imgG1 = border.detectColors("http://img1.mlstatic.com/mini-cooper-s-hot-pepper-16-turbo-tomo-cuatri-parrillero_MLA-O-4656120149_072013.jpg",true,true,"0,0,1,0,0,0,0");
 			ImageInfo imgG2 = border.detectColors("http://mla-s1-p.mlstatic.com/volkswagen-vw-vento-20-tdi-4p-2011-el-puente-automotore-5989-MLA5017888927_092013-F.jpg",true,true,"0,0,1,0,0,0,0");
 			ImageInfo imgG3 = border.detectColors("http://mla-s1-p.mlstatic.com/porsche-911-carrera-s-permuto-moto-departamento-m1-135-m3-5134-MLA4222409793_042013-F.jpg",true,true,"0,0,1,0,0,0,0");
@@ -347,8 +355,16 @@ public class ColorDetector {
 			ImageInfo imgG8 = border.detectColors("http://images02.olx.com.py/ui/16/08/44/1360446611_480730444_2-Remato-por-viaje-Nissan-Armada-SE-2008-gris-humo-Muy-buen-estado-Asuncion.jpg",true,true,"0,0,1,0,0,0,0");
 			ImageInfo imgG9 = border.detectColors("http://safe-img01.olx.com.mx/ui/2/30/69/1372508550_522262169_2-Fiesta-hb-2003-color-gris-oscuro-4-cil-16-economico-CLIMA-o-cambio-Guadalupe.jpg",true,true,"0,0,1,0,0,0,0");
 			ImageInfo imgG10 = border.detectColors("http://images04.olx.com.pe/ui/20/45/45/1380681861_551704045_3-Volswagen-gol-2010-gris-metalico-Autos.jpg",true,true,"0,0,1,0,0,0,0");
-			
+			*/
+			ImageInfo imgG11 = border.detectColors("http://jordanmorningstarblog.files.wordpress.com/2008/11/dsc_0729.jpg",true,true,"0,0,1,0,0,0,0");
+			ImageInfo imgG12 = border.detectColors("http://www.rapidcars.com/images/e92m3.jpg",true,true,"0,0,1,0,0,0,0");
+			ImageInfo imgG13 = border.detectColors("http://s1.cdn.autoevolution.com/images/news/gallery/medium/new-lexus-gs-350-gets-matte-dark-grey-wrap-photo-gallery-medium_11.jpg",true,true,"0,0,1,0,0,0,0");		
+			ImageInfo imgG14 = border.detectColors("http://images.nysportscars.com/pictures/64122171.jpg",true,true,"0,0,1,0,0,0,0");
+			ImageInfo imgG15 = border.detectColors("http://www.p1woc.co.uk/sky/sky1.jpg	",true,true,"0,0,1,0,0,0,0");
+				
+				
 			//plata
+			/*
 			ImageInfo imgP1 = border.detectColors("http://bimg2.mlstatic.com/hilux-sr-30-4x4-dc-ano-2008-oportunidad-_MLA-F-5075976690_092013.jpg",true,true,"1,0,0,0,0,0,0");			
 			ImageInfo imgP2 = border.detectColors("http://bimg2.mlstatic.com/corsa-classic-16-n-super-vendo-o-permuto-_MLA-F-5053040292_092013.jpg",true,true,"1,0,0,0,0,0,0");
 			ImageInfo imgP3 = border.detectColors("http://mla-s2-p.mlstatic.com/golf-16-impecable-permuto-x-moto-honda-twuister-6689-MLA5097011487_092013-F.jpg",true,true,"1,0,0,0,0,0,0");
@@ -359,8 +375,15 @@ public class ColorDetector {
 			ImageInfo imgP8 = border.detectColors("http://images01.olx.com.ar/ui/7/42/62/1370741848_511414062_4-Toyota-corolla-xei-18-2010-gris-plata-Vehiculos.jpg",true,true,"1,0,0,0,0,0,0");	
 			ImageInfo imgP9 = border.detectColors("http://images01.olx.com.ar/ui/20/16/42/1377639057_540231442_1-se-vende-ford-taunus-gxl-color-gris-plata-grand-bourg-callao-y-burmeister.jpg",true,true,"1,0,0,0,0,0,0");
 			ImageInfo imgP10 = border.detectColors("http://media-sa.viva-images.com/vivastreet_ar/clad/b2/3/79559455/large/1.jpg?dt=aac4be09bbc16db5f74dae6536bf7adc",true,true,"1,0,0,0,0,0,0");		
-			
+			*/
+			ImageInfo imgP11 = border.detectColors("http://www.my-lhd.co.uk/images/voitures/1784a-car-bmw-z4-1.jpg",true,true,"1,0,0,0,0,0,0");
+			ImageInfo imgP12 = border.detectColors("http://images.gtcarlot.com/pictures/25653111.jpg",true,true,"1,0,0,0,0,0,0");
+			ImageInfo imgP13 = border.detectColors("http://imganuncios.mitula.net/mercedes_benz_s350l_96714964496420444.jpg",true,true,"1,0,0,0,0,0,0");
+			ImageInfo imgP14 = border.detectColors("http://www.carandclassic.co.uk/uploads/cars/mercedes/4036211.jpg",true,true,"1,0,0,0,0,0,0");
+			ImageInfo imgP15 = border.detectColors("http://favimages.net/wp-content/uploads/2013/09/ferrari-456-gt-silver-grey-car-front-view-headlights.jpg",true,true,"1,0,0,0,0,0,0");
+					
 			//negro
+			/*
 			ImageInfo imgNE1 = border.detectColors("http://img1.mlstatic.com/bmw-series-3-335i-m-sport-biturbo-steptronic_MLA-O-5085301356_092013.jpg",true,true,"0,0,0,1,0,0,0");
 			ImageInfo imgNE2 = border.detectColors("http://bimg1.mlstatic.com/bmw-330-i-265cv-automatico-2010-impecable-idem-a-okm-permuto_MLA-F-4464781334_062013.jpg",true,true,"0,0,0,1,0,0,0");
 			ImageInfo imgNE3 = border.detectColors("http://bimg2.mlstatic.com/bmw-335i-biturbo-sedan_MLA-F-5096800211_092013.jpg",true,true,"0,0,0,1,0,0,0");
@@ -371,8 +394,15 @@ public class ColorDetector {
 			ImageInfo imgNE8 = border.detectColors("http://mla-s2-p.mlstatic.com/chevrolet-corsa-3p-negro-full-full-47000-kms-excelente-7638-MLA5256932199_102013-F.jpg",true,true,"0,0,0,1,0,0,0");	
 			ImageInfo imgNE9 = border.detectColors("http://mla-s2-p.mlstatic.com/clio-yahoo-2008-4132-MLA4896612255_082013-F.jpg",true,true,"0,0,0,1,0,0,0");	
 			ImageInfo imgNE10 = border.detectColors("http://mla-s1-p.mlstatic.com/206-xs-full-full-vendo-o-permuto-552-MLA4689845583_072013-F.jpg",true,true,"0,0,0,1,0,0,0");	
-			
+			*/
+			ImageInfo imgNE11 = border.detectColors("http://www.technobuffalo.com/wp-content/uploads/2013/03/black-car-service-uber.jpg",true,true,"0,0,0,1,0,0,0");
+			ImageInfo imgNE12 = border.detectColors("http://www.team-bhp.com/forum/iipcache/73996.jpg",true,true,"0,0,0,1,0,0,0");
+			ImageInfo imgNE13 = border.detectColors("http://www.12pointsignworks.com/Portals/36109/images/12PSW-Image-045.jpg",true,true,"0,0,0,1,0,0,0");
+			ImageInfo imgNE14 = border.detectColors("http://www.z1auto.com/Images/blackWRX.jpg",true,true,"0,0,0,1,0,0,0");
+			ImageInfo imgNE15 = border.detectColors("http://fancytuning.com/wp-content/uploads/2010/06/sr-auto-audi-r8-valkyrie.jpg",true,true,"0,0,0,1,0,0,0");
+				
 			//blanco
+			/*
 			ImageInfo imgB1 = border.detectColors("http://mla-s1-p.mlstatic.com/fiat-uno-s-272-MLA4675875481_072013-F.jpg",true,true,"0,0,0,0,1,0,0");
 			ImageInfo imgB2 = border.detectColors("http://mla-s1-p.mlstatic.com/renault-trafic-14-7614-MLA5247308146_102013-F.jpg",true,true,"0,0,0,0,1,0,0");	
 			ImageInfo imgB3 = border.detectColors("http://mla-s1-p.mlstatic.com/fiat-500-sport-14-mt-multiair-16v-105cv-7561-MLA5236852956_102013-F.jpg",true,true,"0,0,0,0,1,0,0");
@@ -383,8 +413,15 @@ public class ColorDetector {
 			ImageInfo imgB8 = border.detectColors("http://mla-s1-p.mlstatic.com/volkswagen-gol-power-16-3ptasespecial-unico-dueno-7684-MLA5247581964_102013-F.jpg",true,true,"0,0,0,0,1,0,0");	
 			ImageInfo imgB9 = border.detectColors("http://mla-s1-p.mlstatic.com/peugeot-207-xt-3-ptas-blanco-7693-MLA5248680820_102013-F.jpg",true,true,"0,0,0,0,1,0,0");	
 			ImageInfo imgB10 = border.detectColors("http://mla-s1-p.mlstatic.com/bmw-335i-s-paq-m-autom-7ma-doble-embrague-levas-cedin-5292-MLA4288337360_052013-F.jpg",true,true,"0,0,0,0,1,0,0");	
+			*/
+			ImageInfo imgB11 = border.detectColors("http://www.here.org.uk/wp-content/uploads/2008/02/nissan-gt-r_20082.jpg",true,true,"0,0,0,0,1,0,0");
+			ImageInfo imgB12 = border.detectColors("http://www.wallm.com/images/2013/03/bmw-white-car-482685.jpg",true,true,"0,0,0,0,1,0,0");
+			ImageInfo imgB13 = border.detectColors("http://forums.forzamotorsport.net/photos/aaron_pass/images/2252647/original.aspx",true,true,"0,0,0,0,1,0,0");
+			ImageInfo imgB14 = border.detectColors("http://www.fototime.com/A30E829D11E6B87/orig.jpg",true,true,"0,0,0,0,1,0,0");
+			ImageInfo imgB15 = border.detectColors("http://www.sunrisesigns.com/Portals/84214/images/matte%20white%20wrap-resized-600.jpg",true,true,"0,0,0,0,1,0,0");
 				
 			//azul
+			/*
 			ImageInfo imgA1 = border.detectColors("http://mla-s2-p.mlstatic.com/peugeot-206-16-excelente-7017-MLA5146735986_102013-F.jpg",true,true,"0,0,0,0,0,1,0");
 			ImageInfo imgA2 = border.detectColors("http://mla-s2-p.mlstatic.com/fiat-uno-2006-5-puertas-muy-buenofinancio-oportunidad-6939-MLA5140422163_102013-F.jpg",true,true,"0,0,0,0,0,1,0");
 			ImageInfo imgA3 = border.detectColors("http://mla-s2-p.mlstatic.com/citron-c5-30i-v6-exclusive-aut-impec-oportunidad-1465-MLA4752549281_072013-F.jpg",true,true,"0,0,0,0,0,1,0");
@@ -396,7 +433,13 @@ public class ColorDetector {
 			ImageInfo imgA9 = border.detectColors("http://mla-s1-p.mlstatic.com/nissan-sentra-tekna-ano-2011-con-41000km-automatico-2523-MLA4803937364_082013-F.jpg",true,true,"0,0,0,0,0,1,0");
 			ImageInfo imgA10 = border.detectColors("http://mla-s2-p.mlstatic.com/volkswagen-fox-16-route-3-p-5817-MLA5003088725_092013-F.jpg",true,true,"0,0,0,0,0,1,0");
 			ImageInfo imgA11 = border.detectColors("http://mla-s2-p.mlstatic.com/vw-gol-19-sd-azul-2004-km-180000-39900--7616-MLA5253972907_102013-F.jpg",true,true,"0,0,0,0,0,1,0");
-			
+			*/
+			ImageInfo imgA12 = border.detectColors("http://3.bp.blogspot.com/-u_4itKBZGBM/USbCqDMWPRI/AAAAAAAAXXs/-dRIiwmDGwk/s640/bollore-bluecar-1.jpg",true,true,"0,0,0,0,0,1,0");
+			ImageInfo imgA13 = border.detectColors("http://www.fiatbarchetta.com/links/images/kit12515.jpg",true,true,"0,0,0,0,0,1,0");
+			ImageInfo imgA14 = border.detectColors("http://www.mcleodsbritishcars.com/code/styled-10/files/triumph-gt6-03.jpg",true,true,"0,0,0,0,0,1,0");
+			ImageInfo imgA15 = border.detectColors("http://image-cache.boostcruising.com/database/journal/files/post-23512-1201399021822695246.jpg",true,true,"0,0,0,0,0,1,0");
+			ImageInfo imgA16 = border.detectColors("http://www.governmentauctions.org/uploaded_images/chevycobalt-748584.JPG",true,true,"0,0,0,0,0,1,0");
+				
 			//verde claro
 			ImageInfo imgV1 = border.detectColors("http://mla-s1-p.mlstatic.com/renault-twingo-2001-muy-lindo-doble-airbag-y-levantacristale-5554-MLA4510574583_062013-F.jpg",true,true,"0,0,0,0,0,0,1");
 			ImageInfo imgV2 = border.detectColors("http://mla-s1-p.mlstatic.com/renault-gordini-5p-da-2v-1969-automotores-el-puente-5122-MLA4205628815_042013-F.jpg",true,true,"0,0,0,0,0,0,1");
@@ -405,6 +448,7 @@ public class ColorDetector {
 			//ImageInfo imgV3 = border.detectColors("http://www.auto-blog.com.mx/wp-content/uploads/2012/08/Aventador-Verde-Ithaca-580x300.jpg",true,true,"0,0,0,0,0,0,1");
 			
 			//verde oscuro
+			/*
 			ImageInfo imgV3 = border.detectColors("http://images04.olx.com.pe/ui/6/92/95/1275924865_98678795_1-VENDO-AUTO-NISSAN-SENTRA-DEL-96-COLOR-VERDE-LA-VICTORIA-BALCONCILLO-1275924865.jpg",true,true,"0,0,0,0,0,0,1");
 			ImageInfo imgV4 = border.detectColors("http://www.hupmobile.com.ar/Siam%20verde%20445.jpg",true,true,"0,0,0,0,0,0,1");
 			ImageInfo imgV5 = border.detectColors("http://www.todoautos.com.pe/attachments/f50/122937d1221072504-toyota-corolla-1998-auto-verde.jpg",true,true,"0,0,0,0,0,0,1");
@@ -413,7 +457,14 @@ public class ColorDetector {
 			ImageInfo imgV8 = border.detectColors("http://img2.mlstatic.com/renault-twingo-97-3p-verde-oportunidad-juan-manuel-auto_MLA-O-4996053906_092013.jpg",true,true,"0,0,0,0,0,0,1");
 			ImageInfo imgV9 = border.detectColors("http://images01.olx.com.ar/ui/11/82/61/1297483935_165968161_2-Fotos-de--VENDO-GOL-5-PUERTAS-COLOR-VERDE-EN-MUY-BUENAS-CONDICIONES.jpg",true,true,"0,0,0,0,0,0,1");	
 			ImageInfo imgV10 = border.detectColors("http://imganuncios.mitula.net/vendo_muy_buen_estado_acepto_auto_menos_valor_96868092354435406.jpg",true,true,"0,0,0,0,0,0,1");
-									
+			 */
+			
+			ImageInfo imgV11 = border.detectColors("http://www.carsguide.com.au/images/uploads/imiev-green-w.jpg",true,true,"0,0,0,0,0,0,1");
+			ImageInfo imgV12 = border.detectColors("http://www.whitegadget.com/attachments/car-accessories/18982d1227068174-short-list-green-car-year-auto-show-short-list-green-car-year-auto-show.jpg",true,true,"0,0,0,0,0,0,1");
+			ImageInfo imgV13 = border.detectColors("http://www.examiner.com/images/blog/wysiwyg/image/Mazda_Green(1).jpg",true,true,"0,0,0,0,0,0,1");
+			ImageInfo imgV14 = border.detectColors("http://www.examiner.com/images/blog/EXID40434/images/porsche_eruf_stormster_green_exotic_car_sports.jpg",true,true,"0,0,0,0,0,0,1");
+			ImageInfo imgV15 = border.detectColors("http://img.gawkerassets.com/img/18fzfegxlms5ijpg/original.jpg",true,true,"0,0,0,0,0,0,1");
+			
 			/*
 			ImageInfo img6 = border.detectColors("http://img1.mlstatic.com/bmw-series-3-335i-m-sport-biturbo-steptronic_MLA-O-5085301356_092013.jpg",true,false,"");
 			ImageInfo img7 = border.detectColors("http://bimg1.mlstatic.com/bmw-330-i-265cv-automatico-2010-impecable-idem-a-okm-permuto_MLA-F-4464781334_062013.jpg",true,false,"");
@@ -500,6 +551,9 @@ public class ColorDetector {
 			imagenes.add(imgN9);
 			imagenes.add(imgN10);
 			*/
+			
+			
+			/*
 			imagenes.add(imgR1);
 			imagenes.add(imgR2);
 			imagenes.add(imgR3);
@@ -512,7 +566,14 @@ public class ColorDetector {
 			imagenes.add(imgR10);
 			imagenes.add(imgR11);
 			imagenes.add(imgR12);
+			*/
+			imagenes.add(imgR13);
+			imagenes.add(imgR14);
+			imagenes.add(imgR15);
+			imagenes.add(imgR16);
+			imagenes.add(imgR17);
 			
+			/*
 			imagenes.add(imgG1);
 			imagenes.add(imgG2);
 			imagenes.add(imgG3);
@@ -523,7 +584,14 @@ public class ColorDetector {
 			imagenes.add(imgG8);
 			imagenes.add(imgG9);
 			imagenes.add(imgG10);
-
+			*/
+			imagenes.add(imgG11);
+			imagenes.add(imgG12);
+			imagenes.add(imgG13);
+			imagenes.add(imgG14);
+			imagenes.add(imgG15);
+			
+			/*
 			imagenes.add(imgP1);
 			imagenes.add(imgP2);
 			imagenes.add(imgP3);
@@ -534,7 +602,14 @@ public class ColorDetector {
 			imagenes.add(imgP8);
 			imagenes.add(imgP9);
 			imagenes.add(imgP10);
-						
+			*/
+			imagenes.add(imgP11);
+			imagenes.add(imgP12);
+			imagenes.add(imgP13);
+			imagenes.add(imgP14);
+			imagenes.add(imgP15);
+			
+			/*
 			imagenes.add(imgNE1);
 			imagenes.add(imgNE2);
 			imagenes.add(imgNE3);
@@ -545,7 +620,14 @@ public class ColorDetector {
 			imagenes.add(imgNE8);
 			imagenes.add(imgNE9);
 			imagenes.add(imgNE10);
+			*/
+			imagenes.add(imgNE11);
+			imagenes.add(imgNE12);
+			imagenes.add(imgNE13);
+			imagenes.add(imgNE14);
+			imagenes.add(imgNE15);
 			
+			/*
 			imagenes.add(imgB1);
 			imagenes.add(imgB2);
 			imagenes.add(imgB3);
@@ -556,7 +638,14 @@ public class ColorDetector {
 			imagenes.add(imgB8);
 			imagenes.add(imgB9);
 			imagenes.add(imgB10);
-
+			*/
+			imagenes.add(imgB11);
+			imagenes.add(imgB12);
+			imagenes.add(imgB13);
+			imagenes.add(imgB14);
+			imagenes.add(imgB15);
+			
+			/*
 			imagenes.add(imgA1);
 			imagenes.add(imgA2);
 			imagenes.add(imgA3);
@@ -568,7 +657,14 @@ public class ColorDetector {
 			imagenes.add(imgA9);
 			imagenes.add(imgA10);			
 			imagenes.add(imgA11);
+			*/
+			imagenes.add(imgA12);
+			imagenes.add(imgA13);
+			imagenes.add(imgA14);
+			imagenes.add(imgA15);
+			imagenes.add(imgA16);
 			
+			/*
 			imagenes.add(imgV1);
 			imagenes.add(imgV2);
 			imagenes.add(imgV3);
@@ -579,11 +675,16 @@ public class ColorDetector {
 			imagenes.add(imgV8);
 			imagenes.add(imgV9);
 			imagenes.add(imgV10);			
-			
+			*/
+			imagenes.add(imgV11);
+			imagenes.add(imgV12);
+			imagenes.add(imgV13);
+			imagenes.add(imgV14);
+			imagenes.add(imgV15);
 			
 			FileHelper.createSummary(imagenes, "/home/fersca/summary.html");
 
-		    File file1 = new File("/home/fersca/coloresAutosCentro50-plata.txt");
+		    File file1 = new File("/home/fersca/coloresAutosCentro50-plata-2.txt");
 		    Writer output = new BufferedWriter(new FileWriter(file1));
 			output.write(FileHelper.sb.toString());
 			output.close();	    

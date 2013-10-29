@@ -118,7 +118,7 @@ public class DecodeAndCaptureFrames
   public static void main(String[] args)
   {
 
-    String filename = "/home/fersca/peliculas/starwars.mp4";
+    String filename = "/home/fersca/pelis/monster.avi";
 
     // make sure that we can actually convert video pixel formats
 
