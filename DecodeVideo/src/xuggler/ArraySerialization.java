@@ -58,7 +58,8 @@ public class ArraySerialization {
 			fotos = (ArrayList<ImageInfo>) ois.readObject();
 	        ois.close();
 	        
-	        System.out.println("Cargado");
+	        System.out.println("Cargado: "+fotos.size());
+	        
 			
 		} catch (Exception e){
 	        System.out.println("Error cargando archivo");

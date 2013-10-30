@@ -93,9 +93,16 @@ public class ColorDetector {
 			}
 			
 			//Calcula los anchos y altos de los bloques
-			int ancho = image.getWidth();
-			int alto = image.getHeight();
-						
+			int ancho;
+			int alto;
+			try {
+				ancho = image.getWidth();
+				alto = image.getHeight();
+			} catch (Exception e){
+				System.out.println(file.getName());
+				e.printStackTrace();
+				throw e;
+			}
 			//Resetea los colores
 			red=0;
 			green=0;

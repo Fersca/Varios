@@ -14,30 +14,32 @@ public class FindBestMach {
 		FindBestMach fbm = new FindBestMach();
 		ColorDetector cd = new ColorDetector();
 		
-		//320x240
-		String foto = "https://fbcdn-sphotos-f-a.akamaihd.net/hphotos-ak-prn1/164033_10150107315499610_4534687_n.jpg";
+		//imagen a calcular
+		String foto = "https://fbcdn-sphotos-b-a.akamaihd.net/hphotos-ak-prn1/946499_385532184890466_1567347820_n.jpg";
 		
+		//obtiene la imagen
 		URL url = new URL(foto);
 		BufferedImage image = ImageIO.read(url);
 		
+		//cantidad de imagenes de lado
+		int cantFotosAncho = 60;
+		repetitions=200;
+
+		//obtiene la conf de la pelicula
+		Movie movie = MovieConfig.getMovie("Monster");
+		array = ArraySerialization.deSerialiceArray(movie.colorFile);		
+		int anchoFotos = movie.ancho; 
+		int altoFotos = movie.alto;
+
+		//tamanio de las imagenes ejemplo con 80 y 60
 		int ancho =image.getWidth();
 		int alto  =image.getHeight();
-		
-		int cantFotosAncho = 160;
-
-		//tamanio de las imagenes
-		//80
-		//60
-
-		int anchoFotos = 80; 
-		int altoFotos = 43;
-		
 		double pixelsEnAncho = ancho/cantFotosAncho; //48 
 		double proporcios    = anchoFotos/pixelsEnAncho;// 1.6666
 		double pixelsEnAlto  = altoFotos/proporcios;//36
 		int cantFotosAlto  = (int)(alto/pixelsEnAlto);//30
 		
-		System.out.println("Calcular cuadros");
+		System.out.println("Calcular cuadros: "+cantFotosAncho*cantFotosAlto);
 		
 		//dividir la foto en array con color promedio
 		ArrayList<Bloque> bloques = cd.obtieneMatriz(image,cantFotosAncho, cantFotosAlto); //3x3
@@ -46,7 +48,6 @@ public class FindBestMach {
 		for (Bloque bloque : bloques) {
 			fbm.getBestImage(bloque);			
 		}
-		
 		
 		//genera una imagen en blanco
 		BufferedImage off_Image =new BufferedImage(anchoFotos*cantFotosAncho, altoFotos*cantFotosAlto, BufferedImage.TYPE_INT_RGB);
@@ -61,7 +62,7 @@ public class FindBestMach {
 		for (Bloque bloque : bloques) {
 
 			//obtiene la imagen del archivo
-			File file = new File("/home/fersca/pelis/monster/mini/mini2/"+bloque.imagenSimilar.filename);
+			File file = new File(movie.directory+bloque.imagenSimilar.filename);
 			BufferedImage image2 = ImageIO.read(file);
 
 			//obtiene el ancho y el alto
@@ -91,8 +92,8 @@ public class FindBestMach {
 			
 		}
 		
-
 		System.out.println("Grabando Archivo");
+		
 		//pasa la imagen al archivo final
 	    File outputfile = new File("/home/fersca/pelis/peques/prueba4.png");
 	    ImageIO.write(off_Image, "png", outputfile);
@@ -101,7 +102,8 @@ public class FindBestMach {
 	}
 
 	//array con la info de las imagenes serializadas
-	ArrayList<ImageInfo> array = ArraySerialization.deSerialiceArray("/home/fersca/pelis/monster.ser");
+	static ArrayList<ImageInfo> array;
+	static int repetitions;
 	
 	//busca la imagen serializada que mas se parece al bloque
 	public void getBestImage(Bloque image) throws Exception {
@@ -110,7 +112,16 @@ public class FindBestMach {
 		double diff;
 		ImageInfo best=new ImageInfo();
 		
-		for (ImageInfo imageInfo : array) {
+		int bestPos = 0;
+		
+		for (int arrayPos=0;arrayPos<array.size();arrayPos++) {
+		
+			ImageInfo imageInfo = array.get(arrayPos);
+			
+			//si repitio mas de X veces usa otra
+			if (imageInfo.repetitions==repetitions)
+				continue;
+			
 			//busca la imagen mas parecida
 			diff = difference(image.red, image.green, image.blue, imageInfo.red, imageInfo.green, imageInfo.blue);
 			//System.out.println(diff+" - "+imageInfo.filename);
@@ -118,11 +129,14 @@ public class FindBestMach {
 			if (diff<min){
 				min=diff;
 				best=imageInfo;
+				bestPos = arrayPos;
 			}
+			
+			arrayPos++;
 					
 		}
-		
-		//System.out.println("Minimo: "+min+" - "+best.filename);
+
+		array.get(bestPos).repetitions++;
 		
 		image.imagenSimilar=best;
 		

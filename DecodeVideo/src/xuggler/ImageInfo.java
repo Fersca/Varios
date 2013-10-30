@@ -9,5 +9,6 @@ public class ImageInfo implements Serializable {
 	int green;
 	int blue;
 	String filename;
+	int repetitions;
 	
 }

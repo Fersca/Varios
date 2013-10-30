@@ -49,7 +49,7 @@ public class DecodeAndCaptureFrames
 {
   /** The number of seconds between frames. */
 
-  public static final double SECONDS_BETWEEN_FRAMES = 5;
+  public static final double SECONDS_BETWEEN_FRAMES = 1;
 
   /** The number of nano-seconds between frames. */
 
