@@ -19,7 +19,7 @@ public class ProcessImages {
 	private void run() throws Exception{
 		
 		//obtiene los archivos de imagenes.
-		File folder = new File("/home/fersca/pelis/monster2/mivi");
+		File folder = new File("/home/fersca/pelis/monster2/mivi/low");
 		File[] files = folder.listFiles(); 		 
 
 		ArrayList<ImageInfo> array = new ArrayList<ImageInfo>();
@@ -37,7 +37,7 @@ public class ProcessImages {
 		}
 						
 		//guarda el array en disco
-		ArraySerialization.serialiceArray(array, "/home/fersca/pelis/monster2/mivi/monster.ser");
+		ArraySerialization.serialiceArray(array, "/home/fersca/pelis/monster2/mivi/low/monster.ser");
 		
 	}
 	
