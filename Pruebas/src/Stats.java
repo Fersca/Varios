@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 
 public class Stats {
@@ -11,12 +12,12 @@ public class Stats {
 	public synchronized void calculateMaxMin(long time, long tamanio){
 		
 		tiempos.add(time);
-		tamanio = tamanio + tamanio;
+		this.tamanio = this.tamanio + tamanio;
 		terminados++;
 		
 	}
 
-	public void printStats() {
+	public void printStats() throws InterruptedException {
 		
 		//cantidad de threads terminados
 		System.out.println("Terminan los threads: "+ terminados);
@@ -34,6 +35,10 @@ public class Stats {
 		double more200ms=0;
 		double more500ms=0;
 		double more1000ms=0;
+		double more5000ms=0;
+		
+		//esperando 3 segundos.
+		Thread.sleep(3000);
 		
 		for (Long tiempo : tiempos) {
 		
@@ -42,7 +47,8 @@ public class Stats {
 			
 			promedio = promedio + tiempo;
 
-			if (tiempo>1000) more1000ms++;
+			if (tiempo>5000) more5000ms++;
+			else if (tiempo>1000) more1000ms++;
 			else if (tiempo>500) more500ms++;
 			else if (tiempo>200) more200ms++;
 			else if (tiempo>100) more100ms++;
@@ -60,7 +66,7 @@ public class Stats {
 		
 		System.out.println("Tiempo Total de la prueba: " + (end-init) + "ms");
 		System.out.println("Cantidad de Operaciones por ms: " + terminadosDouble/(double)(end-init));
-		System.out.println("Cantidad promedio de items hit: " + ((double)tamanio)/terminadosDouble);
+		System.out.println("Cantidad promedio de items hit: " + 100*(double)tamanio/(terminadosDouble*10) + "%");
 		System.out.println("Promedio de tiempos de respuesta: " + promedio + "ms");
 	    
 		//Calculo m‡ximos y m’nimos
@@ -76,6 +82,7 @@ public class Stats {
 	    System.out.println("Mas de 200ms:  " + 100*more200ms/terminadosDouble + "% - " + more200ms);
 	    System.out.println("Mas de 500ms:  " + 100*more500ms/terminadosDouble + "% - " + more500ms);
 	    System.out.println("Mas de 1000ms: " + 100*more1000ms/terminadosDouble + "% - " + more1000ms);
+	    System.out.println("Mas de 5000ms: " + 100*more5000ms/terminadosDouble + "% - " + more5000ms);
 	   
 	    
 	}
