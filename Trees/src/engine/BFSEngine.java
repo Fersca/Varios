@@ -28,6 +28,7 @@ public class BFSEngine {
 		nodos.add(raiz);
 		
 		//Voy recorriendo cada uno de los niveles y chequeando los nodos de esos niveles
+		//Se verifica que i sea menor al nivel para poner un corte en la profundidad
 		for(int i=0;i<nivel;i++){
 
 			//Verifica los nodos de los niveles y ademas devuelve el nuevo nivel al mismo tiempo
