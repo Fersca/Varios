@@ -1,87 +1,163 @@
 package maps;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-public class HashMap {
-
-	public static void main(String[] args) {
-
-		HashMap hm = new HashMap();
-		hm.put("hola", "hola");
-		String nombre = hm.get("hola");
-		System.out.println(nombre);
-		hm.delete("hola");
-
+/**
+ * Hashmap de fersca
+ * @author fscasserra
+ *
+ */
+public class HashMap<K,V> {
+		
+	//nodo que contiene los elementos del mapa
+	class Nodo<K2,V2> {
+		K2 clave;
+		V2 valor;
+		Nodo<K2,V2> next;
 	}
 
-	class Nodo {
-		String clave;
-		String valor;
+	Nodo<K,V>[] array;
+	
+	@SuppressWarnings("unchecked")
+	public HashMap(){
+		this.array = (Nodo<K,V>[])new Nodo[10];
 	}
+	@SuppressWarnings("unchecked")
+	public HashMap(int initialCapacity){
+		this.array = (Nodo<K,V>[])new Nodo[initialCapacity];
+	}
+		
+	/**
+	 * Agrega un elemento al mapa
+	 * @param clave
+	 * @param valor
+	 */
+	public void put(K clave, V valor){
 	
-	//array fijo de 20 elementos
-	ArrayList<LinkedList<Nodo>> array = new ArrayList<LinkedList<Nodo>>(20); 
-	
-	public void put(String clave, String valor){
-	
+		if (clave==null) return;
+		if (valor==null) return;
+		
 		//calcula el hash de la clave
-		int bucket = hash(clave)%20;
-		LinkedList<Nodo> list = array.get(bucket);
+		int bucket = hash(clave)%array.length;
+		Nodo<K,V> n = array[bucket];
 		
 		//crea el arraylist si est‡ vacio
-		if (list==null){
-			//creo el array list
-			list = new LinkedList<Nodo>();
+		if (n==null){
 			//le agrego el nodo
-			Nodo n = new Nodo();
+			n = new Nodo<K,V>();
 			n.clave = clave;
 			n.valor = valor;
-			list.add(n);
-			//lo agrego en el bucket que corresponde
-			array.add(bucket,list);
+			array[bucket] = n;
 		} else {
 			//le agrego el nodo
-			Nodo n = new Nodo();
-			n.clave = clave;
-			n.valor = valor;
-			list.add(n);			
+			Nodo<K,V> n2 = new Nodo<K,V>();
+			n2.clave = clave;
+			n2.valor = valor;
+			while(n.next!=null){
+				n = n.next;		
+			}
+			n.next=n2;
 		}
 			
 	}
 
-	public String get(String clave){
+	/**
+	 * Obtiene el elemento definido con la clave especificada
+	 * @param clave
+	 * @return
+	 */
+	public V get(K clave){
 		
-		int bucket = hash(clave)%20;
+		if (clave==null) return null;
 		
-		LinkedList<Nodo> list = array.get(bucket);
+		//encuentro el bucket
+		int bucket = hash(clave)%array.length;
 		
-		for (Nodo nodo : list) {
-			if (nodo.clave==clave)
-				return nodo.valor;
+		//obtengo el nodo
+		Nodo<K,V> n = array[bucket];
+				
+		//mientras haya objeto verifico la clave
+		while(n!=null){
+			if (n.clave.equals(clave))
+				return n.valor;
+			n=n.next;
 		}
 		
 		return null;
+		
 	}
 
-	public void delete(String clave){
+	/**
+	 * Elimina el elemento con la clave especificada
+	 * @param clave
+	 */
+	public void delete(K clave){
 		
-		int bucket = hash(clave)%20;
+		if (clave==null) return;
 		
-		LinkedList<Nodo> list = array.get(bucket);
-
-		int i = 0;
-		for (Nodo nodo : list) {
-			if (nodo.clave==clave)
-				list.remove(i);
-			i++;
+		//encuentro el bucket
+		int bucket = hash(clave)%array.length;
+		
+		//obtengo el nodo
+		Nodo<K,V> n = array[bucket];
+		Nodo<K,V> ant = null;
+		
+		//mientras haya objeto verifico la clave
+		while(n!=null){
+			if (n.clave.equals(clave)){
+				if (ant!=null){
+					ant.next=n.next;					
+				} else {
+					array[bucket]=n.next;
+				}
+				return;
+			}
+			ant = n;
+			n=n.next;
 		}
 		
 	}
 	
-	//Calcula la funci—n de hash de un string
-	private int hash(String clave){
-		return 0;
+	/**
+	 * Devuelve la cantidad de elementos de todo el mapa
+	 * @return
+	 */
+	public int getCountElements(){
+		
+		int i=0;
+		for (Nodo<K,V> nodo : array) {
+			if (nodo!=null){
+				do {
+					i++;	
+					nodo=nodo.next;
+				} while ((nodo!=null));
+			}
+		}
+		return i;
 	}
+
+	//Calcula la funci—n de hash de un string
+	private int hash(K clave){
+		return clave.hashCode();
+	}
+	
+	public static void main(String[] args) {
+
+		HashMap<String, Integer> hm = new HashMap<String, Integer>();
+		hm.put("hola", 1);
+		hm.put("chau", 2);
+		hm.put("fer",  3);
+		hm.put("vale", 4);
+		hm.put(null, 5);
+		Integer nombre = hm.get("hola");
+		System.out.println(nombre);
+		nombre = hm.get("chau");
+		nombre = hm.get(null);
+		System.out.println(nombre);
+		hm.delete("hola");
+		System.out.println(hm.getCountElements());
+		hm.delete("fer");
+		System.out.println(hm.getCountElements());
+
+	}
+
 	
 }
