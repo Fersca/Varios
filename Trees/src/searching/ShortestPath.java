@@ -2,25 +2,21 @@ package searching;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
 
-public class BFS {
-				
+public class ShortestPath {
+
 	//matriz de adyasencia
 	ArrayList<Edge> edges;
 	
-	public Vertex find(Vertex root, Vertex solution){
+	public LinkedList<Vertex> find(Vertex root, Vertex solution){
 	
 		//creo la cola para visitar
 		LinkedList<Vertex> queue = new LinkedList<Vertex>();
+		//lista de soluciones
+		LinkedList<Vertex> solutions = new LinkedList<Vertex>();
 		
-		//me guardo los vertices ya visitados
-		Set<Vertex> visited = new TreeSet<Vertex>();
-
 		//encolo el root en ambos
 		queue.add(root);
-		visited.add(root);
 		
 		//mientras tenga por visitar
 		while(!queue.isEmpty()){
@@ -30,8 +26,9 @@ public class BFS {
 			
 			//verifico si es la condici—n final
 			if (verifConfition(v1, solution)){
-				return v1;
-			}
+				solutions.add(v1);
+				continue;
+			} 
 			
 			//obtengo las aristas
 			ArrayList<Edge> edges= getEdges(v1); 
@@ -41,16 +38,34 @@ public class BFS {
 				//obtengo el vertice
 				Vertex v2 = nextVertex(edge, v1);
 				//lo agrego a la cola a visitar si no estaba visitado
-				if (!visited.contains(v2))
-					visited.add(v2);
-					queue.add(v2);
+				if (!contiene(v1.history,v2)){
+					Vertex v2clone = new Vertex(v2.value);
+					//copia la historia del nodo
+					for (Vertex vh : v1.history) {
+						v2clone.history.add(vh);
+					}
+					v2clone.history.add(v1);
+					v2clone.cost=edge.dist;
+					queue.add(v2clone);
+				}									
 			}
+			//limpia la historia del nodo anterior para hacer espacio
+			v1.history=null;
 			
 		}
 		
 		//devuelvo null si ninguno cupli— la condici—n
-		return null;
+		return solutions;
 			
+	}
+
+	private boolean contiene(LinkedList<Vertex> visited, Vertex v2) {
+
+		for (Vertex vertex : visited) {
+			if (vertex.value.equals(v2.value))
+				return true;
+		}
+		return false;
 	}
 
 	private Vertex nextVertex(Edge edge, Vertex v1) {
@@ -76,7 +91,7 @@ public class BFS {
 		
 	public static void main(String[] args){
 		
-		BFS bfs = new BFS();
+		ShortestPath sp = new ShortestPath();
 		
 		//Creo la matriz 
 		
@@ -101,6 +116,22 @@ public class BFS {
 		Edge e8 = new Edge(v5,v7,80);
 		Edge e9 = new Edge(v6,v7,90);
 		
+		/*
+		 * 
+		 *           v2             v6    
+		 *          -   -          -  -
+		 *       -20-    -30-   -70-   -90-
+ 		 *       -          -  -          -
+		 *    v1             v4            v7
+		 *       -          -  -          -
+   		 *       -10-   -40-    -60-   -80-
+		 *          -  -           -  -
+		 *           v3  ----50---- v5
+		 *
+		 * 
+		 */
+		
+		
 		ArrayList<Edge> edges = new ArrayList<Edge>();
 		edges.add(e1);
 		edges.add(e2);
@@ -112,9 +143,18 @@ public class BFS {
 		edges.add(e8);
 		edges.add(e9);
 		
-		bfs.edges=edges;
-		Vertex fin = bfs.find(v1,v7);
-		System.out.println("Fin: "+fin.value);
+		sp.edges=edges;
+		LinkedList<Vertex> solutions = sp.find(v1,v7);
+		for (Vertex v : solutions) {
+			System.out.println("Fin: ");
+			int totalCost=0;
+			for (Vertex vertex : v.history) {
+				System.out.println(" -- Node: "+vertex.value);
+				totalCost=totalCost+vertex.cost;
+			}
+			totalCost=totalCost+v.cost;
+			System.out.println(" -- Cost: "+totalCost);
+		}
 	}
 	
 }

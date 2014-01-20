@@ -1,13 +1,20 @@
 package searching;
 
+import java.util.LinkedList;
+
 //clase que representa un vértice
-public class Vertex implements Comparable<Vertex>{
-	Object value;
-	public Vertex(Object value){
+public class Vertex {
+	String value;
+	public Vertex(String value){
 		this.value=value;
 	}
-	@Override
-	public int compareTo(Vertex arg0) {
-		if (arg0.value.equals(this.value)) return 0; else return 1;
-	}
+	//used in shortest path to store the history 
+	LinkedList<Vertex> history = new LinkedList<Vertex>();
+	
+	//used in dijkstra to store the previous vertex in the path
+	Vertex previous;
+	
+	//cost to actual vertex
+	int cost;
+	
 }
