@@ -12,6 +12,9 @@ public class DFS {
 						
 		//verify if vertex is a solution, finish
 		if (root.value=="V7"){
+			for (Vertex v : root.history) {
+				System.out.print(v.value);
+			}
 			System.out.println(root.value);
 			return true;
 		} 
@@ -26,15 +29,18 @@ public class DFS {
 			//if it wasnt visited previously			
 			if (!contiene(root.history,v2)){
 				//add root history to new node
+				
+				//clona el nuevo nodo para crearle el historial
+				Vertex v2Clone = new Vertex(v2.value);
+				
 				for (Vertex v:root.history){
-					v2.history.add(v);
+					v2Clone.history.add(v);
 				}
 				//add root to the new node
-				v2.history.add(root);
+				v2Clone.history.add(root);
 				//process vertex calling recursively to DFS
-				if (run(v2)){
-					System.out.println(root.value);
-					return true;
+				if (run(v2Clone)){
+					//return true; //si se lo deja en true, corta cuando encuentra el primer resultado.
 				}
 			}
 		}
