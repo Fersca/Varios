@@ -12,15 +12,23 @@ public class DFS {
 						
 		//verify if vertex is a solution, finish
 		if (root.value=="V7"){
+			int costo=0;
 			for (Vertex v : root.history) {
 				System.out.print(v.value);
-			}
-			System.out.println(root.value);
+				costo=costo+v.cost;
+			}			
+			System.out.print(root.value);
+			costo=costo+root.cost;
+			System.out.println("--- cost: "+costo);
+			
 			return true;
 		} 
 					
 		//if not, get edges from vertex
 		ArrayList<Edge> edges = getEdges(root);
+		
+		//se ordena la forma de recorrer a los vertices, a esto se le llama A* (al poner una heur’stica)
+		edges = orderEdges(edges);
 		
 		//for each edge process into it
 		for (Edge e : edges){
@@ -38,6 +46,7 @@ public class DFS {
 				}
 				//add root to the new node
 				v2Clone.history.add(root);
+				v2Clone.cost=e.dist;
 				//process vertex calling recursively to DFS
 				if (run(v2Clone)){
 					//return true; //si se lo deja en true, corta cuando encuentra el primer resultado.
@@ -48,6 +57,31 @@ public class DFS {
 		
 	}
 	
+	private ArrayList<Edge> orderEdges(ArrayList<Edge> edges2) {
+		
+		ArrayList<Edge> nueva = new ArrayList<Edge>();		
+		int min=-1;
+		Edge menor=null;
+		
+		for (Edge edge : edges2) {
+			if (min==-1 || edge.dist<min){
+				min=edge.dist;
+				menor = edge;
+			}
+		}
+		
+		nueva.add(menor);
+		
+		for (Edge edge : edges2) {
+			if (edge.vertex1.value==menor.vertex1.value && edge.vertex2.value==menor.vertex2.value){
+			} else {
+				nueva.add(edge);
+			}
+		}
+		
+		return nueva;
+	}
+
 	private boolean contiene(LinkedList<Vertex> visited, Vertex v2) {
 
 		for (Vertex vertex : visited) {
@@ -129,18 +163,6 @@ public class DFS {
 		
 		d.edges=edges;
 		d.run(v1);
-		/*
-		for (Vertex v : solutions) {
-			System.out.println("Fin: ");
-			int totalCost=0;
-			for (Vertex vertex : v.history) {
-				System.out.println(" -- Node: "+vertex.value);
-				totalCost=totalCost+vertex.cost;
-			}
-			totalCost=totalCost+v.cost;
-			System.out.println(" -- Cost: "+totalCost);
-		}
-		*/
 	}	
 	
 }
