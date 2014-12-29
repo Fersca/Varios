@@ -1,7 +1,8 @@
 import groovy.json.JsonSlurper
 
 //obtengo los repos desde github
-def token ="&per_page=100&access_token=957bb65bea4c680a9da72c5889dba619f8a120fe"
+def token ="&per_page=100&access_token=XXXXXXXXXXXXXXXXXXXX"
+def token1 = "?access_token=XXXXXXXXXXXXXXXXXXXX"
 def github = "https://api.github.com/"
 
 def counter = 1
@@ -9,7 +10,7 @@ def counter = 1
 //aca se guarda los repos
 def repos = []
 
-//pide todos los depos
+//pide todos los repos
 println "fetching repos"
 def reposJson = getURL(github+"orgs/mercadolibre/repos?page="+counter+token)
 while (reposJson.size()>0 && counter<3){
@@ -22,28 +23,40 @@ while (reposJson.size()>0 && counter<3){
 }
 
 //de cada repo, obtiene todos los commits
-def users = [:]
+def rows = []
+
 repos[1..10].each { repo ->
     counter = 1
     println "feching commits for ${repo}"
     def commitsJson = getURL(github+"repos/mercadolibre/"+repo+"/commits?page="+counter+token)
+    def commit
+    def lineas
+    def name
+    String linea
     while (commitsJson.size()>0 && counter<3){
         commitsJson.each {
-            def name = it.commit.author.name
-            if (users.get(name)){
-                users.put(name,users.get(name)+1)
-            } else {
-                users.put(name,1)
-            }
+
+            println "get commit ${it.sha}"
+            commit = getURL(it.url+token1)
+            println " url" 
+            lineas = commit.stats.total
+            name = commit.author.login
+            
+            linea = name+";"+repo+";"+lineas
+            println linea
+            rows << linea
+
         }
+
         counter++
         println "fetching commits for ${repo}"
         reposJson = getURL(github+"repos/mercadolibre/"+repo+"/commits?page="+counter+token)
     }
 }
 
-println users.sort { a, b -> b.value <=> a.value }
+println rows.sort //{ a, b -> b.value <=> a.value }
 
 def getURL(def url){
+    println url
     return new JsonSlurper().parseText(new URL(url).getText())
 }

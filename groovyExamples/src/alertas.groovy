@@ -56,7 +56,7 @@ if (!verifica) {
 def json = new JsonSlurper()
 
 //exluir los pooles con estas palabras
-def excluir = ['feedback','history_api','frontend','varnish','shipping','payments','node','seo_dashboard','attributes','merka','myml','fend']
+def excluir = ['-atl','test','feedback','history_api','frontend','varnish','shipping','payments','node','seo_dashboard','attributes','merka','myml','fend']
 
 //equipos que hay que setear igual
 def procesar = ['feedback-wrapperApi-webserver-write-master-vir','feedback-wrapperApi-webserver-read-master-vir']
@@ -160,19 +160,22 @@ def procesa(def pool, def tamanio, def json, def token){
     def metadata = json.parseText(('http://api.melicloud.com/compute/pools/'+pool).toURL().getText())
 
     //verifica si tiene NOC=1
-    if (metadata.noc==0){
+    if (metadata.noc=="0"){
         println "NO TIENE SETEADO EL NOC: "+pool 
     }
     
     //verifica si tienen la tolerancia
+	println metadata.tolerance
     //if (metadata.tolerance==0){
+	
+		/*
 		println "Seteando pool: ${pool} "  
 		
 		def url = "http://api.melicloud.com/compute/pools/${pool}"
 		def content = '{"tolerance":'+porcSugerido(tamanio)+'}'
 		def result = http(url, content, "PUT", token)
 		println result
-		
+		*/
     //}
 
 }
