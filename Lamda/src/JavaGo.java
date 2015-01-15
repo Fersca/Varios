@@ -4,10 +4,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This class shows how you could simulate the Golang "go" 
- * function to run tasks in background
+ * This class shows how you could simulate the Golang "go" function to run tasks
+ * in background
+ * 
  * @author Fersca
- * @date   15/1/2015
+ * @date 15/1/2015
  *
  */
 public class JavaGo {
@@ -18,50 +19,50 @@ public class JavaGo {
 
 	private void run() throws Exception {
 
-		//Create a Lamda function to process in background
+		// Create a Lamda function to process in background
 		Runnable printHello = () -> {
 			int a = 4;
-			for (int i=0;i<a;i++){
+			for (int i = 0; i < a; i++) {
 				sleep();
-				System.out.println("Hello World..."+i);
+				System.out.println("Hello World..." + i);
 			}
 		};
 
-		//Create a channel to wait for tasks
+		// Create a channel to wait for tasks
 		AtomicInteger channel = new AtomicInteger();
 
 		System.out.println("Sending tasks to background...");
-		
-		//Send three times the lamba to be proess in background
+
+		// Send three times the lamba to be proess in background
 		go(printHello, channel);
 		go(printHello, channel);
 		go(printHello, channel);
 
 		System.out.println("End sending background tasks");
-		
-		//send Another task but we are not going to wait for it to finish 
+
+		// Send another task but we are not going to wait for it to finish
 		go(printHello);
-		
-		//Wait until all tasks finish (the ones that uses the channel)
+
+		// Wait until all tasks finish (the ones that uses the channel)
 		wait(channel);
 		System.out.println("Tasks finished");
-		
-		//End the threads in the executor
+
+		// End the threads in the executor
 		executor.shutdown();
 
 	}
-	
-	///////////////////////////////////////////////////
-	//Mini framework to process the background tasks //
-	///////////////////////////////////////////////////
-	
-	//Creating an executor that has one thread per core.
+
+	// /////////////////////////////////////////////////
+	// Mini framework to process the background tasks //
+	// /////////////////////////////////////////////////
+
+	// Creating an executor that has one thread per core.
 	ExecutorService executor = Executors.newFixedThreadPool(Runtime
 			.getRuntime().availableProcessors());
 
-
 	/**
 	 * Runs only one tasks in background without waiting to finish it
+	 * 
 	 * @param f
 	 */
 	public void go(Runnable f) {
@@ -70,20 +71,21 @@ public class JavaGo {
 		};
 		executor.execute(r1);
 	}
-	
+
 	/**
 	 * Sleep a random number of seconds between 0 and 3
 	 */
-	private void sleep(){
+	private void sleep() {
 		try {
 			Thread.sleep(new Random().nextInt(3000));
 		} catch (InterruptedException e) {
 		}
 	}
-	
+
 	/**
-	 * Runs a runnable function in background, with a channel to synchronize 
+	 * Runs a runnable function in background, with a channel to synchronize
 	 * with the concurrent tasks
+	 * 
 	 * @param f
 	 * @param channel
 	 */
@@ -98,9 +100,10 @@ public class JavaGo {
 		};
 		executor.execute(r1);
 	}
-	
+
 	/**
 	 * Wait until all the tasks are finished
+	 * 
 	 * @param channel
 	 * @throws Exception
 	 */
