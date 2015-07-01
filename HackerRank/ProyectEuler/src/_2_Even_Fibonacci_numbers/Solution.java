@@ -1,4 +1,4 @@
-package two_Even_Fibonacci_numbers;
+package _2_Even_Fibonacci_numbers;
 
 import java.io.BufferedReader;
 import java.io.IOException;

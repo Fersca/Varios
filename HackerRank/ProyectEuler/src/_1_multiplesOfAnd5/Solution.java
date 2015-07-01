@@ -1,4 +1,4 @@
-package one_multiplesOfAnd5;
+package _1_multiplesOfAnd5;
 
 import java.io.BufferedReader;
 import java.io.IOException;
