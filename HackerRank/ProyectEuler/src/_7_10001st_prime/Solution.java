@@ -10,26 +10,27 @@ public class Solution {
 		Solution s = new Solution();	
 		s.run();				
 	}
-    
+
+	int[] primos = new int[10000];
+	int cant = 2;
+	
 	private void run() {		
 		long[] data = leer();
+		primos[0] = 2;	
+		primos[1] = 3;
+		
 		for(long s: data) {			
 			System.out.println(calcular((int)s));
 		}		
 	}
 			
 	private int calcular(int n) {
-
-		if (n==1) return 2;
-		if (n==2) return 3;
-		if (n==2) return 5;
 		
-		int[] primos = new int[n];
-		int cant = 1;
-		primos[cant-1] = 2;
-		for(int i = 3;;i=i+2) {
+		if (n<=cant) return primos[n-1];
+		
+		for(int i = primos[cant-1]+2;;i=i+2) {
 			boolean primo = true;
-			for(int j=0;j<cant;j++) {
+			for(int j=1;j<cant;j++) {
 				if(i%primos[j]==0) {
 					primo = false;
 					break;
