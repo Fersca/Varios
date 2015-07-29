@@ -4,7 +4,7 @@ import groovy.json.JsonSlurper
 //def countTh = new AtomicInteger()
 
 //obtengo los repos desde github
-def t = "XXXXXXXXXXXXXXXXXXXXXXXXX"
+def t = "957bb65bea4c680a9da72c5889dba619f8a120fe"
 def token ="&per_page=100&access_token=${t}"
 def token1 = "?access_token=${t}"
 def github = "https://api.github.com/"
