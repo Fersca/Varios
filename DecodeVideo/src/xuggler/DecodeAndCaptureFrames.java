@@ -22,7 +22,10 @@ package xuggler;
  */
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.imageio.ImageIO;
 
@@ -84,11 +87,12 @@ public class DecodeAndCaptureFrames
         // Make a temorary file name
 
         File file = File.createTempFile("frame", ".png");
-
+    	//File file = File("/Users/fscasserra/video/frame.png")//, ".png");
+    	  
         // write out PNG
 
-        ImageIO.write(image, "png", file);
-
+        ImageIO.write(image, "png", file);            
+        
         // indicate file written
 
         double seconds = ((double)picture.getPts()) / Global.DEFAULT_PTS_PER_SECOND;
@@ -118,7 +122,7 @@ public class DecodeAndCaptureFrames
   public static void main(String[] args)
   {
 
-    String filename = "/home/fersca/pelis/monster.avi";
+    String filename = "/Users/fscasserra/video/pelito.mpg";//"/home/fersca/pelis/monster.avi";
 
     // make sure that we can actually convert video pixel formats
 
