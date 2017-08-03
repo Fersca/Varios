@@ -57,16 +57,24 @@ public class ImageToString {
 
 		PrintWriter out = new PrintWriter("/Users/fscasserra/video/resize/transmission.txt");
 		
-		String s1 = "中国电视卫星遭到黑客入侵。视频格式320x240 RGB，色彩强度基于汉字频率。从下一行开始。连续7帧。最后一行是问候语";
+		String s1 = "中国电视系统。视频格式320x240 RGB，色彩强度基于汉字频率。从下一行开始。连续7帧。分手：中国电视 - 中国电视 - 中国电视台。最后一行是问候语和电视格式规范";		
 		out.println(s1);
+		out.println("中国电视 - 中国电视 - 中国电视");		
 		for (String e:l1) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");		
 		for (String e:l2) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");
 		for (String e:l3) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");
 		for (String e:l4) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");
 		for (String e:l5) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");
 		for (String e:l6) out.println(e);
-		for (String e:l7) out.println(e);		
-		String s2 = "传输结束";
+		out.println("中国电视 - 中国电视 - 中国电视");
+		for (String e:l7) out.println(e);
+		out.println("中国电视 - 中国电视 - 中国电视");
+		String s2 = "传输端，电视规格：http://bit.ly/ChineseTV";
 		out.println(s2);
 		out.close();
 		
