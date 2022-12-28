@@ -1,0 +1,2 @@
+cd /Users/Fernando.Scasserra/NetBeansProjects/javaBasic; JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home "/Applications/NetBeans/Apache NetBeans 14.app/Contents/Resources/NetBeans/netbeans/java/maven/bin/mvn" -Dexec.vmArgs= "-Dexec.args=${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}" -Dexec.appArgs= -Dexec.mainClass=com.mycompany.javabasic.JavaBasic -Dexec.executable=/Library/Java/JavaVirtualMachines/jdk-18.0.2.jdk/Contents/Home/bin/java process-classes org.codehaus.mojo:exec-maven-plugin:3.0.0:exec
+
