@@ -12,10 +12,10 @@ class HelloWorldTest {
 
     @Inject
     EmbeddedApplication<?> application;
-
+            
     @Test
     void testItWorks() {
         Assertions.assertTrue(application.isRunning());
     }
-
+    
 }

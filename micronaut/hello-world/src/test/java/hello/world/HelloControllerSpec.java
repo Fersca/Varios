@@ -22,8 +22,8 @@ public class HelloControllerSpec {
     HttpClient client;
 
     @Test
-    void testHelloWorldResponse() {
+    void testHelloWorldResponse() {                    
         String response = client.toBlocking().retrieve(HttpRequest.GET("/hello"));
-        assertEquals("Hello World", response); // 
+        assertEquals("{\"msg\":\"OK\"}", response); //         
     }
 }
