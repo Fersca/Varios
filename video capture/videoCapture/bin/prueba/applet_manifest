@@ -1,0 +1,6 @@
+Extension-List: s_my_jmf 
+s_my_jmf-Extension-Name: javax.media.s_my_jmf 
+s_my_jmf-Specification-Version: 2.1 
+s_my_jmf-Implementation-Version: 2.1.1
+s_my_jmf-Implementation-Vendor-Id: com.sun 
+s_my_jmf-Implementation-URL: file:///C:/Users/Naty/workspace/videoCapture/bin/prueba/s_my_jmf
