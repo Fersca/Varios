@@ -10,10 +10,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -43,7 +45,84 @@ public class JavaBasic {
         var jsonMap3 = j.getJson("https://api.mercadolibre.com/users/10",true);        
         System.out.println(jsonMap3.get("nickname"));        
                 
+        //Concurrency Example
+        j.concurrency();        
+        
         //System.exit(0);
+    }
+
+    private class RunableImpl implements Runnable {
+        public void run() {
+            System.out.println("Asynchronous task 0");
+        }
+    } 
+    
+    private class CallableImpl implements Callable {
+        @Override
+        public String call() throws InterruptedException {
+            System.out.println("Asynchronous Callable task 0");
+            Thread.sleep(1000);
+            return "Callable 0";
+        }
+    } 
+
+    
+    private void concurrency() throws InterruptedException, ExecutionException {
+        
+        //Create an executor service with 10 threads
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        //One way to create a runnable is throught a class definition.
+        var r0 = new RunableImpl();
+        executorService.execute(r0);
+
+        //Another way it to creathe the class inline in the parameter call.
+        executorService.execute(new Runnable() {
+            public void run() {
+                System.out.println("Asynchronous task 1");
+            }
+        });        
+        
+        //Another way is to create an inline object and assign it to a varieble
+        var r2 = new Runnable() {
+            public void run() {
+                System.out.println("Asynchronous task 2");
+            }
+        };        
+        
+        executorService.execute(r2);
+        
+        //Another way is with lambda expressions
+        Runnable r3 = () -> {
+            System.out.println("Asynchronous task 3");
+        };        
+        
+        executorService.execute(r3);
+        
+        //other way is to send the lambda directly in the execution
+        executorService.execute(() -> {
+            System.out.println("Asynchronous task 4");
+        });        
+        
+        //Send a Callable task (the callable return a value)
+        var c1 = new CallableImpl();
+        Future f1 = executorService.submit(c1);
+        var futureValue = f1.get();
+        System.out.println("Valor futuro: "+futureValue);
+        
+        //Smallest way -->
+        Callable c2 = () -> {
+            System.out.println("Asynchronous Callable task 2");
+            return "Callable task 2";
+        };        
+
+        var future2 = executorService.submit(c2);
+        System.out.println("Valor futuro: "+future2.get());
+
+        
+        //Shutdown the executor
+        executorService.shutdown();
+                
     }
 
     protected String greetings() {
