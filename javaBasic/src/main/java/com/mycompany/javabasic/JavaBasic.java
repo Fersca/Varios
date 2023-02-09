@@ -2,6 +2,8 @@ package com.mycompany.javabasic;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,6 +18,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 /**
  *
@@ -23,7 +33,7 @@ import java.util.concurrent.Future;
  */
 public class JavaBasic {
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, ExecutionException {
+    public static void main(String[] args) throws  Exception {
 
         var j = new JavaBasic();
         var m = j.greetings();
@@ -48,7 +58,64 @@ public class JavaBasic {
         //Concurrency Example
         j.concurrency();        
         
+        //http server
+        j.createHttpServer();
+        
         //System.exit(0);
+    }
+
+
+    private void createHttpServer() throws Exception {
+
+        // Create a Server instance.
+        Server server = new Server();
+
+        // The HTTP configuration object.
+        HttpConfiguration httpConfig = new HttpConfiguration();
+        // Configure the HTTP support, for example:
+        httpConfig.setSendServerVersion(false);        
+        
+        // The ConnectionFactory for HTTP/1.1.
+        HttpConnectionFactory http11 = new HttpConnectionFactory(httpConfig);        
+        
+        // Create a ServerConnector instance on port 8080.
+        ServerConnector connector1 = new ServerConnector(server, http11);
+        connector1.setPort(8080);
+        server.addConnector(connector1);
+
+        // Set a simple Handler to handle requests/responses.
+        server.setHandler(new AbstractHandler()
+        {
+            @Override
+            public void handle(String target, Request jettyRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+            {
+                // Mark the request as handled so that it
+                // will not be processed by other handlers.
+                jettyRequest.setHandled(true);
+                response.setStatus(200);
+                response.setContentType("text/html; charset=UTF-8");
+
+                // Write a Hello World response.
+                response.getWriter().print("" +
+                    "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "  <title>Jetty Hello World Handler</title>" +
+                    "</head>" +
+                    "<body>" +
+                    "  <p>Hello World</p>" +
+                    "</body>" +
+                    "</html>" +
+                    "");                
+                
+            }
+        });
+
+        // Start the Server so it starts accepting connections from clients.
+        System.out.println("1");
+        server.start();                
+        System.out.println("2");
+        
     }
 
     private class RunableImpl implements Runnable {
@@ -200,8 +267,8 @@ public class JavaBasic {
             var time2 = System.currentTimeMillis();
                         
             var diff = time2-time1;
-            System.out.println(diff);
-
+            System.out.println(diff);           
+            
             String body = response.body();    
             
             //Close the thread pool
