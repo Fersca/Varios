@@ -31,5 +31,27 @@ public class NewEmptyJUnitTest {
         assertEquals(jsonMap.get("name"),"mkyong" );
         
     }
+
+    @Test
+    @DisplayName("Test Get API")
+    public void testGetAPI() throws Exception {
+    
+        var jb = new JavaBasic();
+        
+        //create the webserver
+        jb.createHttpServer();
+
+        String response = jb.httpCli("http://localhost:8080");
+      
+        System.out.println(response);
+        
+        //check the string response
+        assertTrue(response.contains("Hello World"));        
+                 
+        //shutdown the webserver
+        jb.shutdownWebserver();      
+        
+    }
+
     
 }

@@ -18,6 +18,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
@@ -59,14 +61,22 @@ public class JavaBasic {
         //http server
         j.createHttpServer();
         
+        //waits 10 seconds
+        System.out.println("Waiting 10 seconds until shutdown");
+        Thread.sleep(10000);
+        
+        //shutdown http server
+        j.shutdownWebserver();
+        
         //System.exit(0);
     }
 
-
-    private void createHttpServer() throws Exception {
+    private Server server;
+    
+    protected void createHttpServer() throws Exception {
 
         // Create a Server instance.
-        Server server = new Server();
+        server = new Server();
 
         // The HTTP configuration object.
         HttpConfiguration httpConfig = new HttpConfiguration();
@@ -106,16 +116,25 @@ public class JavaBasic {
                     "</html>" +
                     "");                
                 
+                System.out.println("Request Handled");
             }
         });
 
         // Start the Server so it starts accepting connections from clients.
-        System.out.println("1");
         server.start();                
-        System.out.println("2");
+        System.out.println("Server started");
         
     }
 
+    protected void shutdownWebserver(){
+        try {
+            System.out.println("Shutting down server");
+            server.stop();
+        } catch (Exception ex) {
+            System.out.println("Error while closing webserver");
+        }
+    }
+    
     private class RunableImpl implements Runnable {
         public void run() {
             System.out.println("Asynchronous task 0");
