@@ -1,1 +1,3 @@
 *.class
+/helidon/helidon-quickstart-mp/target/
+/helidon/helidon-quickstart-se/target/
