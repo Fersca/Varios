@@ -1,0 +1,8 @@
+Para hacer que funcione la compilación de GraalVM, tuve que instalar los plugins en build.gradle
+y Además, instalar esto:
+
+https://www.cyberithub.com/how-to-install-zlib-package-on-ubuntu-20-04-lts-focal-fossa/
+
+--> sudo apt install zlib1g-dev
+
+
