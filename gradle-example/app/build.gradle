@@ -6,16 +6,35 @@
  * User Manual available at https://docs.gradle.org/8.0.2/userguide/building_java_projects.html
  */
 
+
+// https://central.sonatype.com/ -- Acá se pueden buscar los jars 
+
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    
+    //Esto es para crear un Fat Jar
+    // https://imperceptiblethoughts.com/shadow/introduction/#benefits-of-shadow
+    // Genera dentro del directorio build/distributions un file que se llama -shadow.tar el cual tiene 1 solo -jar 
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
+    
+    //Plugin para compilar nativo con graalvm
     id 'org.graalvm.buildtools.native' version '0.9.12'
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    
+    /* -- Si pongo esta configuración parece que baja los sources y el javadoc, no lo probé.
+    mavenCentral() {
+        artifactTypes {
+            artifactType("source", "jar", "sources")
+            artifactType("doc", "jar", "javadoc")
+        }
+    }    
+    */
 }
 
 dependencies {
@@ -23,7 +42,21 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:31.1-jre'
+    //Fer: Lo saco, no se por que estaba esto...
+    //implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.eclipse.jetty:jetty-server:11.0.13'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    //https://www.slf4j.org/codes.html#noProviders 
+    //-- es para evitar el warning de que no hay proveedor de log, alguna dependencia lo debe usar, creo que es jetty o el package de jakarta
+    /*
+     *  SLF4J: No SLF4J providers were found.
+     *   SLF4J: Defaulting to no-operation (NOP) logger implementation
+     *   SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+     * 
+    */
+    implementation 'org.slf4j:slf4j-nop:2.0.7'
+    
 }
 
 application {
@@ -40,6 +73,12 @@ jar {
 graalvmNative {
      binaries.all {
          resources.autodetect()
+         
+         //En teoría esto es para activar los features preview (virtual threads) en momento de compilar
+         //https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html 
+         buildArgs.add('--enable-preview')
+        
      }
+
      toolchainDetection = true
 }
