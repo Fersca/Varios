@@ -1,0 +1,21 @@
+##### Added By Fer #####
+
+#Dart
+export PATH="$PATH:/usr/lib/dart/bin"
+
+#Java
+#export JAVA_HOME="/lib/jvm/jdk-19"
+export JAVA_HOME="/lib/jvm/graalvm-ce-java19-22.3.1"
+export PATH="$PATH:$JAVA_HOME/bin"
+export CLASSPATH="$JAVA_HOME/lib"
+
+#esto lo que hace es ponerme en el classpath todas las despendencias bajadas en el directorio de gradle, asi puedo ejecutar scripts de java 
+#con librerías desde la línea de comando
+export CLASSPATH=$CLASSPATH:$(find /home/fersca/.gradle/caches/modules-2/files-2.1 -name "*.jar" -printf "%p:" | sed 's/:$//')
+
+
+#GraalVM
+export GRAALVM_HOME="$JAVA_HOME"
+
+#Gradle
+export PATH=$PATH:/opt/gradle/gradle-8.0.2/bin
