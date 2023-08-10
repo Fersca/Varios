@@ -82,3 +82,15 @@ graalvmNative {
 
      toolchainDetection = true
 }
+
+/*
+ * Tuve que agregarle esto, porque cada vez que corría un run, parece que la tarea quedaba
+ * cacheada como que ya estaba lista y luego la próxima vez que la corría, no la ejecutaba.
+ * Al inficarle que la tarea run no está up-to-date, la corre siempre, es raro que esto no venga
+ * así por default.
+ * Me di cuenta al ejecutar un gradlew run --info en donde decía: Skipping task ':app:run' as it is up-to-date 
+*/
+
+tasks.named('run') {
+    outputs.upToDateWhen { false }
+}
