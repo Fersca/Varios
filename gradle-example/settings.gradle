@@ -10,6 +10,8 @@
 
  pluginManagement {
      repositories {
+         //Agrego esto para TeaVM
+         maven { url = uri("https://teavm.org/maven/repository") }    
          mavenCentral()
          gradlePluginPortal()
      }

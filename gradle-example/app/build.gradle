@@ -21,6 +21,11 @@ plugins {
     
     //Plugin para compilar nativo con graalvm
     id 'org.graalvm.buildtools.native' version '0.9.12'
+    
+    //Para TeaVM
+    // https://www.teavm.org/docs/tooling/gradle.html
+    id "org.teavm" version "0.8.1"
+    
 }
 
 repositories {
@@ -94,3 +99,12 @@ graalvmNative {
 tasks.named('run') {
     outputs.upToDateWhen { false }
 }
+
+teavm.js {
+    addedToWebApp = true
+    mainClass = "gradle.example.TeaExample"
+    
+    // this is also optional, default value is <project name>.js
+    targetFileName = "example.js"
+}
+
