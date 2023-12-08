@@ -107,7 +107,7 @@ println "GB a Liberar: $mbLibres"
 //evita la división por cero.
 if (mbTotales>0){
     Integer repe = (mbLibres/mbTotales)*100
-println "% Repetidos: $repe%"
+    println "% Repetidos: $repe%"
 }
 
 def biggestGB = biggest/1024/1024/1024
