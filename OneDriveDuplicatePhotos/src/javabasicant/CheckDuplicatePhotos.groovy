@@ -103,8 +103,12 @@ Integer mbLibres = bytesRepetidos/1024/1024/1024
 println "Cantidad de repetidas: $cantidad"
 println "GB totales: $mbTotales"
 println "GB a Liberar: $mbLibres"
-Integer repe = (mbLibres/mbTotales)*100
+
+//evita la división por cero.
+if (mbTotales>0){
+    Integer repe = (mbLibres/mbTotales)*100
 println "% Repetidos: $repe%"
+}
 
 def biggestGB = biggest/1024/1024/1024
 println "Biggest: $biggestImg | size: $biggestGB GB"
