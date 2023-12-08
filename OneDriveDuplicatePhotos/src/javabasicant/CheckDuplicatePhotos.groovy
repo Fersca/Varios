@@ -104,7 +104,7 @@ println "Cantidad de repetidas: $cantidad"
 println "GB totales: $mbTotales"
 println "GB a Liberar: $mbLibres"
 
-//evita la división por cero.
+//Evita la división por cero.
 if (mbTotales>0){
     Integer repe = (mbLibres/mbTotales)*100
     println "% Repetidos: $repe%"
