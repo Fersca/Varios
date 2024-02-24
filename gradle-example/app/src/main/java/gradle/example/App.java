@@ -65,7 +65,13 @@ public class App {
         System.out.println(m);
 
         //Test Json Parsing
-        String json = "{\"name\":\"mkyong\", \"age\":33}";
+        String json = """
+            {
+                "name":"mkyong", 
+                "age":33
+            }
+            """;
+
         var jsonMap = j.processJson(json);
 
         System.out.println(m);
@@ -128,17 +134,19 @@ public class App {
                 response.setContentType("text/html; charset=UTF-8");
 
                 // Write a Hello World response.
-                response.getWriter().print("" +
-                    "<!DOCTYPE html>" +
-                    "<html>" +
-                    "<head>" +
-                    "  <title>Jetty Hello World Handler</title>" +
-                    "</head>" +
-                    "<body>" +
-                    "  <p>Hello World</p>" +
-                    "</body>" +
-                    "</html>" +
-                    "");                
+                response.getWriter().print(
+                    """ 
+                    <!DOCTYPE html> 
+                    <html>
+                    <head>
+                      <title>Jetty Hello World Handler</title>
+                    </head>
+                    <body>
+                      <p>Hello World</p>
+                    </body>
+                    </html>
+                    """        
+                );                
                 
                 System.out.println("Request Handled");
             }
@@ -247,6 +255,7 @@ public class App {
         Gson gson = new Gson();
         Map<String, Object> map = gson.fromJson(jsonString, new TypeToken<Map<String, Object>>() {
         }.getType());
+
         return map;
 
     }
