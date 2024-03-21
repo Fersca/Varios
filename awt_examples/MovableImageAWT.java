@@ -26,6 +26,7 @@ public class MovableImageAWT extends Frame {
     // Timer para mover la imagen cada N milisegundos
     Timer timer = new Timer();
     BufferStrategy bs;
+    boolean imageWithBuffer = false;
 
     public void crearPersonajes(){
 
@@ -61,14 +62,14 @@ public class MovableImageAWT extends Frame {
         };
 
         //crea los personajes
-        Character zorrito = new Character("Zorrito","/Users/Fernando.Scasserra/Downloads/zorro.png",8,movimientoNulo);
+        Character zorrito = new Character("Zorrito","/Users/Fernando.Scasserra/Downloads/zorro.png",14,movimientoNulo);
         zorrito.setImagenColision("/Users/Fernando.Scasserra/Downloads/zorro_muerto.png");
 
         //pajaro estandar
-        Character pajaro = new Character("Pajaro","/Users/Fernando.Scasserra/Downloads/pajaro.png",6,movimientoRebote);
+        Character pajaro = new Character("Pajaro","/Users/Fernando.Scasserra/Downloads/pajaro.png",10,movimientoRebote);
 
         //pajaro con velocidad y para arriba
-        Character pajaro2 = new Character("Pajaro","/Users/Fernando.Scasserra/Downloads/pajaro.png",6,movimientoRebote);
+        Character pajaro2 = new Character("Pajaro2","/Users/Fernando.Scasserra/Downloads/pajaro.png",10,movimientoRebote);
         pajaro2.velocidad = 2;
         pajaro2.avanzando_y = "arriba";
         
@@ -95,8 +96,11 @@ public class MovableImageAWT extends Frame {
 
     }
 
-    public MovableImageAWT() {
+    public MovableImageAWT(boolean buffer) {
         super("Imagen Móvil AWT");
+
+        //carga el parámetro del buffer
+        this.imageWithBuffer = buffer;
 
         //Crea los personajes del juego
         crearPersonajes();
@@ -120,12 +124,20 @@ public class MovableImageAWT extends Frame {
                 }
 
                 //Calcular si colisionaron
+                boolean colisionPrincipal = false;
                 for (Character c : personajes) {
                     //No chequea colisión contra el principal.
                     if (c.name.equals(principal.name))
                         continue;
-                    principal.verificaColision(c);
+                    
+                    if (principal.verificaColision(c)){
+                        c.colisionado = true;
+                        colisionPrincipal = true;
+                    } else {
+                        c.colisionado = false;
+                    }
                 }
+                principal.colisionado = colisionPrincipal;
 
                 // Repinta el canvas para mostrar la imagen en la nueva posición
                 canvas.repaint();
@@ -198,52 +210,64 @@ public class MovableImageAWT extends Frame {
         @Override        
         public void paint(Graphics g) {
 
-            // Asegurarse de que exista una BufferStrategy
-            if (getBufferStrategy() == null) {
-                createBufferStrategy(3); // Crea una estrategia de doble buffer
-                return; // Salir del método para permitir que la estrategia se cree correctamente
-            }
+            BufferStrategy bs=null;
 
-            BufferStrategy bs = getBufferStrategy();
-            Graphics bg = bs.getDrawGraphics();
+            if (imageWithBuffer){
+                // Asegurarse de que exista una BufferStrategy
+                if (getBufferStrategy() == null) {
+                    createBufferStrategy(2); // Crea una estrategia de doble buffer
+                    return; // Salir del método para permitir que la estrategia se cree correctamente
+                }
 
-            bg.setColor(Color.BLACK);            
-            bg.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
-            
+                bs = getBufferStrategy();
+                g = bs.getDrawGraphics();
+
+                g.setColor(Color.BLACK);            
+                g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
+            } 
+
             //Dibuja los personajes
             for (Character c : personajes){
                 if (c.img!=null){
-                    c.drawImage(this, bg);
+                    c.drawImage(this, g);
                 }
             }
 
             // Define la fuente del texto
-            bg.setFont(new Font("SansSerif", Font.BOLD, 20));
+            g.setFont(new Font("SansSerif", Font.BOLD, 20));
 
             String text;
             if (principal.colisionado){
                 // Define el color del texto
-                bg.setColor(Color.RED);
+                g.setColor(Color.RED);
                 // Dibuja el texto en el Canvas
                 text = "MUERTO";
 
             } else {
                 // Define el color del texto
-                bg.setColor(Color.WHITE);
+                g.setColor(Color.WHITE);
                 // Dibuja el texto en el Canvas
                 text = "VIVO";
             }
 
-            bg.drawString(text, 50, 50);
+            g.drawString(text, 50, 50);
 
-            bg.dispose(); // Liberar los recursos del Graphics
-            bs.show(); // Mostrar el contenido del buffer
+            if (imageWithBuffer){
+                g.dispose(); // Liberar los recursos del Graphics
+                bs.show(); // Mostrar el contenido del buffer    
+            }
 
         }
     }
 
     public static void main(String[] args) {
-        new MovableImageAWT();
+        
+        if (args.length>0 && "buffer".equals(args[0])){
+            System.out.println("Usando buffer de imágenes");
+            new MovableImageAWT(true);
+        } else {
+            new MovableImageAWT(false);
+        }
     }
 }
 
@@ -279,11 +303,17 @@ class Character {
 
     public void drawImage(Canvas canvas, Graphics g){
     
-        Image imgTemp;
-        if (colisionado)
-            imgTemp = img_colision;
-        else
+        Image imgTemp=null;
+        if (colisionado){
+            //pongo este if porque sino aparece un cuadrado negro porque no carga
+            //la imagen de colisión si no la tiene.
+            if (img_colision!=null)
+                imgTemp = img_colision;
+            else
+                imgTemp = img;
+        } else {
             imgTemp = img;
+        }
 
         int newWidth = img.getWidth(canvas) / scale;
         int newHeight = img.getHeight(canvas) / scale;
@@ -301,7 +331,7 @@ class Character {
     };
 
     //Verifica si hay una colisión entre los dos objetos
-    public void verificaColision(Character c){
+    public boolean verificaColision(Character c){
 
         //Calcula los lados del triángulo
         int lado1 = this.x-c.x;
@@ -319,9 +349,9 @@ class Character {
 
         //si la distancia es menor a la suma de los radios, hay colisión
         if (distancia <(this.radio+c.radio)){
-            colisionado=true;
+            return true;
         } else {
-            colisionado = false;
+            return false;
         }
 
     }
