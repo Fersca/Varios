@@ -13,6 +13,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -34,6 +35,10 @@ public class MovableImageAWT extends Frame {
     boolean imageWithBuffer = false;
     MyCanvas canvas = new MyCanvas();
     boolean terminado = false;
+    double zoom=1;
+    int general_x=0;
+    int general_y=0;
+    long initTimeMillis;
 
     //posicion de la jaula en el mapa
     int jaulaX = 375;
@@ -104,15 +109,26 @@ public class MovableImageAWT extends Frame {
         ArrayList<Character> personajesCreados = new ArrayList<Character>();
 
         //crea los personajes
-        Character zorrito = new Character("Zorrito","/Users/Fernando.Scasserra/Downloads/zorro.png",14,movimientoNulo);
+        Character zorrito = new Character("Zorrito","/Users/Fernando.Scasserra/Downloads/zorro.png",15,movimientoNulo);
         zorrito.setImagenColision("/Users/Fernando.Scasserra/Downloads/zorro_muerto.png");
 
+        //Crea la jaula
         Character jaula = new Character("Jaula","/Users/Fernando.Scasserra/Downloads/jaula.png",5,movimientoNulo);
         jaula.x = jaulaX;
         jaula.y = jaulaY;
         jaula.colisiona = false;
 
+        //Crea el mapa
+        Character bosque = new Character("Jaula","/Users/Fernando.Scasserra/Downloads/bosque.png",1,movimientoNulo);
+        bosque.x = 0;
+        bosque.y = 0;
+        bosque.fixedSize=true;
+        bosque.fixed_witdh=1440;
+        bosque.fixed_heigth=875;
+        bosque.colisiona = false;
+
         //agrega los personajes a la lista
+        personajesCreados.add(bosque);
         personajesCreados.add(zorrito);
 
         //crea muchos pájaros
@@ -128,7 +144,6 @@ public class MovableImageAWT extends Frame {
 
     }
 
-
     private ArrayList<Character> crearEnemigos(){
 
         Random random = new Random();
@@ -136,18 +151,18 @@ public class MovableImageAWT extends Frame {
         String[] movimientosArriba_Abajo = {"arriba","abajo"};
         String[] movimientosIzquierda_Derecha = {"izquierda","derecha"};
 
-        for (int i=0;i<2;i++){
+        for (int i=0;i<20;i++){
 
             //pajaro estandar
             Character pajaro = new Character("Pajaro"+i,"/Users/Fernando.Scasserra/Downloads/pajaro.png",15,movimientoRebote);
-            pajaro.velocidadX = random.nextInt(10) + 1; 
-            System.out.println(pajaro.velocidadX);
-            pajaro.velocidadY = random.nextInt(10) + 1; 
-            System.out.println(pajaro.velocidadY);
+            pajaro.velocidadX = random.nextInt(20) + 1; 
+            //System.out.println(pajaro.velocidadX);
+            pajaro.velocidadY = random.nextInt(20) + 1; 
+            //System.out.println(pajaro.velocidadY);
             pajaro.avanzando_y = movimientosArriba_Abajo[random.nextInt(2)];
-            System.out.println(pajaro.avanzando_y);
+            //System.out.println(pajaro.avanzando_y);
             pajaro.avanzando_x = movimientosIzquierda_Derecha[random.nextInt(2)];
-            System.out.println(pajaro.avanzando_x);            
+            //System.out.println(pajaro.avanzando_x);            
             
             //los pone en la punta de la pantalla
             pajaro.x = 1440;
@@ -160,9 +175,13 @@ public class MovableImageAWT extends Frame {
     }
 
     private TimerTask comienzaJuego(MyCanvas canvas, Timer timer){
+
+        //obtiene el tiempo actual.
+        initTimeMillis = System.currentTimeMillis();
         return new TimerTask() {
             @Override
             public void run() {
+
 
                 // Actualiza la posición de la imagen
                 for (Character c : personajes) {
@@ -198,7 +217,7 @@ public class MovableImageAWT extends Frame {
                 canvas.repaint();
 
                 //si queda solo la jaula, corta el timer
-                if (vivos == 1) {
+                if (vivos == 2) {
                     timer.cancel();
                     terminado = true;
                 }
@@ -207,7 +226,7 @@ public class MovableImageAWT extends Frame {
     }
 
     public MovableImageAWT(boolean buffer) {
-        super("Imagen Móvil AWT");
+        super("Zorrito 1.0");
 
         //carga el parámetro del buffer
         this.imageWithBuffer = buffer;
@@ -279,15 +298,31 @@ public class MovableImageAWT extends Frame {
         else if (pressedKeys.contains(KeyEvent.VK_K) && pressedKeys.size()==1) {
             c.y += 10;
         }           
+        else if (pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.size()==1) {
+            this.zoom = this.zoom+0.1;
+        }           
+        else if (pressedKeys.contains(KeyEvent.VK_X) && pressedKeys.size()==1) {
+            this.zoom = this.zoom-0.1;
+        }           
+        else if (pressedKeys.contains(KeyEvent.VK_V) && pressedKeys.size()==1) {
+            this.general_x=this.general_x+10;
+        }           
+        else if (pressedKeys.contains(KeyEvent.VK_C) && pressedKeys.size()==1) {
+            this.general_x=this.general_x-10;
+        }           
+        else if (pressedKeys.contains(KeyEvent.VK_F) && pressedKeys.size()==1) {
+            this.general_y=this.general_y+10;
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_R) && pressedKeys.size()==1) {
+            this.general_y=this.general_y-10;
+        }           
+        else if (pressedKeys.contains(KeyEvent.VK_E) && pressedKeys.size()==1) {
             resetJuego();
         } else if (pressedKeys.contains(KeyEvent.VK_Q) && pressedKeys.size()==1){
             timer.cancel();
             System.exit(0);
         }
-
-        //System.out.println("x: "+c.centroX+" y: "+c.centroY);
-
+        if (c.numImagen==0) c.numImagen = 1; else c.numImagen =0;
     }
 
     private void resetJuego() {
@@ -304,9 +339,10 @@ public class MovableImageAWT extends Frame {
     class MyCanvas extends Canvas {
 
         @Override        
-        public void paint(Graphics g) {
+        public void paint(Graphics gOrigin) {
 
             BufferStrategy bs=null;
+            Graphics2D g;
 
             if (imageWithBuffer){
                 // Asegurarse de que exista una BufferStrategy
@@ -316,19 +352,40 @@ public class MovableImageAWT extends Frame {
                 }
 
                 bs = getBufferStrategy();
-                g = bs.getDrawGraphics();
+                gOrigin = bs.getDrawGraphics();
 
+                g = (Graphics2D) gOrigin;
+
+                g = (Graphics2D) g.create();
+                
+                // Aplicar anti-aliasing para suavizar las líneas y el texto
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+                // Mejorar la calidad del renderizado
+                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        
+                // Mejorar la calidad del texto
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+                            
                 g.setColor(Color.BLACK);            
                 g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
-            } 
+                
+            } else {
+                g = (Graphics2D) gOrigin;                
+            }
 
             //Dibuja los personajes
             for (Character c : personajes){
                 if (c.img!=null){
-                    c.drawImage(this, g);
+                    c.drawImage(this, g,zoom, general_x, general_y);
                 }
             }
 
+            //vuelve a centrar el centro el 0,0
+            AffineTransform tx = new AffineTransform();        
+            tx.translate(0, 0); // Traslación        
+            g.setTransform(tx);    
+        
             // Define la fuente del texto
             g.setFont(new Font("SansSerif", Font.BOLD, 20));
 
@@ -337,30 +394,47 @@ public class MovableImageAWT extends Frame {
                 // Define el color del texto
                 g.setColor(Color.RED);
                 // Dibuja el texto en el Canvas
-                text = "COME!!";
+                text = "Status: COME";
 
             } else {
                 // Define el color del texto
                 g.setColor(Color.WHITE);
                 // Dibuja el texto en el Canvas
-                text = "CAZANDO...";
+                text = "Status: CAZANDO ";
             }
             
+            //imprime el status
             g.drawString(text, 50, 50);
 
+            //imprime el cronómetro
+            g.setColor(Color.WHITE);
+            g.drawString(obtenerCronometro(), 700, 50);           
+
+            //imprime el zoom
+            String printZoom = String.format("%.2f", zoom);
+            g.drawString("Zoom: "+printZoom+"x", 900, 50);            
+
+            //imprime el cartel de ganador
             if (terminado){
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
-                text = "GANO!!";
+                text = "¡¡GANO!!";
                 g.drawString(text, 600, 300);
             }
 
+            //libera los recursos
             if (imageWithBuffer){
                 g.dispose(); // Liberar los recursos del Graphics
                 bs.show(); // Mostrar el contenido del buffer    
             }
 
+        }
+
+        private String obtenerCronometro() {
+            long tiempoActual = System.currentTimeMillis();
+            long diff = tiempoActual-initTimeMillis;
+            return "Tiempo: "+diff/1000;
         }
     }
 
@@ -385,6 +459,9 @@ class Character {
     public Image img_colision;
     public int x = 100;
     public int y = 100;
+    public int fixed_witdh;
+    public int fixed_heigth;
+    public boolean fixedSize= false;
     private int scale;
     public Function<Character, Void> movimiento;
     public String name;
@@ -399,9 +476,21 @@ class Character {
     public int rotaAngulo = 0;
     private int angulo = 0;
     public boolean colisiona = true;
+    public int numImagen = 0;
+    //caché de imágenes
+    private static HashMap<String, Image> imagenes = new HashMap<String, Image>();
 
     public Character(String name, String imageFile, int scale, Function<Character, Void> movimientoPersonaje){
-        this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
+
+        //chequea en el caché de imágenes
+        if (imagenes.containsKey(imageFile)){
+            this.img = imagenes.get(imageFile);
+        } else {
+            this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
+            imagenes.put(imageFile, this.img);
+        }
+
+        //this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
         this.scale = scale;
         this.movimiento = movimientoPersonaje;
         this.name = name;    
@@ -412,7 +501,7 @@ class Character {
             this.img_colision = Toolkit.getDefaultToolkit().getImage(imageFileColision);
     }
 
-    public void drawImage(Canvas canvas, Graphics g){
+    public void drawImage(Canvas canvas, Graphics2D g2d, double zoom, int general_x, int general_y){
     
         //Cambia la imagen si está colisionado
         Image imgTemp=null;
@@ -430,9 +519,27 @@ class Character {
             rotaAngulo = 0;
         }
 
+        //va cambiando la imagen
+        if (numImagen==0)
+            imgTemp = img;
+        else {
+            if (img_colision!=null)
+                imgTemp = img_colision;
+            else
+                imgTemp = img;
+        }
+
         //escala la imagen
-        int newWidth = img.getWidth(canvas) / scale;
-        int newHeight = img.getHeight(canvas) / scale;
+        int newWidth=0;
+        int newHeight=0;
+
+        if (fixedSize){
+            newWidth = fixed_witdh;
+            newHeight = fixed_heigth;
+        } else {
+            newWidth = img.getWidth(canvas) / scale;
+            newHeight = img.getHeight(canvas) / scale;    
+        }
 
         //calcula el centro y el radio
         centroX = x+newWidth/2;
@@ -440,27 +547,14 @@ class Character {
         //deja el radio más grande
         radio = (newWidth>newHeight)?newWidth/2:newHeight/2;    
 
-        Graphics2D g2d = (Graphics2D) g;
-
-        g2d = (Graphics2D) g2d.create();
-
-        
-        // Aplicar anti-aliasing para suavizar las líneas y el texto
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Mejorar la calidad del renderizado
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-        // Mejorar la calidad del texto
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        
         AffineTransform tx = new AffineTransform();
-        tx.translate(centroX, centroY); // Traslación
+        
+        tx.translate(general_x+centroX, general_y+centroY); // Traslación
         tx.rotate(Math.toRadians(angulo)); // Rotación
         
         //escalo la imagen (no hace falta si uso el newWidh como escala)
         //double dScale = (double)1/(double)scale;
-        //tx.scale(3, 3); // Escalado        
+        tx.scale(zoom, zoom); // Escalado        
         
         g2d.setTransform(tx);    
 
@@ -468,8 +562,7 @@ class Character {
         //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
         //a dibujar es 0,0, entonces me rotaba desde una punta
         g2d.drawImage(imgTemp, -(newWidth/2), -(newHeight/2), newWidth, newHeight, canvas); 
-        //g2d.drawImage(imgTemp, 0, 0, canvas);
-        g2d.dispose(); 
+
         angulo = angulo + rotaAngulo;
 
     };
