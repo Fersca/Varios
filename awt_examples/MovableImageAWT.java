@@ -322,7 +322,7 @@ public class MovableImageAWT extends Frame {
             timer.cancel();
             System.exit(0);
         }
-        if (c.numImagen==0) c.numImagen = 1; else c.numImagen =0;
+        //if (c.numImagen==0) c.numImagen = 1; else c.numImagen =0;
     }
 
     private void resetJuego() {
@@ -549,7 +549,8 @@ class Character {
 
         AffineTransform tx = new AffineTransform();
         
-        tx.translate(general_x+centroX, general_y+centroY); // Traslación
+        //tx.translate(general_x+centroX, general_y+centroY); // Traslación
+        tx.translate((general_x+centroX)*zoom, (general_y+centroY)*zoom); // Traslación
         tx.rotate(Math.toRadians(angulo)); // Rotación
         
         //escalo la imagen (no hace falta si uso el newWidh como escala)
@@ -561,7 +562,9 @@ class Character {
         // Dibuja la imagen en la nueva posición
         //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
         //a dibujar es 0,0, entonces me rotaba desde una punta
+        //g2d.drawImage(imgTemp, (int)(-((double)newWidth/2)*zoom), (int)(-((double)newHeight/2)*zoom), (int)(((double)newWidth)*zoom), (int)(((double)newHeight)*zoom), canvas); 
         g2d.drawImage(imgTemp, -(newWidth/2), -(newHeight/2), newWidth, newHeight, canvas); 
+        //g2d.drawImage(img, 300, 300, 700, 700, -(newWidth/2), -(newHeight/2), newWidth, newHeight, canvas);
 
         angulo = angulo + rotaAngulo;
 
