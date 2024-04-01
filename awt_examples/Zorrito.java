@@ -24,20 +24,43 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.RenderingHints;
 
-public class MovableImageAWT extends Frame {
+public class Zorrito extends Frame {
 
+    //Lista de personajes
     private ArrayList<Character> personajes = new ArrayList<Character>();
+
+    //Cantidad de malos
+    private int cantidadMalos;
+    
+    //Personaje principal
     private Character principal;
+    
+    //Lista de teclas presionadas
     private Set<Integer> pressedKeys = new HashSet<>();
+    
     // Timer para mover la imagen cada N milisegundos
     Timer timer = new Timer();
+    
+    //Estrategia para dibugar con buffers
     BufferStrategy bs;
+
+    //Variable que indica si se usa buffer o no
     boolean imageWithBuffer = false;
+
+    //Canvas para dibujar el juego
     MyCanvas canvas = new MyCanvas();
+    
+    //Variable que indica si terminó el juego
     boolean terminado = false;
+    
+    //Nivel de Zoom
     double zoom=1;
+    
+    //Centro general del mapa
     int general_x=0;
     int general_y=0;
+
+    //Tiempo actual para el cronómetro
     long initTimeMillis;
 
     //posicion de la jaula en el mapa
@@ -151,7 +174,7 @@ public class MovableImageAWT extends Frame {
         String[] movimientosArriba_Abajo = {"arriba","abajo"};
         String[] movimientosIzquierda_Derecha = {"izquierda","derecha"};
 
-        for (int i=0;i<20;i++){
+        for (int i=0;i<this.cantidadMalos;i++){
 
             //pajaro estandar
             Character pajaro = new Character("Pajaro"+i,"/Users/Fernando.Scasserra/Downloads/pajaro.png",15,movimientoRebote);
@@ -225,8 +248,11 @@ public class MovableImageAWT extends Frame {
         };        
     }
 
-    public MovableImageAWT(boolean buffer) {
+    public Zorrito(boolean buffer, int cantMalos) {
         super("Zorrito 1.0");
+
+        //carga la cantidad de malos
+        this.cantidadMalos = cantMalos;
 
         //carga el parámetro del buffer
         this.imageWithBuffer = buffer;
@@ -443,12 +469,47 @@ public class MovableImageAWT extends Frame {
         //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
         System.setProperty("sun.java2d.uiScale", "1");
 
-        if (args.length>0 && "-buffer".equals(args[0])){
-            System.out.println("No usando buffer de imágenes");
-            new MovableImageAWT(false);
-        } else {
-            new MovableImageAWT(true);
+        //Chequea si se pidió la ayuda
+        if(args.length>0 && "-help".equals(args[0])) {
+
+            String ayuda = """
+            Zorrito 1.0
+            -----------
+
+            -help   : Muestra esta ayuda en pantalla
+            -buffer : No usa el buffer de imágenes
+            -size   : indica la cantidad de pájaros. Ej: -size:25
+
+            """;
+
+            System.out.println(ayuda);
+            System.exit(0);
+
         }
+
+        //Verifica si se pidió sin buffer
+        boolean conBuffer = true;
+        //cantidad de pajaros
+        int size =20;
+
+        //recorre los parámetros
+        for (String s : args) {
+
+            //verifica si viene sin buffer
+            if ("-buffer".equals(s))
+                conBuffer = false;
+
+            //verifica si viene con size
+            if (s.contains("-size:")){
+                String[] partes = s.split(":");
+                size = Integer.parseInt(partes[1]);
+            }
+                
+            
+        }
+                
+        new Zorrito(conBuffer, size);
+
     }
 }
 
