@@ -35,20 +35,17 @@ public class Zorrito {
         //Crea los objetos del juego.
         this.juego = new Juego();
 
-        //Crea el display
+        //Crea el display y lo setea al juego
         this.display = new Display(buffer,juego);
-
         this.juego.setDisplay(this.display);
 
         //carga la cantidad de malos
         this.juego.cantidadMalos = cantMalos;
         
-        //carga el parámetro del buffer
-        this.juego.imageWithBuffer = buffer;
-
         //Crea los personajes del juego
         this.juego.crearPersonajes();
 
+        //Comienza el juego
         this.juego.comenzar();
 
     }
@@ -108,9 +105,6 @@ public class Zorrito {
 class Juego {
     //Cantidad de malos
     public int cantidadMalos;
-
-    //Variable que indica si se usa buffer o no
-    public boolean imageWithBuffer = false;
     
     //Variable que indica si terminó el juego
     boolean terminado = false;
@@ -122,10 +116,6 @@ class Juego {
 
     public void setDisplay(Display d){
         this.display = d;
-    }
-
-    void repaint(){
-        this.display.doRepaint();
     }
 
     public void comenzar(){
@@ -316,8 +306,8 @@ class Juego {
 
                 principal.colisionado = colisionPrincipal;
 
-                // Repinta el canvas para mostrar la imagen en la nueva posición
-                repaint();
+                // Le avisa al display que hay que repintar
+                display.doRepaint();
 
                 //si queda solo la jaula, corta el timer
                 if (vivos == 2) {
@@ -328,34 +318,36 @@ class Juego {
         };        
     }
 
-    public void moveCharacter(Character c) {
+    //Ejecuta una acción en base a la tecla que se haya presionado
+    public void acciónDeTeclaPresionada() {
+        
         // Verifica combinaciones específicas de teclas
         if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_I)) {
-            c.x -= 7;
-            c.y -= 7;
+            principal.x -= 7;
+            principal.y -= 7;
         } else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.contains(KeyEvent.VK_K)) {
-            c.x += 7;
-            c.y += 7;
+            principal.x += 7;
+            principal.y += 7;
         }
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.contains(KeyEvent.VK_I)) {
-            c.x += 7;
-            c.y -= 7;
+            principal.x += 7;
+            principal.y -= 7;
         } 
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_K)) {
-            c.x -= 7;
-            c.y += 7;
+            principal.x -= 7;
+            principal.y += 7;
         }               
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.size()==1) {
-            c.x -= 10;
+            principal.x -= 10;
         }           
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.size()==1) {
-            c.x += 10;
+            principal.x += 10;
         }           
         else if (pressedKeys.contains(KeyEvent.VK_I) && pressedKeys.size()==1) {
-            c.y -= 10;
+            principal.y -= 10;
         }           
         else if (pressedKeys.contains(KeyEvent.VK_K) && pressedKeys.size()==1) {
-            c.y += 10;
+            principal.y += 10;
         }           
         else if (pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.size()==1) {
             this.zoom = this.zoom+0.1;
@@ -381,7 +373,6 @@ class Juego {
             timer.cancel();
             System.exit(0);
         }
-        //if (c.numImagen==0) c.numImagen = 1; else c.numImagen =0;
     }
 
     private void resetJuego() {
@@ -447,7 +438,7 @@ class Display extends Frame {
             @Override
             public void keyPressed(KeyEvent e) {
                 juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
-                juego.moveCharacter(juego.principal);
+                juego.acciónDeTeclaPresionada();
                 canvas.repaint();
             }
 
@@ -579,7 +570,11 @@ class Display extends Frame {
 
 }
 
-//Clase que guarda el personaje
+/**
+ * Clase que guarda el personaje (objeto del juego)
+ * para ser transportado entre el juego y el display
+ * además de contener la info del personaje.
+ */
 class Character {
     public Image img;
     public Image img_colision;
@@ -699,6 +694,7 @@ class Character {
 
     };
 
+    //Ejecuta la función de movimiento sobre el personaje
     public void seMueve(){
         this.movimiento.apply(this);
     };
@@ -724,11 +720,7 @@ class Character {
         double distancia = Math.sqrt(lado1*lado1 + lado2*lado2);  
 
         //si la distancia es menor a la suma de los radios, hay colisión
-        if (distancia <(this.radio+c.radio)){
-            return true;
-        } else {
-            return false;
-        }
+        return distancia <(this.radio+c.radio);
 
     }
 
