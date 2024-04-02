@@ -55,6 +55,7 @@ public class Zorrito {
         
         //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
         System.setProperty("sun.java2d.uiScale", "1");
+        System.out.println("Inicia Zorrito 1.1");
 
         //Chequea si se pidió la ayuda
         if(args.length>0 && "-help".equals(args[0])) {
