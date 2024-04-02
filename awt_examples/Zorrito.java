@@ -389,8 +389,6 @@ class Juego {
 }
 
 class Display extends Frame {
-    //Estrategia para dibugar con buffers
-    BufferStrategy bs;
 
     //Canvas para dibujar el juego
     MyCanvas canvas = new MyCanvas(this);
@@ -465,12 +463,10 @@ class Display extends Frame {
         }
 
         Display rootDisplay;
-
+        
         @Override        
         public void paint(Graphics gOrigin) {
 
-            //TODO: Entender si se usa este buffer Strategy o usa el de Display
-            //Parece que el de display no se usa para nada.
             BufferStrategy bs=null;
             Graphics2D g;
 
@@ -486,7 +482,8 @@ class Display extends Frame {
 
                 g = (Graphics2D) gOrigin;
 
-                g = (Graphics2D) g.create();
+                //TODO: Lo saqué y no pasó nada, hay que ver para que sirve
+                //g = (Graphics2D) g.create();
                 
                 // Aplicar anti-aliasing para suavizar las líneas y el texto
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -506,7 +503,13 @@ class Display extends Frame {
 
             //Dibuja los personajes
             for (Character c : this.rootDisplay.juego.personajes){
-                if (c.img!=null){
+                if (c.img!=null){      
+                    
+                    //TODO: Crear un método que esté dentro del Frame y se encarga de dibujar el objeto en cuestion
+                    //Para eso hay que obtener algunos datos del objeto, son pocos.
+                    //Hacer un refactor del método drawImage también del lado del Character, no hace falta ya que todo lo 
+                    //se que calcula desde ahi para gráficos se puede poner acá y los otros datos se pueden calcular en 
+                    //cuanto cambien como la posición, radio, etc
                     c.drawImage(this, g,this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
                 }
             }
@@ -621,7 +624,7 @@ class Character {
         if (imageFileColision!=null)
             this.img_colision = Toolkit.getDefaultToolkit().getImage(imageFileColision);
     }
-
+    
     public void drawImage(Canvas canvas, Graphics2D g2d, double zoom, int general_x, int general_y){
     
         //TODO: Este método no está bien acá, justamente toda la parte gráfica tiene que estar en el display
