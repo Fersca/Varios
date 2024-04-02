@@ -380,7 +380,8 @@ class Juego {
         personajes.clear();
         crearPersonajes();
 
-        //comienza el timer del juego
+        //Cancela el timer y comienza de nuevo otro.
+        timer.cancel();
         timer = new Timer();
         timer.scheduleAtFixedRate(comienzaJuego(timer), 0, 50);
 
