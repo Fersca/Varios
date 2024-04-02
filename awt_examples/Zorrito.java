@@ -24,44 +24,134 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.RenderingHints;
 
-public class Zorrito extends Frame {
+public class Zorrito {
 
-    //Lista de personajes
-    private ArrayList<Character> personajes = new ArrayList<Character>();
+    //Juego -- Contiene los parámetros del juego (vidas, timers, etc)
+    Juego juego;
+    Display display;
 
+    public Zorrito(boolean buffer, int cantMalos) {
+
+        //Crea los objetos del juego.
+        this.juego = new Juego();
+
+        //Crea el display
+        this.display = new Display(buffer,juego);
+
+        this.juego.setDisplay(this.display);
+
+        //carga la cantidad de malos
+        this.juego.cantidadMalos = cantMalos;
+        
+        //carga el parámetro del buffer
+        this.juego.imageWithBuffer = buffer;
+
+        //Crea los personajes del juego
+        this.juego.crearPersonajes();
+
+        this.juego.comenzar();
+
+    }
+
+
+    public static void main(String[] args) {
+        
+        //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
+        System.setProperty("sun.java2d.uiScale", "1");
+
+        //Chequea si se pidió la ayuda
+        if(args.length>0 && "-help".equals(args[0])) {
+
+            String ayuda = """
+            Zorrito 1.0
+            -----------
+
+            -help   : Muestra esta ayuda en pantalla
+            -buffer : No usa el buffer de imágenes
+            -size   : indica la cantidad de pájaros. Ej: -size:25
+
+            """;
+
+            System.out.println(ayuda);
+            System.exit(0);
+
+        }
+
+        //Verifica si se pidió sin buffer
+        boolean conBuffer = true;
+        //cantidad de pajaros
+        int size =20;
+
+        //recorre los parámetros
+        for (String s : args) {
+
+            //verifica si viene sin buffer
+            if ("-buffer".equals(s)){
+                conBuffer = false;
+                System.out.println("No usa el buffer de imágenes");
+            }
+
+            //verifica si viene con size
+            if (s.contains("-size:")){
+                String[] partes = s.split(":");
+                size = Integer.parseInt(partes[1]);
+            }
+                
+            
+        }
+                
+        new Zorrito(conBuffer, size);
+
+    }
+}
+
+class Juego {
     //Cantidad de malos
-    private int cantidadMalos;
-    
-    //Personaje principal
-    private Character principal;
-    
-    //Lista de teclas presionadas
-    private Set<Integer> pressedKeys = new HashSet<>();
-    
-    // Timer para mover la imagen cada N milisegundos
-    Timer timer = new Timer();
-    
-    //Estrategia para dibugar con buffers
-    BufferStrategy bs;
+    public int cantidadMalos;
 
     //Variable que indica si se usa buffer o no
-    boolean imageWithBuffer = false;
-
-    //Canvas para dibujar el juego
-    MyCanvas canvas = new MyCanvas();
+    public boolean imageWithBuffer = false;
     
     //Variable que indica si terminó el juego
     boolean terminado = false;
-    
+
+    // Timer para mover la imagen cada N milisegundos
+    Timer timer = new Timer();
+
+    Display display;
+
+    public void setDisplay(Display d){
+        this.display = d;
+    }
+
+    void repaint(){
+        this.display.doRepaint();
+    }
+
+    public void comenzar(){
+        //comienza el timer del juego
+        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, 50);
+
+    }
+
+    //Lista de teclas presionadas
+    public Set<Integer> pressedKeys = new HashSet<>();
+        
     //Nivel de Zoom
     double zoom=1;
+
+    //Tiempo actual para el cronómetro
+    long initTimeMillis;
+
+    //Lista de personajes
+    public ArrayList<Character> personajes = new ArrayList<Character>();
+    
+    //Personaje principal
+    public Character principal;
     
     //Centro general del mapa
     int general_x=0;
     int general_y=0;
-
-    //Tiempo actual para el cronómetro
-    long initTimeMillis;
 
     //posicion de la jaula en el mapa
     int jaulaX = 375;
@@ -91,8 +181,8 @@ public class Zorrito extends Frame {
             c.y = c.y-c.velocidadY;
 
         //calcula la dirección del movimiento
-        int ancho = getWidth();
-        int alto = getHeight();
+        int ancho = display.getWidth();
+        int alto = display.getHeight();
 
         if (c.centroX>ancho)
             c.avanzando_x="izquierda";
@@ -111,19 +201,9 @@ public class Zorrito extends Frame {
 
         //crea los personajes
         personajes.addAll(creaListaDePersonajes());
-        
-        //crea el tracker de imágenes
-        MediaTracker tracker = new MediaTracker(this);
-        int i = 0;
-        for (Character c : personajes) {
-            tracker.addImage(c.img, i);
-            i++;
-        }    
-        try {
-            tracker.waitForAll();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+     
+        //trackea los personajes en el display
+        this.display.trackeaPersonajes(this.personajes,this.display);
 
     }
 
@@ -197,7 +277,7 @@ public class Zorrito extends Frame {
 
     }
 
-    private TimerTask comienzaJuego(MyCanvas canvas, Timer timer){
+    private TimerTask comienzaJuego(Timer timer){
 
         //obtiene el tiempo actual.
         initTimeMillis = System.currentTimeMillis();
@@ -237,7 +317,7 @@ public class Zorrito extends Frame {
                 principal.colisionado = colisionPrincipal;
 
                 // Repinta el canvas para mostrar la imagen en la nueva posición
-                canvas.repaint();
+                repaint();
 
                 //si queda solo la jaula, corta el timer
                 if (vivos == 2) {
@@ -248,54 +328,7 @@ public class Zorrito extends Frame {
         };        
     }
 
-    public Zorrito(boolean buffer, int cantMalos) {
-        super("Zorrito 1.0");
-
-        //carga la cantidad de malos
-        this.cantidadMalos = cantMalos;
-
-        //carga el parámetro del buffer
-        this.imageWithBuffer = buffer;
-
-        //Crea los personajes del juego
-        crearPersonajes();
-
-        //setUndecorated(true); // Elimina los bordes y barra de título
-        setBackground(Color.BLACK);      
-        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.  
-    
-        add(canvas);
-        setSize(1440, 875);
-        setVisible(true);
- 
-        //comienza el timer del juego
-        timer.scheduleAtFixedRate(comienzaJuego(canvas, timer), 0, 50);
-
-        //Listener para las teclas
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
-                moveImage(principal);
-                canvas.repaint();
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                pressedKeys.remove(e.getKeyCode()); // Elimina la tecla liberada del conjunto
-            }
-        });
-
-        //Listener para cerrar la ventana
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent we) {
-                timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
-                System.exit(0);
-            }
-        });
-    }
-
-    private void moveImage(Character c) {
+    public void moveCharacter(Character c) {
         // Verifica combinaciones específicas de teclas
         if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_I)) {
             c.x -= 7;
@@ -358,15 +391,95 @@ public class Zorrito extends Frame {
 
         //comienza el timer del juego
         timer = new Timer();
-        timer.scheduleAtFixedRate(comienzaJuego(canvas, timer), 0, 50);
+        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, 50);
+
+    }
+
+}
+
+class Display extends Frame {
+    //Estrategia para dibugar con buffers
+    BufferStrategy bs;
+
+    //Canvas para dibujar el juego
+    MyCanvas canvas = new MyCanvas(this);
+
+    public boolean imageWithBuffer = true;
+
+    public Juego juego;
+    
+    public void doRepaint(){
+        this.canvas.repaint();
+    }
+
+    public void trackeaPersonajes(ArrayList<Character> personajes, Frame f){
+
+        //crea el tracker de imágenes
+        MediaTracker tracker = new MediaTracker(f);
+        int i = 0;
+        for (Character c : personajes) {
+            tracker.addImage(c.img, i);
+            i++;
+        }    
+        try {
+            tracker.waitForAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public Display(boolean imageWithBuffer, Juego juego){
+        super("Zorrito 1.0");
+        //setUndecorated(true); // Elimina los bordes y barra de título
+        setBackground(Color.BLACK);      
+        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.  
+    
+        add(this.canvas);
+        setSize(1440, 875);
+        setVisible(true);
+
+        this.imageWithBuffer = imageWithBuffer;
+        this.juego = juego;
+
+        //Listener para las teclas
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
+                juego.moveCharacter(juego.principal);
+                canvas.repaint();
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                juego.pressedKeys.remove(e.getKeyCode()); // Elimina la tecla liberada del conjunto
+            }
+        });
+        
+        //Listener para cerrar la ventana
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                juego.timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
+                System.exit(0);
+            }
+        });
 
     }
 
     class MyCanvas extends Canvas {
 
+        public MyCanvas(Display d) {
+            this.rootDisplay = d;
+        }
+
+        Display rootDisplay;
+
         @Override        
         public void paint(Graphics gOrigin) {
 
+            //TODO: Entender si se usa este buffer Strategy o usa el de Display
+            //Parece que el de display no se usa para nada.
             BufferStrategy bs=null;
             Graphics2D g;
 
@@ -401,9 +514,9 @@ public class Zorrito extends Frame {
             }
 
             //Dibuja los personajes
-            for (Character c : personajes){
+            for (Character c : this.rootDisplay.juego.personajes){
                 if (c.img!=null){
-                    c.drawImage(this, g,zoom, general_x, general_y);
+                    c.drawImage(this, g,this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
                 }
             }
 
@@ -416,7 +529,7 @@ public class Zorrito extends Frame {
             g.setFont(new Font("SansSerif", Font.BOLD, 20));
 
             String text;
-            if (principal.colisionado){
+            if (this.rootDisplay.juego.principal.colisionado){
                 // Define el color del texto
                 g.setColor(Color.RED);
                 // Dibuja el texto en el Canvas
@@ -437,11 +550,11 @@ public class Zorrito extends Frame {
             g.drawString(obtenerCronometro(), 700, 50);           
 
             //imprime el zoom
-            String printZoom = String.format("%.2f", zoom);
+            String printZoom = String.format("%.2f", this.rootDisplay.juego.zoom);
             g.drawString("Zoom: "+printZoom+"x", 900, 50);            
 
             //imprime el cartel de ganador
-            if (terminado){
+            if (this.rootDisplay.juego.terminado){
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
@@ -459,60 +572,12 @@ public class Zorrito extends Frame {
 
         private String obtenerCronometro() {
             long tiempoActual = System.currentTimeMillis();
-            long diff = tiempoActual-initTimeMillis;
+            long diff = tiempoActual-this.rootDisplay.juego.initTimeMillis;
             return "Tiempo: "+diff/1000;
         }
     }
 
-    public static void main(String[] args) {
-        
-        //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
-        System.setProperty("sun.java2d.uiScale", "1");
-
-        //Chequea si se pidió la ayuda
-        if(args.length>0 && "-help".equals(args[0])) {
-
-            String ayuda = """
-            Zorrito 1.0
-            -----------
-
-            -help   : Muestra esta ayuda en pantalla
-            -buffer : No usa el buffer de imágenes
-            -size   : indica la cantidad de pájaros. Ej: -size:25
-
-            """;
-
-            System.out.println(ayuda);
-            System.exit(0);
-
-        }
-
-        //Verifica si se pidió sin buffer
-        boolean conBuffer = true;
-        //cantidad de pajaros
-        int size =20;
-
-        //recorre los parámetros
-        for (String s : args) {
-
-            //verifica si viene sin buffer
-            if ("-buffer".equals(s))
-                conBuffer = false;
-
-            //verifica si viene con size
-            if (s.contains("-size:")){
-                String[] partes = s.split(":");
-                size = Integer.parseInt(partes[1]);
-            }
-                
-            
-        }
-                
-        new Zorrito(conBuffer, size);
-
-    }
 }
-
 
 //Clase que guarda el personaje
 class Character {
@@ -564,6 +629,9 @@ class Character {
 
     public void drawImage(Canvas canvas, Graphics2D g2d, double zoom, int general_x, int general_y){
     
+        //TODO: Este método no está bien acá, justamente toda la parte gráfica tiene que estar en el display
+        //el cual tome los parámetros del personaje para dibujarlo. La clase personaje tiene que estar desacoplada del display
+
         //Cambia la imagen si está colisionado
         Image imgTemp=null;
         if (colisionado){
