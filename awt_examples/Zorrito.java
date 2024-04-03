@@ -184,6 +184,8 @@ class Juego {
         if (c.centroY<0)
             c.avanzando_y="abajo";
 
+        //gira al personaje
+        c.angulo = c.angulo + c.rotaAngulo;
         return null;
     };
 
@@ -203,19 +205,20 @@ class Juego {
         ArrayList<Character> personajesCreados = new ArrayList<Character>();
 
         //crea los personajes
-        Character zorrito = new Character("Zorrito","/Users/Fernando.Scasserra/Downloads/zorro.png",15,movimientoNulo);
-        zorrito.setImagenColision("/Users/Fernando.Scasserra/Downloads/zorro_muerto.png");
+        Character zorrito = new Character("Zorrito","zorro.png",15,movimientoNulo);
+        zorrito.setImagenColision("zorro_muerto.png");
 
         //Crea la jaula
-        Character jaula = new Character("Jaula","/Users/Fernando.Scasserra/Downloads/jaula.png",5,movimientoNulo);
+        Character jaula = new Character("Jaula","jaula.png",5,movimientoNulo);
         jaula.x = jaulaX;
         jaula.y = jaulaY;
         jaula.colisiona = false;
 
         //Crea el mapa
-        Character bosque = new Character("Jaula","/Users/Fernando.Scasserra/Downloads/bosque.png",1,movimientoNulo);
+        Character bosque = new Character("Bosque","bosque.png",1,movimientoNulo);
         bosque.x = 0;
         bosque.y = 0;
+        bosque.drawFromCenter=false;
         bosque.fixedSize=true;
         bosque.fixed_witdh=1440;
         bosque.fixed_heigth=875;
@@ -248,7 +251,7 @@ class Juego {
         for (int i=0;i<this.cantidadMalos;i++){
 
             //pajaro estandar
-            Character pajaro = new Character("Pajaro"+i,"/Users/Fernando.Scasserra/Downloads/pajaro.png",15,movimientoRebote);
+            Character pajaro = new Character("Pajaro"+i,"pajaro.png",15,movimientoRebote);
             pajaro.velocidadX = random.nextInt(20) + 1; 
             //System.out.println(pajaro.velocidadX);
             pajaro.velocidadY = random.nextInt(20) + 1; 
@@ -297,15 +300,17 @@ class Juego {
                         continue;
                     
                     if (principal.verificaColision(c)){
-                        c.colisionado = true;
+                        c.setColision(true);
                         colisionPrincipal = true;
                     } else {
-                        c.colisionado = false;
+                        c.setColision(false);
                         vivos++;
                     }
                 }
 
-                principal.colisionado = colisionPrincipal;
+
+                //Setea al principal como colisionado
+                principal.setColision(colisionPrincipal);
 
                 // Le avisa al display que hay que repintar
                 display.doRepaint();
@@ -439,7 +444,7 @@ class Display extends Frame {
             public void keyPressed(KeyEvent e) {
                 juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
                 juego.acciónDeTeclaPresionada();
-                canvas.repaint();
+                //canvas.repaint();
             }
 
             @Override
@@ -466,6 +471,34 @@ class Display extends Frame {
 
         Display rootDisplay;
         
+        private void drawImageCanvas(boolean drawFromCenter, Image imgTemp, int centroX, int centroY, int angulo, int newWidth, int newHeight, Graphics2D g2d, double zoom, int general_x, int general_y){
+
+
+            //Crea el objeto para aplicar los efectos
+            AffineTransform tx = new AffineTransform();
+
+            //Translada la imagen a la posición del mapa
+            tx.translate((general_x+centroX)*zoom, (general_y+centroY)*zoom); // Traslación
+            
+            //Rota la imagen
+            tx.rotate(Math.toRadians(angulo));
+
+            //Aplica el zoom
+            tx.scale(zoom, zoom); // Escalado        
+
+            //Aplica la transformación
+            g2d.setTransform(tx);    
+
+            // Dibuja la imagen en la nueva posición
+            //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
+            //a dibujar es el 0,0 entonces no lo dibujaba centrado, y cuando rotaba lo hacías desde la
+            //punta, la variable drawFromCenter es para indicar eso.
+            g2d.drawImage(imgTemp, drawFromCenter?-(newWidth/2):0, drawFromCenter?-(newHeight/2):0, newWidth, newHeight, this);
+            
+        };
+        
+        
+        
         @Override        
         public void paint(Graphics gOrigin) {
 
@@ -476,14 +509,17 @@ class Display extends Frame {
                 // Asegurarse de que exista una BufferStrategy
                 if (getBufferStrategy() == null) {
                     createBufferStrategy(2); // Crea una estrategia de doble buffer
-                    return; // Salir del método para permitir que la estrategia se cree correctamente
                 }
 
                 bs = getBufferStrategy();
+                
+                g = (Graphics2D) bs.getDrawGraphics();
+                
+                /* Saco eso para ponerlo en una sola instrucción de arriba
                 gOrigin = bs.getDrawGraphics();
-
                 g = (Graphics2D) gOrigin;
-
+                */
+               
                 //TODO: Lo saqué y no pasó nada, hay que ver para que sirve
                 //g = (Graphics2D) g.create();
                 
@@ -506,13 +542,10 @@ class Display extends Frame {
             //Dibuja los personajes
             for (Character c : this.rootDisplay.juego.personajes){
                 if (c.img!=null){      
+                                        
+                    //Repinta el personaje
+                    drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
                     
-                    //TODO: Crear un método que esté dentro del Frame y se encarga de dibujar el objeto en cuestion
-                    //Para eso hay que obtener algunos datos del objeto, son pocos.
-                    //Hacer un refactor del método drawImage también del lado del Character, no hace falta ya que todo lo 
-                    //se que calcula desde ahi para gráficos se puede poner acá y los otros datos se pueden calcular en 
-                    //cuanto cambien como la posición, radio, etc
-                    c.drawImage(this, g,this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
                 }
             }
 
@@ -587,20 +620,23 @@ class Character {
     public int y = 100;
     public int fixed_witdh;
     public int fixed_heigth;
+    public int width = 0;
+    public int height = 0;    
     public boolean fixedSize= false;
+    public boolean drawFromCenter=true;
     private int scale;
     public Function<Character, Void> movimiento;
     public String name;
     public int centroX;
     public int centroY;
-    public int radio;
+    public int radio=0;
     public boolean colisionado;
     public String avanzando_x = "derecha";
     public String avanzando_y = "abajo";
     public int velocidadX = 1;
     public int velocidadY = 1;
     public int rotaAngulo = 0;
-    private int angulo = 0;
+    public int angulo = 0;
     public boolean colisiona = true;
     public int numImagen = 0;
     //caché de imágenes
@@ -620,18 +656,46 @@ class Character {
         this.scale = scale;
         this.movimiento = movimientoPersonaje;
         this.name = name;    
+                
     };
+    
+    public void setColision(boolean colision){
+        this.colisionado = colision;
+        
+        //Si está colisionado lo hace girar
+        if (colision){
+            this.rotaAngulo = 5;
+        } else {
+            this.rotaAngulo = 0;
+        }       
+    }
+    
+    public int getWidth(Canvas canvas){
+        
+        if (fixedSize){
+            return fixed_witdh;
+        } else {
+            this.width = img.getWidth(canvas) / scale;            
+            return this.width;
+        }        
+    }
+    
+    public int getHeight(Canvas canvas){
+        if (fixedSize){
+            return fixed_heigth;
+        } else {
+            this.height = img.getHeight(canvas) / scale;
+            return this.height;
+        }        
+    }
 
     public void setImagenColision(String imageFileColision){
         if (imageFileColision!=null)
             this.img_colision = Toolkit.getDefaultToolkit().getImage(imageFileColision);
     }
     
-    public void drawImage(Canvas canvas, Graphics2D g2d, double zoom, int general_x, int general_y){
-    
-        //TODO: Este método no está bien acá, justamente toda la parte gráfica tiene que estar en el display
-        //el cual tome los parámetros del personaje para dibujarlo. La clase personaje tiene que estar desacoplada del display
-
+    public Image getImagen(){
+        
         //Cambia la imagen si está colisionado
         Image imgTemp=null;
         if (colisionado){
@@ -641,11 +705,8 @@ class Character {
                 imgTemp = img_colision;
             else
                 imgTemp = img;
-
-            rotaAngulo = 5;
         } else {
             imgTemp = img;
-            rotaAngulo = 0;
         }
 
         //va cambiando la imagen
@@ -658,50 +719,33 @@ class Character {
                 imgTemp = img;
         }
 
-        //escala la imagen
-        int newWidth=0;
-        int newHeight=0;
-
-        if (fixedSize){
-            newWidth = fixed_witdh;
-            newHeight = fixed_heigth;
-        } else {
-            newWidth = img.getWidth(canvas) / scale;
-            newHeight = img.getHeight(canvas) / scale;    
-        }
-
-        //calcula el centro y el radio
-        centroX = x+newWidth/2;
-        centroY = y+newHeight/2;
-        //deja el radio más grande
-        radio = (newWidth>newHeight)?newWidth/2:newHeight/2;    
-
-        AffineTransform tx = new AffineTransform();
-        
-        //tx.translate(general_x+centroX, general_y+centroY); // Traslación
-        tx.translate((general_x+centroX)*zoom, (general_y+centroY)*zoom); // Traslación
-        tx.rotate(Math.toRadians(angulo)); // Rotación
-        
-        //escalo la imagen (no hace falta si uso el newWidh como escala)
-        //double dScale = (double)1/(double)scale;
-        tx.scale(zoom, zoom); // Escalado        
-        
-        g2d.setTransform(tx);    
-
-        // Dibuja la imagen en la nueva posición
-        //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
-        //a dibujar es 0,0, entonces me rotaba desde una punta
-        //g2d.drawImage(imgTemp, (int)(-((double)newWidth/2)*zoom), (int)(-((double)newHeight/2)*zoom), (int)(((double)newWidth)*zoom), (int)(((double)newHeight)*zoom), canvas); 
-        g2d.drawImage(imgTemp, -(newWidth/2), -(newHeight/2), newWidth, newHeight, canvas); 
-        //g2d.drawImage(img, 300, 300, 700, 700, -(newWidth/2), -(newHeight/2), newWidth, newHeight, canvas);
-
-        angulo = angulo + rotaAngulo;
-
-    };
-
+        return imgTemp;
+    }
+    
     //Ejecuta la función de movimiento sobre el personaje
     public void seMueve(){
+        
+        //Aplica el algoritmo de movimiento
         this.movimiento.apply(this);
+        
+        //Para todos calcula el centro y el radio TODO: Sacar esto de acá
+        //La primera ver que aun no se calcularon los valores, no funcione, pero la siguiente si.
+        
+        //TODO: Fix, sacar esto
+        if (name.equals("Bosque")){
+            return;
+        }
+        
+        centroX = x+width/2;
+        centroY = y+height/2;
+        
+        //deja el radio más grande si es la primera ver que se calcula
+        if (radio==0)
+            radio = (width>height)?width/2:height/2;    
+        
+        if (this.colisionado){
+            this.angulo = angulo + rotaAngulo;
+        }
     };
 
     //Verifica si hay una colisión entre los dos objetos
