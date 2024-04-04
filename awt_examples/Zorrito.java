@@ -23,6 +23,10 @@ import java.util.function.Function;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.RenderingHints;
+import java.awt.MouseInfo;
+import java.awt.PointerInfo;
+import java.awt.Point;
+
 
 public class Zorrito {
 
@@ -30,21 +34,27 @@ public class Zorrito {
     Juego juego;
     Display display;
 
-    public Zorrito(boolean buffer, int cantMalos) {
+    public Zorrito(boolean buffer, int cantMalos, boolean centrar) {
 
         //Crea los objetos del juego.
         this.juego = new Juego();
 
         //Crea el display y lo setea al juego
-        this.display = new Display(buffer,juego);
+        this.display = new Display(buffer, juego);
         this.juego.setDisplay(this.display);
 
         //carga la cantidad de malos
         this.juego.cantidadMalos = cantMalos;
         
+        //setea si el personaje se centra o no
+        this.juego.centrar = centrar;
+        
         //Crea los personajes del juego
         this.juego.crearPersonajes();
 
+        //Seteo la funcion de terminado
+        this.display.terminadoFunc = juego.terminadoFunc();
+        
         //Comienza el juego
         this.juego.comenzar();
 
@@ -64,9 +74,10 @@ public class Zorrito {
             Zorrito 1.0
             -----------
 
-            -help   : Muestra esta ayuda en pantalla
-            -buffer : No usa el buffer de imágenes
-            -size   : indica la cantidad de pájaros. Ej: -size:25
+            -help       : Muestra esta ayuda en pantalla
+            -buffer     : No usa el buffer de imágenes
+            -size       : indica la cantidad de pájaros. Ej: -size:25
+            -no-centrar : No centra al personaje en la pantalla
 
             """;
 
@@ -79,6 +90,8 @@ public class Zorrito {
         boolean conBuffer = true;
         //cantidad de pajaros
         int size =20;
+        //no centra al personaje
+        boolean centrar =true;
 
         //recorre los parámetros
         for (String s : args) {
@@ -89,16 +102,23 @@ public class Zorrito {
                 System.out.println("No usa el buffer de imágenes");
             }
 
+            //verifica si viene sin buffer
+            if ("-no-centrar".equals(s)){
+                centrar = false;
+                System.out.println("No centra al personaje");
+            }
+           
             //verifica si viene con size
             if (s.contains("-size:")){
                 String[] partes = s.split(":");
                 size = Integer.parseInt(partes[1]);
+                System.out.println("Enemigos: "+size);
             }
                 
             
         }
                 
-        new Zorrito(conBuffer, size);
+        new Zorrito(conBuffer, size, centrar);
 
     }
 }
@@ -106,6 +126,9 @@ public class Zorrito {
 class Juego {
     //Cantidad de malos
     public int cantidadMalos;
+
+    //Centrar personaje
+    public boolean centrar;
     
     //Variable que indica si terminó el juego
     boolean terminado = false;
@@ -147,7 +170,7 @@ class Juego {
     //posicion de la jaula en el mapa
     int jaulaX = 375;
     int jaulaY = 360;
-
+        
     //Crea el movimiento nulo
     Function<Character, Void> movimientoNulo =(Character c) -> {return null;};
 
@@ -189,7 +212,10 @@ class Juego {
         return null;
     };
 
-
+    public Function<Void, Boolean> terminadoFunc(){
+        return (Void) -> {return this.terminado;};
+    }
+    
     public void crearPersonajes(){
 
         //crea los personajes
@@ -205,7 +231,10 @@ class Juego {
         ArrayList<Character> personajesCreados = new ArrayList<Character>();
 
         //crea los personajes
-        Character zorrito = new Character("Zorrito","zorro.png",15,movimientoNulo);
+        Character zorrito = new Character("Zorrito","zorro.png",20,movimientoNulo);
+        zorrito.x = display.getWidth() / 2;
+        zorrito.y = display.getHeight() / 2;
+        
         zorrito.setImagenColision("zorro_muerto.png");
 
         //Crea la jaula
@@ -220,8 +249,8 @@ class Juego {
         bosque.y = 0;
         bosque.drawFromCenter=false;
         bosque.fixedSize=true;
-        bosque.fixed_witdh=1440;
-        bosque.fixed_heigth=875;
+        bosque.fixed_witdh=display.getWidth();
+        bosque.fixed_heigth=display.getHeight();
         bosque.colisiona = false;
 
         //agrega los personajes a la lista
@@ -251,7 +280,7 @@ class Juego {
         for (int i=0;i<this.cantidadMalos;i++){
 
             //pajaro estandar
-            Character pajaro = new Character("Pajaro"+i,"pajaro.png",15,movimientoRebote);
+            Character pajaro = new Character("Pajaro"+i,"pajaro.png",20,movimientoRebote);
             pajaro.velocidadX = random.nextInt(20) + 1; 
             //System.out.println(pajaro.velocidadX);
             pajaro.velocidadY = random.nextInt(20) + 1; 
@@ -262,8 +291,8 @@ class Juego {
             //System.out.println(pajaro.avanzando_x);            
             
             //los pone en la punta de la pantalla
-            pajaro.x = 1440;
-            pajaro.y = 875;
+            pajaro.x = display.getWidth();
+            pajaro.y = display.getHeight();
             enemigos.add(pajaro);
         }
 
@@ -279,7 +308,11 @@ class Juego {
             @Override
             public void run() {
 
-
+                //detecta la posicion del mouse para moverlo;
+                PointerInfo pi = MouseInfo.getPointerInfo();
+                Point p = pi.getLocation();
+                mueveSegunMouse(p.x,p.y);
+                
                 // Actualiza la posición de la imagen
                 for (Character c : personajes) {
                     c.seMueve();
@@ -324,36 +357,133 @@ class Juego {
         };        
     }
 
+    private void mueveSegunMouse(int x, int y){                        
+                
+        if ( (y<(display.getHeight()/7)*3) && (x<(display.getWidth()/7)*3) ) {
+            mueveArribaIzquierda();
+            return;
+        }
+        if ( (y<(display.getHeight()/7)*3) && (x>(display.getWidth()/7)*4) ) {
+            mueveArribaDerecha();
+            return;
+        }
+        if ( (y>(display.getHeight()/7)*4) && (x<(display.getWidth()/7)*3) ) {
+            mueveAbajoIzquierda();
+            return;
+        }
+        if ( (y>(display.getHeight()/7)*4) && (x>(display.getWidth()/7)*4) ) {
+            mueveAbajoDerecha();
+            return;
+        }                
+        if (y<(display.getHeight()/7)*3){
+            mueveArriba();
+            return;
+        }
+        if (y>(display.getHeight()/7)*4){
+            mueveAbajo();
+            return;
+        }
+        if (x<(display.getWidth()/7)*3){
+            mueveIzquierda();
+            return;
+        }
+        if (x>(display.getWidth()/7)*4){
+            mueveDerecha();
+            return;
+        }
+                
+    }
+    private void mueveArribaIzquierda(){
+        if (centrar){
+            general_x  += 4;
+            general_y  += 4;                
+        }
+
+        principal.x -= 4;
+        principal.y -= 4;        
+    }
+    private void mueveAbajoDerecha(){    
+        if (centrar){
+            general_x  -= 4;
+            general_y  -= 4;
+        }
+
+        principal.x += 4;
+        principal.y += 4;        
+    }
+    private void mueveArribaDerecha(){    
+        if (centrar){
+            general_x  -= 4;
+            general_y  += 4;
+        }
+
+        principal.x += 4;
+        principal.y -= 4;        
+    }
+    private void mueveAbajoIzquierda(){   
+        if (centrar){            
+            general_x  += 4;
+            general_y  -= 4;
+        }
+
+        principal.x -= 4;
+        principal.y += 4;        
+    }
+    private void mueveIzquierda(){   
+        if (centrar){            
+            general_x  += 6;
+        }
+
+        principal.x -= 6;        
+    }
+    private void mueveDerecha(){   
+        if (centrar){
+            general_x  -= 6;
+        }
+
+        principal.x += 6;        
+    }
+    private void mueveArriba(){   
+        if (centrar){            
+            general_y  += 6;
+        }
+
+        principal.y -= 6;        
+    }
+    private void mueveAbajo(){   
+        if (centrar){
+            general_y  -= 6;
+        }
+
+        principal.y += 6;        
+    }
+    
     //Ejecuta una acción en base a la tecla que se haya presionado
     public void acciónDeTeclaPresionada() {
         
         // Verifica combinaciones específicas de teclas
         if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_I)) {
-            principal.x -= 7;
-            principal.y -= 7;
+            mueveArribaIzquierda();
         } else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.contains(KeyEvent.VK_K)) {
-            principal.x += 7;
-            principal.y += 7;
+            mueveAbajoDerecha();
         }
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.contains(KeyEvent.VK_I)) {
-            principal.x += 7;
-            principal.y -= 7;
+            mueveArribaDerecha();
         } 
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_K)) {
-            principal.x -= 7;
-            principal.y += 7;
+            mueveAbajoIzquierda();
         }               
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.size()==1) {
-            principal.x -= 10;
+            mueveIzquierda();
         }           
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.size()==1) {
-            principal.x += 10;
+            mueveDerecha();
         }           
         else if (pressedKeys.contains(KeyEvent.VK_I) && pressedKeys.size()==1) {
-            principal.y -= 10;
+            mueveArriba();
         }           
         else if (pressedKeys.contains(KeyEvent.VK_K) && pressedKeys.size()==1) {
-            principal.y += 10;
+            mueveAbajo();
         }           
         else if (pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.size()==1) {
             this.zoom = this.zoom+0.1;
@@ -398,11 +528,13 @@ class Juego {
 class Display extends Frame {
 
     //Canvas para dibujar el juego
-    MyCanvas canvas = new MyCanvas(this);
+    private final MyCanvas canvas = new MyCanvas(this);
 
-    public boolean imageWithBuffer = true;
+    private boolean imageWithBuffer = true;
 
-    public Juego juego;
+    private final Juego juego;
+    
+    public Function<Void, Boolean> terminadoFunc;
     
     public void doRepaint(){
         this.canvas.repaint();
@@ -434,17 +566,16 @@ class Display extends Frame {
         add(this.canvas);
         setSize(1440, 875);
         setVisible(true);
-
+        
         this.imageWithBuffer = imageWithBuffer;
-        this.juego = juego;
-
+        this.juego = juego;        
+                               
         //Listener para las teclas
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
                 juego.acciónDeTeclaPresionada();
-                //canvas.repaint();
             }
 
             @Override
@@ -455,6 +586,7 @@ class Display extends Frame {
         
         //Listener para cerrar la ventana
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent we) {
                 juego.timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
                 System.exit(0);
@@ -463,7 +595,7 @@ class Display extends Frame {
 
     }
 
-    class MyCanvas extends Canvas {
+    private class MyCanvas extends Canvas {
 
         public MyCanvas(Display d) {
             this.rootDisplay = d;
@@ -582,8 +714,8 @@ class Display extends Frame {
             String printZoom = String.format("%.2f", this.rootDisplay.juego.zoom);
             g.drawString("Zoom: "+printZoom+"x", 900, 50);            
 
-            //imprime el cartel de ganador
-            if (this.rootDisplay.juego.terminado){
+            //Chequea si el juego está termiando mediante la función enviada. (desacoplata)
+            if (terminadoFunc.apply(null)) {
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
@@ -616,8 +748,8 @@ class Display extends Frame {
 class Character {
     public Image img;
     public Image img_colision;
-    public int x = 100;
-    public int y = 100;
+    public int x = 500;
+    public int y = 500;
     public int fixed_witdh;
     public int fixed_heigth;
     public int width = 0;
