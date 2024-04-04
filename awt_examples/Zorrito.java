@@ -89,7 +89,7 @@ public class Zorrito {
         //Verifica si se pidió sin buffer
         boolean conBuffer = true;
         //cantidad de pajaros
-        int size =20;
+        int size =2;
         //no centra al personaje
         boolean centrar =true;
 
@@ -346,7 +346,8 @@ class Juego {
                 principal.setColision(colisionPrincipal);
 
                 // Le avisa al display que hay que repintar
-                display.doRepaint();
+                display.ddraw();
+                //display.doRepaint();
 
                 //si queda solo la jaula, corta el timer
                 if (vivos == 2) {
@@ -539,6 +540,9 @@ class Display extends Frame {
     public void doRepaint(){
         this.canvas.repaint();
     }
+    public void ddraw(){
+        this.canvas.draw();
+    }
 
     public void trackeaPersonajes(ArrayList<Character> personajes, Frame f){
 
@@ -629,6 +633,99 @@ class Display extends Frame {
             
         };
         
+        /*
+        @Override
+        public void update(Graphics g) {
+            paint(g);
+        }
+        */
+        
+        int count = 0;
+        public void draw() {
+            // Obtén la BufferStrategy actual del Canvas
+            BufferStrategy bs = getBufferStrategy();
+            if (bs == null) {
+                createBufferStrategy(2); // Crea una estrategia de doble buffer
+                return;
+            }
+
+            // Obtén el objeto Graphics para dibujar en el búfer
+            Graphics2D g = (Graphics2D) bs.getDrawGraphics();
+
+            // Aplicar anti-aliasing para suavizar las líneas y el texto
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Mejorar la calidad del renderizado
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+            // Mejorar la calidad del texto
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+            g.setColor(Color.BLACK);            
+            g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
+            
+            //Dibuja los personajes
+            for (Character c : this.rootDisplay.juego.personajes){
+                if (c.img!=null){      
+                                        
+                    //Repinta el personaje
+                    drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
+                    
+                }
+            }
+            
+            //vuelve a centrar el centro el 0,0
+            AffineTransform tx = new AffineTransform();        
+            tx.translate(0, 0); // Traslación        
+            g.setTransform(tx);    
+        
+            // Define la fuente del texto
+            g.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+            String text;
+            if (this.rootDisplay.juego.principal.colisionado){
+                // Define el color del texto
+                g.setColor(Color.RED);
+                // Dibuja el texto en el Canvas
+                text = "Status: COME";
+
+            } else {
+                // Define el color del texto
+                g.setColor(Color.WHITE);
+                // Dibuja el texto en el Canvas
+                text = "Status: CAZANDO ";
+            }
+            
+            //imprime el status
+            g.drawString(text, 50, 50);
+
+            //imprime el cronómetro
+            g.setColor(Color.WHITE);
+            g.drawString(obtenerCronometro(), 700, 50);           
+
+            //imprime el zoom
+            String printZoom = String.format("%.2f", this.rootDisplay.juego.zoom);
+            g.drawString("Zoom: "+printZoom+"x", 900, 50);            
+
+            //Chequea si el juego está termiando mediante la función enviada. (desacoplata)            
+            boolean termino = terminadoFunc.apply(null);
+            System.out.println("termino: "+termino+ " - "+count);
+            count++;
+            if (termino) {
+                // Define la fuente del texto
+                g.setFont(new Font("SansSerif", Font.BOLD, 100));
+                g.setColor(Color.YELLOW);
+                text = "¡¡GANO!!";
+                System.out.println("GANO!!!!"  + count);
+                g.drawString(text, 600, 300);
+            } 
+
+            g.dispose(); // Liberar los recursos del Graphics
+            bs.show(); // Mostrar el contenido del buffer    
+            
+            // Asegúrate de que la operación de dibujo se completa
+            Toolkit.getDefaultToolkit().sync();
+        }        
         
         
         @Override        
