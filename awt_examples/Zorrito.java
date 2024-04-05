@@ -117,6 +117,7 @@ public class Zorrito {
 }
 
 class Juego {
+    
     //Cantidad de malos
     public int cantidadMalos;
 
@@ -124,19 +125,24 @@ class Juego {
     public boolean centrar;
     
     //Variable que indica si terminó el juego
-    boolean terminado = false;
+    //0 - andando, 1 - Ganó, 2 - Cazado
+    int terminado = 0;
     
     // Timer para mover la imagen cada N milisegundos
     Timer timer = new Timer();
 
+    //link al objeto del display
     Display display;
     
+    //tiempo entre cada iteración del juego
     private int delay = 50;
 
+    //setea el objeto display
     public void setDisplay(Display d){
         this.display = d;
     }
 
+    //comienza el juego
     public void comenzar(){
         //comienza el timer del juego
         timer.scheduleAtFixedRate(comienzaJuego(timer), 0, delay);
@@ -207,7 +213,41 @@ class Juego {
         return null;
     };
 
-    public Function<Void, Boolean> terminadoFunc(){
+    //Crea el movimiento de cazar
+    Function<Character, Void> movimientoCazar =(Character c) -> { 
+
+        //Si está colisionado me lo manda a la jaula pero lo descoliciona.
+        if (c.colisionado){
+            c.follow.cazado=true;
+            return null;
+        }
+
+        //obtiene la posicion de la presa
+        int presaX = c.follow.x;
+        int presaY = c.follow.y;
+        
+        //obtiene la posicion del cazador
+        int cazadorX = c.x;
+        int cazadorY = c.y;
+        
+        if (presaX<cazadorX)
+            c.x = c.x-c.velocidadX;
+        else 
+            c.x = c.x+c.velocidadX;
+
+        if (presaY<cazadorY)
+            c.y = c.y-c.velocidadY;
+        else 
+            c.y = c.y+c.velocidadY;
+        
+        //gira al personaje
+        c.angulo = c.angulo + c.rotaAngulo;
+        return null;
+    };
+    
+    
+    
+    public Function<Void, Integer> terminadoFunc(){
         return (Void) -> {return this.terminado;};
     }
     
@@ -248,9 +288,20 @@ class Juego {
         bosque.fixed_heigth=display.getHeight();
         bosque.colisiona = false;
 
+        //crea el aguila, la pone arriba a la derecha
+        Character aguila = new Character("Aguila","aguila.png",5,movimientoCazar);
+        aguila.x = display.getWidth();
+        aguila.y = 0;
+        aguila.velocidadX = 1;
+        aguila.velocidadY = 1;
+        
+        aguila.follow = zorrito;
+        
+        
         //agrega los personajes a la lista
         personajesCreados.add(bosque);
         personajesCreados.add(zorrito);
+        personajesCreados.add(aguila);
 
         //crea muchos pájaros
         for (Character p : crearEnemigos()) {
@@ -332,23 +383,26 @@ class Juego {
                         colisionPrincipal = true;
                     } else {
                         c.setColision(false);
-                        vivos++;
+                        
+                        //al agrear este if me aseguro que es un pajaro
+                        if (c.follow==null)
+                            vivos++;
                     }
                 }
 
 
                 //Setea al principal como colisionado
                 principal.setColision(colisionPrincipal);
-
-                // Le avisa al display que hay que repintar
-                //display.doRepaint();
-
-                //si queda solo la jaula, corta el timer
-                if (vivos == 2) {
-                    timer.cancel();
-                    terminado = true;
-                }
                 
+                if (principal.cazado) {
+                    timer.cancel();
+                    terminado = 2;
+                } else if (vivos == 2) {
+                    //si queda solo la jaula, corta el timer
+                    timer.cancel();
+                    terminado = 1;
+                }
+                                               
                 //manda a dibujar con buffer
                 display.bufferedDraw();
             }
@@ -510,7 +564,7 @@ class Juego {
     }
 
     private void resetJuego() {
-        terminado=false;
+        terminado=0;
         personajes.clear();
         crearPersonajes();
 
@@ -530,7 +584,7 @@ class Display extends Frame {
 
     private final Juego juego;
     
-    public Function<Void, Boolean> terminadoFunc;
+    public Function<Void, Integer> terminadoFunc;
     
     public void bufferedDraw(){
         this.canvas.draw();
@@ -684,8 +738,15 @@ class Display extends Frame {
             g.drawString("Zoom: "+printZoom+"x", 900, 50);            
 
             //Chequea si el juego está termiando mediante la función enviada. (desacoplata)            
-            boolean termino = terminadoFunc.apply(null);
-            if (termino) {
+            int codigoTerminado = terminadoFunc.apply(null);
+            if (codigoTerminado==2) {
+                // Define la fuente del texto
+                g.setFont(new Font("SansSerif", Font.BOLD, 100));
+                g.setColor(Color.RED);
+                text = "¡¡CAZADO!!";
+                g.drawString(text, 600, 300);
+            }            
+            if (codigoTerminado==1) {
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
@@ -769,6 +830,11 @@ class Character {
     public int angulo = 0;
     public boolean colisiona = true;
     public int numImagen = 0;
+    public boolean cazado = false;
+    
+    //setea otro caracter para que lo siga con el movimiento
+    public Character follow;
+    
     //caché de imágenes
     private static HashMap<String, Image> imagenes = new HashMap<String, Image>();
 
