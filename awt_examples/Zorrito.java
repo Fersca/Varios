@@ -2,7 +2,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
@@ -27,7 +26,6 @@ import java.awt.MouseInfo;
 import java.awt.PointerInfo;
 import java.awt.Point;
 
-
 public class Zorrito {
 
     //Juego -- Contiene los parámetros del juego (vidas, timers, etc)
@@ -40,9 +38,11 @@ public class Zorrito {
         this.juego = new Juego();
 
         //Crea el display y lo setea al juego
-        this.display = new Display(buffer, juego);
+        this.display = new Display(juego);
+        
+        //linkea el display al juego
         this.juego.setDisplay(this.display);
-
+        
         //carga la cantidad de malos
         this.juego.cantidadMalos = cantMalos;
         
@@ -75,7 +75,6 @@ public class Zorrito {
             -----------
 
             -help       : Muestra esta ayuda en pantalla
-            -buffer     : No usa el buffer de imágenes
             -size       : indica la cantidad de pájaros. Ej: -size:25
             -no-centrar : No centra al personaje en la pantalla
 
@@ -89,18 +88,12 @@ public class Zorrito {
         //Verifica si se pidió sin buffer
         boolean conBuffer = true;
         //cantidad de pajaros
-        int size =2;
+        int size =20;
         //no centra al personaje
         boolean centrar =true;
 
         //recorre los parámetros
         for (String s : args) {
-
-            //verifica si viene sin buffer
-            if ("-buffer".equals(s)){
-                conBuffer = false;
-                System.out.println("No usa el buffer de imágenes");
-            }
 
             //verifica si viene sin buffer
             if ("-no-centrar".equals(s)){
@@ -132,11 +125,13 @@ class Juego {
     
     //Variable que indica si terminó el juego
     boolean terminado = false;
-
+    
     // Timer para mover la imagen cada N milisegundos
     Timer timer = new Timer();
 
     Display display;
+    
+    private int delay = 50;
 
     public void setDisplay(Display d){
         this.display = d;
@@ -144,7 +139,7 @@ class Juego {
 
     public void comenzar(){
         //comienza el timer del juego
-        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, 50);
+        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, delay);
 
     }
 
@@ -346,7 +341,6 @@ class Juego {
                 principal.setColision(colisionPrincipal);
 
                 // Le avisa al display que hay que repintar
-                display.ddraw();
                 //display.doRepaint();
 
                 //si queda solo la jaula, corta el timer
@@ -354,6 +348,9 @@ class Juego {
                     timer.cancel();
                     terminado = true;
                 }
+                
+                //manda a dibujar con buffer
+                display.bufferedDraw();
             }
         };        
     }
@@ -520,7 +517,7 @@ class Juego {
         //Cancela el timer y comienza de nuevo otro.
         timer.cancel();
         timer = new Timer();
-        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, 50);
+        timer.scheduleAtFixedRate(comienzaJuego(timer), 0, delay);
 
     }
 
@@ -529,18 +526,13 @@ class Juego {
 class Display extends Frame {
 
     //Canvas para dibujar el juego
-    private final MyCanvas canvas = new MyCanvas(this);
-
-    private boolean imageWithBuffer = true;
+    private final MyCanvas canvas;
 
     private final Juego juego;
     
     public Function<Void, Boolean> terminadoFunc;
     
-    public void doRepaint(){
-        this.canvas.repaint();
-    }
-    public void ddraw(){
+    public void bufferedDraw(){
         this.canvas.draw();
     }
 
@@ -561,17 +553,30 @@ class Display extends Frame {
 
     }
 
-    public Display(boolean imageWithBuffer, Juego juego){
+    public Display(Juego juego){
         super("Zorrito 1.0");
         //setUndecorated(true); // Elimina los bordes y barra de título
-        setBackground(Color.BLACK);      
-        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.  
-    
-        add(this.canvas);
-        setSize(1440, 875);
-        setVisible(true);
+
+        //crea el canvas
+        this.canvas = new MyCanvas(this);
         
-        this.imageWithBuffer = imageWithBuffer;
+        setBackground(Color.BLACK);      
+        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.         
+        //setSize(1440, 875);        
+        add(this.canvas);        
+        setVisible(true);
+
+        //setea el ícono
+        setIconImage(Toolkit.getDefaultToolkit().getImage("zorro.png"));
+        
+        //Espera medio segundo a que se maximize la pantalla.
+        //para que los getWidth y los getHeigth tomen el valor correcto.
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+                
         this.juego = juego;        
                                
         //Listener para las teclas
@@ -632,38 +637,9 @@ class Display extends Frame {
             g2d.drawImage(imgTemp, drawFromCenter?-(newWidth/2):0, drawFromCenter?-(newHeight/2):0, newWidth, newHeight, this);
             
         };
-        
-        /*
-        @Override
-        public void update(Graphics g) {
-            paint(g);
-        }
-        */
-        
-        int count = 0;
-        public void draw() {
-            // Obtén la BufferStrategy actual del Canvas
-            BufferStrategy bs = getBufferStrategy();
-            if (bs == null) {
-                createBufferStrategy(2); // Crea una estrategia de doble buffer
-                return;
-            }
+                
+        private void drawElementosComunes(Graphics2D g){
 
-            // Obtén el objeto Graphics para dibujar en el búfer
-            Graphics2D g = (Graphics2D) bs.getDrawGraphics();
-
-            // Aplicar anti-aliasing para suavizar las líneas y el texto
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            // Mejorar la calidad del renderizado
-            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-            // Mejorar la calidad del texto
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-
-            g.setColor(Color.BLACK);            
-            g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
-            
             //Dibuja los personajes
             for (Character c : this.rootDisplay.juego.personajes){
                 if (c.img!=null){      
@@ -709,125 +685,50 @@ class Display extends Frame {
 
             //Chequea si el juego está termiando mediante la función enviada. (desacoplata)            
             boolean termino = terminadoFunc.apply(null);
-            System.out.println("termino: "+termino+ " - "+count);
-            count++;
             if (termino) {
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
                 text = "¡¡GANO!!";
-                System.out.println("GANO!!!!"  + count);
                 g.drawString(text, 600, 300);
             } 
 
+            
+        }
+        public void draw() {
+                                    
+            // Obtén la BufferStrategy actual del Canvas
+            BufferStrategy bs = getBufferStrategy();
+            if (bs == null) {
+                createBufferStrategy(2); // Crea una estrategia de doble buffer
+                return;
+            }
+
+            // Obtén el objeto Graphics para dibujar en el búfer
+            Graphics2D g = (Graphics2D) bs.getDrawGraphics();
+
+            // Aplicar anti-aliasing para suavizar las líneas y el texto
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Mejorar la calidad del renderizado
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+            // Mejorar la calidad del texto
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+            g.setColor(Color.BLACK);            
+            g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
+            
+            //Muestra los elementos comunes (que van con buffer o no)
+            drawElementosComunes(g);
+            
             g.dispose(); // Liberar los recursos del Graphics
             bs.show(); // Mostrar el contenido del buffer    
             
             // Asegúrate de que la operación de dibujo se completa
             Toolkit.getDefaultToolkit().sync();
         }        
-        
-        
-        @Override        
-        public void paint(Graphics gOrigin) {
-
-            BufferStrategy bs=null;
-            Graphics2D g;
-
-            if (imageWithBuffer){
-                // Asegurarse de que exista una BufferStrategy
-                if (getBufferStrategy() == null) {
-                    createBufferStrategy(2); // Crea una estrategia de doble buffer
-                }
-
-                bs = getBufferStrategy();
                 
-                g = (Graphics2D) bs.getDrawGraphics();
-                
-                /* Saco eso para ponerlo en una sola instrucción de arriba
-                gOrigin = bs.getDrawGraphics();
-                g = (Graphics2D) gOrigin;
-                */
-               
-                //TODO: Lo saqué y no pasó nada, hay que ver para que sirve
-                //g = (Graphics2D) g.create();
-                
-                // Aplicar anti-aliasing para suavizar las líneas y el texto
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-                // Mejorar la calidad del renderizado
-                g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        
-                // Mejorar la calidad del texto
-                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-                            
-                g.setColor(Color.BLACK);            
-                g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
-                
-            } else {
-                g = (Graphics2D) gOrigin;                
-            }
-
-            //Dibuja los personajes
-            for (Character c : this.rootDisplay.juego.personajes){
-                if (c.img!=null){      
-                                        
-                    //Repinta el personaje
-                    drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
-                    
-                }
-            }
-
-            //vuelve a centrar el centro el 0,0
-            AffineTransform tx = new AffineTransform();        
-            tx.translate(0, 0); // Traslación        
-            g.setTransform(tx);    
-        
-            // Define la fuente del texto
-            g.setFont(new Font("SansSerif", Font.BOLD, 20));
-
-            String text;
-            if (this.rootDisplay.juego.principal.colisionado){
-                // Define el color del texto
-                g.setColor(Color.RED);
-                // Dibuja el texto en el Canvas
-                text = "Status: COME";
-
-            } else {
-                // Define el color del texto
-                g.setColor(Color.WHITE);
-                // Dibuja el texto en el Canvas
-                text = "Status: CAZANDO ";
-            }
-            
-            //imprime el status
-            g.drawString(text, 50, 50);
-
-            //imprime el cronómetro
-            g.setColor(Color.WHITE);
-            g.drawString(obtenerCronometro(), 700, 50);           
-
-            //imprime el zoom
-            String printZoom = String.format("%.2f", this.rootDisplay.juego.zoom);
-            g.drawString("Zoom: "+printZoom+"x", 900, 50);            
-
-            //Chequea si el juego está termiando mediante la función enviada. (desacoplata)
-            if (terminadoFunc.apply(null)) {
-                // Define la fuente del texto
-                g.setFont(new Font("SansSerif", Font.BOLD, 100));
-                g.setColor(Color.YELLOW);
-                text = "¡¡GANO!!";
-                g.drawString(text, 600, 300);
-            }
-
-            //libera los recursos
-            if (imageWithBuffer){
-                g.dispose(); // Liberar los recursos del Graphics
-                bs.show(); // Mostrar el contenido del buffer    
-            }
-
-        }
-
         private String obtenerCronometro() {
             long tiempoActual = System.currentTimeMillis();
             long diff = tiempoActual-this.rootDisplay.juego.initTimeMillis;
