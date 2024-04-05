@@ -1,3 +1,4 @@
+import java.awt.AWTException;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
@@ -26,16 +27,37 @@ import java.awt.MouseInfo;
 import java.awt.PointerInfo;
 import java.awt.Point;
 
+//Para la captura de pantalla
+import javax.imageio.ImageIO;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+//Para la pantalla completa
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsDevice;
+
+
 public class Zorrito {
 
     //Juego -- Contiene los parámetros del juego (vidas, timers, etc)
     Juego juego;
     Display display;
 
-    public Zorrito(boolean buffer, int cantMalos, boolean centrar) {
+    public Zorrito(boolean buffer, int cantMalos, boolean centrar, boolean sinFondo) {
 
         //Crea los objetos del juego.
         this.juego = new Juego();
+        
+        //Setea la variable de fondo invicible
+        this.juego.sinFondo = sinFondo;
+
+        if (sinFondo){
+            //captura la pantalla
+            capturaPantalla();            
+        }
 
         //Crea el display y lo setea al juego
         this.display = new Display(juego);
@@ -65,7 +87,7 @@ public class Zorrito {
         
         //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
         System.setProperty("sun.java2d.uiScale", "1");
-        System.out.println("Inicia Zorrito 1.1");
+        System.out.println("Inicia Zorrito 1.0");
 
         //Chequea si se pidió la ayuda
         if(args.length>0 && "-help".equals(args[0])) {
@@ -77,6 +99,7 @@ public class Zorrito {
             -help       : Muestra esta ayuda en pantalla
             -size       : indica la cantidad de pájaros. Ej: -size:25
             -no-centrar : No centra al personaje en la pantalla
+            -sin-fondo  : El juego se da sobre la pantalla actual
 
             """;
 
@@ -91,7 +114,9 @@ public class Zorrito {
         int size =20;
         //no centra al personaje
         boolean centrar =true;
-
+        //setea el efecto de fondo invicible
+        boolean sinFondo =false;
+                
         //recorre los parámetros
         for (String s : args) {
 
@@ -107,11 +132,42 @@ public class Zorrito {
                 size = Integer.parseInt(partes[1]);
                 System.out.println("Enemigos: "+size);
             }
-                
-            
+
+            //Verifica que se haya pedido sin fondo
+            if ("-sin-fondo".equals(s)){
+                sinFondo = true;
+                System.out.println("Se pone fondo invicible");
+            }
+                                    
         }
                 
-        new Zorrito(conBuffer, size, centrar);
+        new Zorrito(conBuffer, size, centrar, sinFondo);
+
+    }
+    
+    private void capturaPantalla(){
+        
+        // Crea el objeto Robot.
+        Robot robot = null;
+        try {
+            robot = new Robot();
+        } catch (AWTException ex) {
+            ex.printStackTrace();
+            return;
+        }
+
+        // Determina el tamaño de la pantalla.
+        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+
+        // Captura la imagen de la pantalla.
+        BufferedImage screenFullImage = robot.createScreenCapture(screenRect);
+
+        try {
+            // Guarda la captura de pantalla en un archivo.
+            ImageIO.write(screenFullImage, "PNG", new File("screenshot.png"));
+        } catch (IOException ex) {           
+            ex.printStackTrace();
+        }
 
     }
 }
@@ -123,6 +179,9 @@ class Juego {
 
     //Centrar personaje
     public boolean centrar;
+
+    //Centrar personaje
+    public boolean sinFondo;
     
     //Variable que indica si terminó el juego
     //0 - andando, 1 - Ganó, 2 - Cazado
@@ -279,7 +338,13 @@ class Juego {
         jaula.colisiona = false;
 
         //Crea el mapa
-        Character bosque = new Character("Bosque","bosque.png",1,movimientoNulo);
+        Character bosque;
+        if (sinFondo){
+            bosque = new Character("Bosque","screenshot.png",1,movimientoNulo);            
+        } else {
+            bosque = new Character("Bosque","bosque.png",1,movimientoNulo);            
+        }        
+        
         bosque.x = 0;
         bosque.y = 0;
         bosque.drawFromCenter=false;
@@ -292,8 +357,8 @@ class Juego {
         Character aguila = new Character("Aguila","aguila.png",5,movimientoCazar);
         aguila.x = display.getWidth();
         aguila.y = 0;
-        aguila.velocidadX = 1;
-        aguila.velocidadY = 1;
+        aguila.velocidadX = 2;
+        aguila.velocidadY = 2;
         
         aguila.follow = zorrito;
         
@@ -609,8 +674,24 @@ class Display extends Frame {
 
     public Display(Juego juego){
         super("Zorrito 1.0");
-        //setUndecorated(true); // Elimina los bordes y barra de título
 
+        if (juego.sinFondo){
+
+            // Obtiene el entorno gráfico y el dispositivo gráfico predeterminados.
+            GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice device = env.getDefaultScreenDevice();
+
+            // Intenta establecer el modo de pantalla completa.
+            if (device.isFullScreenSupported()) {
+                // Oculta la barra de título y otros elementos de la ventana.
+                //setUndecorated(true);
+
+                // Activa el modo de pantalla completa.
+                device.setFullScreenWindow(this);
+            }         
+                    
+        }
+        
         //crea el canvas
         this.canvas = new MyCanvas(this);
         
@@ -625,12 +706,15 @@ class Display extends Frame {
         
         //Espera medio segundo a que se maximize la pantalla.
         //para que los getWidth y los getHeigth tomen el valor correcto.
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+        //Solo si no usa fondo invicible, sino no hace falta        
+        if (!juego.sinFondo){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }            
         }
-                
+                        
         this.juego = juego;        
                                
         //Listener para las teclas
@@ -893,7 +977,7 @@ class Character {
     public Image getImagen(){
         
         //Cambia la imagen si está colisionado
-        Image imgTemp=null;
+        Image imgTemp;
         if (colisionado){
             //pongo este if porque sino aparece un cuadrado negro porque no carga
             //la imagen de colisión si no la tiene.
