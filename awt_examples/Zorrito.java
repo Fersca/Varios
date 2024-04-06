@@ -46,12 +46,12 @@ public class Zorrito {
     Juego juego;
     Display display;
 
-    public Zorrito(boolean buffer, int cantMalos, boolean centrar, boolean sinFondo) {
+    public Zorrito(boolean buffer, int cantMalos, boolean centrar, boolean sinFondo, int aguilas) {
 
         //Crea los objetos del juego.
         this.juego = new Juego();
         
-        //Setea la variable de fondo invicible
+        //Setea la variable de fondo invisible
         this.juego.sinFondo = sinFondo;
 
         if (sinFondo){
@@ -65,8 +65,11 @@ public class Zorrito {
         //linkea el display al juego
         this.juego.setDisplay(this.display);
         
-        //carga la cantidad de malos
+        //carga la cantidad de pajaros
         this.juego.cantidadMalos = cantMalos;
+
+        //carga la cantidad de aguilas
+        this.juego.cantidadAguilas = aguilas;
         
         //setea si el personaje se centra o no
         this.juego.centrar = centrar;
@@ -88,16 +91,16 @@ public class Zorrito {
         //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
         System.setProperty("sun.java2d.uiScale", "1");
         System.out.println("Inicia Zorrito 1.0");
+        System.out.println("------------------");
+        System.out.println("");
 
         //Chequea si se pidió la ayuda
         if(args.length>0 && "-help".equals(args[0])) {
 
             String ayuda = """
-            Zorrito 1.0
-            -----------
-
             -help       : Muestra esta ayuda en pantalla
-            -size       : indica la cantidad de pájaros. Ej: -size:25
+            -pajaros    : Indica la cantidad de pájaros. Ej: -pajaros:25
+            -aguilas    : Indica la cantidad de enemigos. Ej: -aguilas:10
             -no-centrar : No centra al personaje en la pantalla
             -sin-fondo  : El juego se da sobre la pantalla actual
 
@@ -112,9 +115,11 @@ public class Zorrito {
         boolean conBuffer = true;
         //cantidad de pajaros
         int size =20;
+        //cantidad de aguilas
+        int aguilas=0;
         //no centra al personaje
         boolean centrar =true;
-        //setea el efecto de fondo invicible
+        //setea el efecto de fondo invisible
         boolean sinFondo =false;
                 
         //recorre los parámetros
@@ -123,25 +128,32 @@ public class Zorrito {
             //verifica si viene sin buffer
             if ("-no-centrar".equals(s)){
                 centrar = false;
-                System.out.println("No centra al personaje");
+                System.out.println("- Personaje no centrado");
             }
            
-            //verifica si viene con size
-            if (s.contains("-size:")){
+            //verifica si viene con pajaros customs
+            if (s.contains("-pajaros:")){
                 String[] partes = s.split(":");
                 size = Integer.parseInt(partes[1]);
-                System.out.println("Enemigos: "+size);
+                System.out.println("- Pajaros: "+size);
             }
+
+            //verifica si viene con pajaros customs
+            if (s.contains("-aguilas:")){
+                String[] partes = s.split(":");
+                aguilas = Integer.parseInt(partes[1]);
+                System.out.println("- Aguilas: "+aguilas);
+            }            
 
             //Verifica que se haya pedido sin fondo
             if ("-sin-fondo".equals(s)){
                 sinFondo = true;
-                System.out.println("Se pone fondo invicible");
+                System.out.println("- Fondo invisible");
             }
                                     
         }
                 
-        new Zorrito(conBuffer, size, centrar, sinFondo);
+        new Zorrito(conBuffer, size, centrar, sinFondo, aguilas-1);
 
     }
     
@@ -176,6 +188,9 @@ class Juego {
     
     //Cantidad de malos
     public int cantidadMalos;
+
+    //Cantidad de aguilas
+    public int cantidadAguilas;
 
     //Centrar personaje
     public boolean centrar;
@@ -367,19 +382,28 @@ class Juego {
         bosque.fixed_witdh=display.getWidth();
         bosque.fixed_heigth=display.getHeight();
         bosque.colisiona = false;
+        personajesCreados.add(bosque);
 
         //crea el aguila, la pone arriba a la derecha
         Character aguila = new Character("Aguila","aguila.png",7,movimientoCazar);
         aguila.x = display.getWidth();
         aguila.y = 0;
         aguila.velocidadX = 2;
-        aguila.velocidadY = 2;
-        
+        aguila.velocidadY = 2;        
         aguila.follow = zorrito;
-        
-        
+          
+        Random random = new Random();
+        for (int i=0; i<cantidadAguilas;i++){
+            Character enemy = new Character("Aguila"+i,"aguila.png",7,movimientoCazar);
+            enemy.x = random.nextInt(display.getWidth());
+            enemy.y = random.nextInt(display.getHeight());
+            enemy.velocidadX = 2;
+            enemy.velocidadY = 2;        
+            enemy.follow = zorrito;
+            personajesCreados.add(enemy);    
+        }
+
         //agrega los personajes a la lista
-        personajesCreados.add(bosque);
         personajesCreados.add(zorrito);
         personajesCreados.add(aguila);
 
@@ -800,7 +824,7 @@ class Display extends Frame {
         
         //Espera medio segundo a que se maximize la pantalla.
         //para que los getWidth y los getHeigth tomen el valor correcto.
-        //Solo si no usa fondo invicible, sino no hace falta        
+        //Solo si no usa fondo invisible, sino no hace falta        
         if (!juego.sinFondo){
             try {
                 Thread.sleep(500);
