@@ -325,7 +325,22 @@ class Juego {
         ArrayList<Character> personajesCreados = new ArrayList<Character>();
 
         //crea los personajes
-        Character zorrito = new Character("Zorrito","zorro.png",20,movimientoNulo);
+        //Character zorrito = new Character("Zorrito","zorro.png",20,movimientoNulo);
+        Character zorrito = new Character("Zorrito","sprites.png",10,movimientoNulo);
+        
+        //Configuración de los sprites
+        zorrito.hasSprites = true;
+        //zorrito.spritesArray = new ArrayList<Character.Sprite>();
+        zorrito.spritesArray = new Character.Sprite[8];        
+        zorrito.spritesArray[0] = zorrito.new Sprite(0, 0, 1098/2, 1932/4);
+        zorrito.spritesArray[1] = zorrito.new Sprite(0, 1932/4, 1098/2, 1932/4);
+        zorrito.spritesArray[2] = zorrito.new Sprite(0, 1932/2, 1098/2, 1932/4);
+        zorrito.spritesArray[3] = zorrito.new Sprite(0, (1932/4)*3, 1098/2, 1932/4);
+        zorrito.spritesArray[4] = zorrito.new Sprite(1098/2, 0, 1098/2, 1932/4);
+        zorrito.spritesArray[5] = zorrito.new Sprite(1098/2, 1932/4, 1098/2, 1932/4);
+        zorrito.spritesArray[6] = zorrito.new Sprite(1098/2, 1932/2, 1098/2, 1932/4);
+        zorrito.spritesArray[7] = zorrito.new Sprite(1098/2, (1932/4)*3, 1098/2, 1932/4);
+                              
         zorrito.x = display.getWidth() / 2;
         zorrito.y = display.getHeight() / 2;
         
@@ -354,7 +369,7 @@ class Juego {
         bosque.colisiona = false;
 
         //crea el aguila, la pone arriba a la derecha
-        Character aguila = new Character("Aguila","aguila.png",5,movimientoCazar);
+        Character aguila = new Character("Aguila","aguila.png",7,movimientoCazar);
         aguila.x = display.getWidth();
         aguila.y = 0;
         aguila.velocidadX = 2;
@@ -474,42 +489,88 @@ class Juego {
         };        
     }
 
-    private void mueveSegunMouse(int x, int y){                        
+    private void mueveSegunMouse(int x, int y){
+
+        // Si hay una tecla presionada sigue la orden del teclado por sobre el mouse        
+        if (!pressedKeys.isEmpty())
+            return;
+        
+        double px = (general_x+principal.centroX)*zoom;
+        double py = (general_y+principal.centroY)*zoom;
+        
+        double opuesto=0;
+        double adyacente=0;
+        double sumar=0;
                 
-        if ( (y<(display.getHeight()/7)*3) && (x<(display.getWidth()/7)*3) ) {
-            mueveArribaIzquierda();
+        //Calcula el cuadrante en el cual está el mouse
+        int cuadrante=0;
+        if (px < x & py < y){
+            cuadrante=3;
+            opuesto = y-py;
+            adyacente = x-px;                       
+            sumar = 90;
+        }            
+        if (px > x & py < y){
+            cuadrante=4;
+            opuesto = px-x;
+            adyacente = y-py;                       
+            sumar = 180;
+        }            
+        if (px < x & py > y){
+            cuadrante=2;
+            opuesto = x-px;
+            adyacente = py-y;            
+            sumar = 0;
+        }            
+        if (px > x & py > y){
+            cuadrante=1;
+            opuesto = py-y;
+            adyacente = px-x;
+            sumar = 270;
+        }
+         
+        //Si el mouse está muy sobre el personaje, no lo mueve
+        if (opuesto < 50 && adyacente < 50){
+            noMueve();
             return;
         }
-        if ( (y<(display.getHeight()/7)*3) && (x>(display.getWidth()/7)*4) ) {
+        
+        //para evitar la division por cero
+        if (adyacente==0)
+            adyacente = 1;
+                       
+        double tangente = opuesto/adyacente;
+        double angulo = Math.toDegrees(Math.atan(tangente));                                       
+        angulo = angulo + sumar;                    
+        
+        //ver para donde hay que mover:
+        if (angulo > 22.5 && angulo < 67.5 ){
             mueveArribaDerecha();
-            return;
-        }
-        if ( (y>(display.getHeight()/7)*4) && (x<(display.getWidth()/7)*3) ) {
-            mueveAbajoIzquierda();
-            return;
-        }
-        if ( (y>(display.getHeight()/7)*4) && (x>(display.getWidth()/7)*4) ) {
-            mueveAbajoDerecha();
-            return;
-        }                
-        if (y<(display.getHeight()/7)*3){
-            mueveArriba();
-            return;
-        }
-        if (y>(display.getHeight()/7)*4){
-            mueveAbajo();
-            return;
-        }
-        if (x<(display.getWidth()/7)*3){
-            mueveIzquierda();
-            return;
-        }
-        if (x>(display.getWidth()/7)*4){
+        } else if (angulo > 67.5 && angulo < 112.5 ){
             mueveDerecha();
-            return;
-        }
-                
+        } else if (angulo > 112.5 && angulo < 157.5 ){            
+            mueveAbajoDerecha();
+        } else if (angulo > 157.5 && angulo < 202.5 ){            
+            mueveAbajo();
+        } else if (angulo > 202.5 && angulo < 247.5 ){            
+            mueveAbajoIzquierda();
+        } else if (angulo > 247.5 && angulo < 292.5 ){
+            mueveIzquierda();
+        } else if (angulo > 292.5 && angulo < 337.5 ){
+            mueveArribaIzquierda();
+        } else if (angulo > 337.5 || angulo < 22.5 ){
+            mueveArriba();
+        }            
+        
+        //System.out.println("Cuadrante: "+cuadrante + " x: "+x+" y :"+y+ " opuesto: "+opuesto + " adyacente: "+adyacente+" angulo: "+angulo);
+        
     }
+       
+    private void noMueve(){
+        principal.avanzando_x = "quieto";
+        principal.avanzando_y = "quieto";
+    }
+    
     private void mueveArribaIzquierda(){
         if (centrar){
             general_x  += 4;
@@ -518,7 +579,12 @@ class Juego {
 
         principal.x -= 4;
         principal.y -= 4;        
-    }
+        
+        principal.avanzando_x = "izquierda";
+        principal.avanzando_y = "arriba";
+        
+    }    
+    
     private void mueveAbajoDerecha(){    
         if (centrar){
             general_x  -= 4;
@@ -527,6 +593,10 @@ class Juego {
 
         principal.x += 4;
         principal.y += 4;        
+
+        principal.avanzando_x = "derecha";
+        principal.avanzando_y = "abajo";
+        
     }
     private void mueveArribaDerecha(){    
         if (centrar){
@@ -536,6 +606,10 @@ class Juego {
 
         principal.x += 4;
         principal.y -= 4;        
+
+        principal.avanzando_x = "derecha";
+        principal.avanzando_y = "arriba";
+        
     }
     private void mueveAbajoIzquierda(){   
         if (centrar){            
@@ -545,6 +619,10 @@ class Juego {
 
         principal.x -= 4;
         principal.y += 4;        
+
+        principal.avanzando_x = "izquierda";
+        principal.avanzando_y = "abajo";
+        
     }
     private void mueveIzquierda(){   
         if (centrar){            
@@ -552,6 +630,10 @@ class Juego {
         }
 
         principal.x -= 6;        
+        
+        principal.avanzando_x = "izquierda";
+        principal.avanzando_y = "quieto";
+        
     }
     private void mueveDerecha(){   
         if (centrar){
@@ -559,6 +641,10 @@ class Juego {
         }
 
         principal.x += 6;        
+
+        principal.avanzando_x = "derecha";
+        principal.avanzando_y = "quieto";
+        
     }
     private void mueveArriba(){   
         if (centrar){            
@@ -566,6 +652,10 @@ class Juego {
         }
 
         principal.y -= 6;        
+        
+        principal.avanzando_x = "quieto";
+        principal.avanzando_y = "arriba";
+        
     }
     private void mueveAbajo(){   
         if (centrar){
@@ -573,6 +663,10 @@ class Juego {
         }
 
         principal.y += 6;        
+
+        principal.avanzando_x = "quieto";
+        principal.avanzando_y = "abajo";
+        
     }
     
     //Ejecuta una acción en base a la tecla que se haya presionado
@@ -750,7 +844,7 @@ class Display extends Frame {
 
         Display rootDisplay;
         
-        private void drawImageCanvas(boolean drawFromCenter, Image imgTemp, int centroX, int centroY, int angulo, int newWidth, int newHeight, Graphics2D g2d, double zoom, int general_x, int general_y){
+        private void drawImageCanvas(boolean drawFromCenter, Image imgTemp, int centroX, int centroY, int angulo, int newWidth, int newHeight, Graphics2D g2d, double zoom, int general_x, int general_y, int radio){
 
 
             //Crea el objeto para aplicar los efectos
@@ -768,11 +862,17 @@ class Display extends Frame {
             //Aplica la transformación
             g2d.setTransform(tx);    
 
-            // Dibuja la imagen en la nueva posición
+            //Dibuja la imagen en la nueva posición
             //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
             //a dibujar es el 0,0 entonces no lo dibujaba centrado, y cuando rotaba lo hacías desde la
             //punta, la variable drawFromCenter es para indicar eso.
             g2d.drawImage(imgTemp, drawFromCenter?-(newWidth/2):0, drawFromCenter?-(newHeight/2):0, newWidth, newHeight, this);
+            
+            //dibuja un circulo alrededor (para debug)
+            /*
+            g2d.setColor(Color.WHITE);                        
+            g2d.drawOval(-radio, -radio, radio*2, radio*2);            
+            */
             
         };
                 
@@ -783,8 +883,8 @@ class Display extends Frame {
                 if (c.img!=null){      
                                         
                     //Repinta el personaje
-                    drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y);
-                    
+                    drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y, c.radio);
+                                        
                 }
             }
             
@@ -906,22 +1006,33 @@ class Character {
     public int centroY;
     public int radio=0;
     public boolean colisionado;
-    public String avanzando_x = "derecha";
-    public String avanzando_y = "abajo";
+    public String avanzando_x = "derecha";  //derecha, izquierda, quieto
+    public String avanzando_y = "abajo";    //arriba, abajo, quieto
     public int velocidadX = 1;
     public int velocidadY = 1;
     public int rotaAngulo = 0;
     public int angulo = 0;
     public boolean colisiona = true;
     public int numImagen = 0;
-    public boolean cazado = false;
-    
+    public boolean cazado = false;    
+    public boolean hasSprites = false;
+    private int spritesIndex = 0;
+    public Sprite[] spritesArray;
+    //public ArrayList<Sprite> spritesArray;
+            
     //setea otro caracter para que lo siga con el movimiento
     public Character follow;
     
     //caché de imágenes
     private static HashMap<String, Image> imagenes = new HashMap<String, Image>();
 
+    class Sprite {
+        int x, y, w, h;
+        public Sprite (int x, int y, int w, int h){
+            this.x=x; this.y = y; this.w = w; this.h = h;
+        }
+        
+    }
     public Character(String name, String imageFile, int scale, Function<Character, Void> movimientoPersonaje){
 
         //chequea en el caché de imágenes
@@ -943,7 +1054,7 @@ class Character {
         this.colisionado = colision;
         
         //Si está colisionado lo hace girar
-        if (colision){
+        if (colision & !name.equals("Zorrito")){
             this.rotaAngulo = 5;
         } else {
             this.rotaAngulo = 0;
@@ -999,8 +1110,78 @@ class Character {
                 imgTemp = img;
         }
 
-        return imgTemp;
+        //Si la imagen viene con sprites la recorta
+        if (hasSprites){
+
+            Image croppedImage;
+            
+            //Verifica si se está moviendo sino devuelve la imagen de que está parado
+            if (this.avanzando_x.equals("quieto") && this.avanzando_y.equals("quieto")){
+                Sprite s = spritesArray[0];                
+                croppedImage = cropImage(imgTemp, s.x, s.y, s.w, s.h);
+                spritesIndex = 1;
+            } else {
+                
+                Sprite s = spritesArray[spritesIndex];
+                croppedImage = cropImage(imgTemp, s.x, s.y, s.w, s.h);
+
+                //cicla el contador de la imagen
+                spritesIndex++;
+                if (spritesIndex==spritesArray.length) spritesIndex = 0;
+                
+            }
+                        
+            return croppedImage;
+            
+        } else {
+            return imgTemp;
+        }               
+
     }
+    
+    public BufferedImage espejarImagen(BufferedImage img) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+
+        // Crear una nueva BufferedImage para la imagen espejada
+        BufferedImage espejada = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        // Configurar la transformación para el efecto espejo
+        AffineTransform at = AffineTransform.getScaleInstance(-1, 1);
+        at.translate(-width, 0);
+
+        // Dibujar la imagen original espejada en la nueva BufferedImage
+        Graphics2D g2d = espejada.createGraphics();
+        g2d.transform(at);
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+
+        return espejada;
+    }    
+   
+    private BufferedImage toBufferedImage(Image img) {
+        if (img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
+
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        return bimage;
+    }
+
+    private Image cropImage(Image img, int x, int y, int width, int height) {
+        BufferedImage bimg = toBufferedImage(img);
+        BufferedImage subImg = bimg.getSubimage(x, y, width, height);
+        
+        //espeja la imagen si el personaje está yendo para la izequierda
+        if (avanzando_x.equals("izquierda"))
+            return espejarImagen(subImg);
+        else 
+            return subImg;
+    }    
     
     //Ejecuta la función de movimiento sobre el personaje
     public void seMueve(){
@@ -1028,22 +1209,26 @@ class Character {
         }
     };
 
-    //Verifica si hay una colisión entre los dos objetos
+    /**
+     * Verifica si hay una colisión entre los dos objetos
+     * Calcula la distancia entre los centros de cada objeto
+     * Valida que la distancia sea menor que la suma de sus radios
+     * */
     public boolean verificaColision(Character c){
 
         //si no colisiona, como la jaula, sale así no lo rota.
         if (!c.colisiona) return false;
         
         //Calcula los lados del triángulo
-        int lado1 = this.x-c.x;
-        int lado2 = this.y-c.y;
+        int lado1 = this.centroX-c.centroX;
+        int lado2 = this.centroY-c.centroY;
 
         //da vuelta los valores si son negativos
         if (lado1<0)
-            lado1 = c.x-this.x;
-
+            lado1 = c.centroX-this.centroX;
+        
         if (lado2<0)
-            lado2 = c.y-this.y;
+            lado2 = c.centroY-this.centroY;
 
         //calcula la hipotenusa
         double distancia = Math.sqrt(lado1*lado1 + lado2*lado2);  
