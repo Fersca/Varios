@@ -184,8 +184,13 @@ public class Zorrito {
     }
 }
 
+enum Direccion {
+    Derecha, Izquierda, Arriba, Abajo, Quieto
+}
+
+
 class Juego {
-    
+        
     //Cantidad de malos
     public int cantidadMalos;
 
@@ -260,13 +265,13 @@ class Juego {
         }
 
         //avanza al personaje
-        if ("derecha".equals(c.avanzando_x))
+        if (Direccion.Derecha == c.avanzando_x)
             c.x = c.x+c.velocidadX;
-        if ("izquierda".equals(c.avanzando_x))
+        if (Direccion.Izquierda == c.avanzando_x)
             c.x = c.x-c.velocidadX;
-        if ("abajo".equals(c.avanzando_y))
+        if (Direccion.Abajo == c.avanzando_y)
             c.y = c.y+c.velocidadY;
-        if ("arriba".equals(c.avanzando_y))
+        if (Direccion.Arriba == c.avanzando_y)
             c.y = c.y-c.velocidadY;
 
         //calcula la dirección del movimiento
@@ -274,13 +279,13 @@ class Juego {
         int alto = display.getHeight();
 
         if (c.centroX>ancho)
-            c.avanzando_x="izquierda";
+            c.avanzando_x=Direccion.Izquierda;
         if (c.centroX<0)
-            c.avanzando_x="derecha";
+            c.avanzando_x=Direccion.Derecha;
         if (c.centroY>alto)
-            c.avanzando_y="arriba";
+            c.avanzando_y=Direccion.Arriba;
         if (c.centroY<0)
-            c.avanzando_y="abajo";
+            c.avanzando_y=Direccion.Abajo;
 
         //gira al personaje
         c.angulo = c.angulo + c.rotaAngulo;
@@ -424,8 +429,8 @@ class Juego {
 
         Random random = new Random();
         ArrayList<Character> enemigos = new ArrayList<Character>();
-        String[] movimientosArriba_Abajo = {"arriba","abajo"};
-        String[] movimientosIzquierda_Derecha = {"izquierda","derecha"};
+        Direccion[] movimientosArriba_Abajo = {Direccion.Arriba,Direccion.Abajo};
+        Direccion[] movimientosIzquierda_Derecha = {Direccion.Izquierda,Direccion.Derecha};
 
         for (int i=0;i<this.cantidadMalos;i++){
 
@@ -591,8 +596,8 @@ class Juego {
     }
        
     private void noMueve(){
-        principal.avanzando_x = "quieto";
-        principal.avanzando_y = "quieto";
+        principal.avanzando_x = Direccion.Quieto;
+        principal.avanzando_y = Direccion.Quieto;
     }
     
     private void mueveArribaIzquierda(){
@@ -604,8 +609,8 @@ class Juego {
         principal.x -= 4;
         principal.y -= 4;        
         
-        principal.avanzando_x = "izquierda";
-        principal.avanzando_y = "arriba";
+        principal.avanzando_x = Direccion.Izquierda;
+        principal.avanzando_y = Direccion.Arriba;
         
     }    
     
@@ -618,8 +623,8 @@ class Juego {
         principal.x += 4;
         principal.y += 4;        
 
-        principal.avanzando_x = "derecha";
-        principal.avanzando_y = "abajo";
+        principal.avanzando_x = Direccion.Derecha;
+        principal.avanzando_y = Direccion.Abajo;
         
     }
     private void mueveArribaDerecha(){    
@@ -631,8 +636,8 @@ class Juego {
         principal.x += 4;
         principal.y -= 4;        
 
-        principal.avanzando_x = "derecha";
-        principal.avanzando_y = "arriba";
+        principal.avanzando_x = Direccion.Derecha;
+        principal.avanzando_y = Direccion.Arriba;
         
     }
     private void mueveAbajoIzquierda(){   
@@ -644,8 +649,8 @@ class Juego {
         principal.x -= 4;
         principal.y += 4;        
 
-        principal.avanzando_x = "izquierda";
-        principal.avanzando_y = "abajo";
+        principal.avanzando_x = Direccion.Izquierda;
+        principal.avanzando_y = Direccion.Abajo;
         
     }
     private void mueveIzquierda(){   
@@ -655,8 +660,8 @@ class Juego {
 
         principal.x -= 6;        
         
-        principal.avanzando_x = "izquierda";
-        principal.avanzando_y = "quieto";
+        principal.avanzando_x = Direccion.Izquierda;
+        principal.avanzando_y = Direccion.Quieto;
         
     }
     private void mueveDerecha(){   
@@ -666,8 +671,8 @@ class Juego {
 
         principal.x += 6;        
 
-        principal.avanzando_x = "derecha";
-        principal.avanzando_y = "quieto";
+        principal.avanzando_x = Direccion.Derecha;
+        principal.avanzando_y = Direccion.Quieto;
         
     }
     private void mueveArriba(){   
@@ -677,8 +682,8 @@ class Juego {
 
         principal.y -= 6;        
         
-        principal.avanzando_x = "quieto";
-        principal.avanzando_y = "arriba";
+        principal.avanzando_x = Direccion.Quieto;
+        principal.avanzando_y = Direccion.Arriba;
         
     }
     private void mueveAbajo(){   
@@ -688,8 +693,8 @@ class Juego {
 
         principal.y += 6;        
 
-        principal.avanzando_x = "quieto";
-        principal.avanzando_y = "abajo";
+        principal.avanzando_x = Direccion.Quieto;
+        principal.avanzando_y = Direccion.Abajo;
         
     }
     
@@ -1032,8 +1037,8 @@ class Character {
     public int centroY;
     public int radio=0;
     public boolean colisionado;
-    public String avanzando_x = "derecha";  //derecha, izquierda, quieto
-    public String avanzando_y = "abajo";    //arriba, abajo, quieto
+    public Direccion avanzando_x = Direccion.Derecha;  //derecha, izquierda, quieto
+    public Direccion avanzando_y = Direccion.Abajo;    //arriba, abajo, quieto
     public int velocidadX = 1;
     public int velocidadY = 1;
     public int rotaAngulo = 0;
@@ -1146,7 +1151,7 @@ class Character {
             Image croppedImage;
             
             //Verifica si se está moviendo sino devuelve la imagen de que está parado
-            if (this.avanzando_x.equals("quieto") && this.avanzando_y.equals("quieto")){
+            if (this.avanzando_x == Direccion.Quieto && this.avanzando_y == Direccion.Quieto){
                 Sprite s = spritesArray[0];                
                 croppedImage = cropImage(imgTemp, s.x, s.y, s.w, s.h);
                 spritesIndex = 1;
@@ -1207,7 +1212,7 @@ class Character {
         BufferedImage subImg = bimg.getSubimage(x, y, width, height);
         
         //espeja la imagen si el personaje está yendo para la izequierda
-        if (avanzando_x.equals("izquierda"))
+        if (avanzando_x == Direccion.Izquierda)
             return espejarImagen(subImg);
         else 
             return subImg;
