@@ -347,14 +347,14 @@ class Juego {
         zorrito.hasSprites = true;
         //zorrito.spritesArray = new ArrayList<Character.Sprite>();
         zorrito.spritesArray = new Character.Sprite[8];        
-        zorrito.spritesArray[0] = zorrito.new Sprite(0, 0, 1098/2, 1932/4);
-        zorrito.spritesArray[1] = zorrito.new Sprite(0, 1932/4, 1098/2, 1932/4);
-        zorrito.spritesArray[2] = zorrito.new Sprite(0, 1932/2, 1098/2, 1932/4);
-        zorrito.spritesArray[3] = zorrito.new Sprite(0, (1932/4)*3, 1098/2, 1932/4);
-        zorrito.spritesArray[4] = zorrito.new Sprite(1098/2, 0, 1098/2, 1932/4);
-        zorrito.spritesArray[5] = zorrito.new Sprite(1098/2, 1932/4, 1098/2, 1932/4);
-        zorrito.spritesArray[6] = zorrito.new Sprite(1098/2, 1932/2, 1098/2, 1932/4);
-        zorrito.spritesArray[7] = zorrito.new Sprite(1098/2, (1932/4)*3, 1098/2, 1932/4);
+        zorrito.spritesArray[0] = new Character.Sprite(0, 0, 1098/2, 1932/4);
+        zorrito.spritesArray[1] = new Character.Sprite(0, 1932/4, 1098/2, 1932/4);
+        zorrito.spritesArray[2] = new Character.Sprite(0, 1932/2, 1098/2, 1932/4);
+        zorrito.spritesArray[3] = new Character.Sprite(0, (1932/4)*3, 1098/2, 1932/4);
+        zorrito.spritesArray[4] = new Character.Sprite(1098/2, 0, 1098/2, 1932/4);
+        zorrito.spritesArray[5] = new Character.Sprite(1098/2, 1932/4, 1098/2, 1932/4);
+        zorrito.spritesArray[6] = new Character.Sprite(1098/2, 1932/2, 1098/2, 1932/4);
+        zorrito.spritesArray[7] = new Character.Sprite(1098/2, (1932/4)*3, 1098/2, 1932/4);
                               
         zorrito.x = display.getWidth() / 2;
         zorrito.y = display.getHeight() / 2;
@@ -742,7 +742,8 @@ class Juego {
             resetJuego();
         } else if (pressedKeys.contains(KeyEvent.VK_Q) && pressedKeys.size()==1){
             timer.cancel();
-            System.exit(0);
+            System.out.println("End.");
+            System.exit(0);            
         }
     }
 
@@ -854,6 +855,7 @@ class Display extends Frame {
             @Override
             public void windowClosing(WindowEvent we) {
                 juego.timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
+                System.out.println("End.");
                 System.exit(0);
             }
         });
@@ -1050,6 +1052,9 @@ class Character {
     //caché de imágenes
     private static HashMap<String, Image> imagenes = new HashMap<String, Image>();
 
+    record Sprite(int x, int y, int w, int h){};
+    
+    /*
     class Sprite {
         int x, y, w, h;
         public Sprite (int x, int y, int w, int h){
@@ -1057,6 +1062,7 @@ class Character {
         }
         
     }
+    */
     public Character(String name, String imageFile, int scale, Function<Character, Void> movimientoPersonaje){
 
         //chequea en el caché de imágenes
