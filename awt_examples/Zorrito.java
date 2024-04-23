@@ -50,36 +50,36 @@ public class Zorrito {
 
         //Crea los objetos del juego.
         this.juego = new Juego();
-
+        
         //Setea la variable de fondo invisible
         this.juego.sinFondo = sinFondo;
 
         if (sinFondo){
             //captura la pantalla
-            capturaPantalla();
+            capturaPantalla();            
         }
 
         //Crea el display y lo setea al juego
         this.display = new Display(juego);
-
+        
         //linkea el display al juego
         this.juego.setDisplay(this.display);
-
+        
         //carga la cantidad de pajaros
         this.juego.cantidadMalos = cantMalos;
 
         //carga la cantidad de aguilas
         this.juego.cantidadAguilas = aguilas;
-
+        
         //setea si el personaje se centra o no
         this.juego.centrar = centrar;
-
+        
         //Crea los personajes del juego
         this.juego.crearPersonajes();
 
         //Seteo la funcion de terminado
         this.display.terminadoFunc = juego.terminadoFunc();
-
+        
         //Comienza el juego
         this.juego.comenzar();
 
@@ -87,7 +87,7 @@ public class Zorrito {
 
 
     public static void main(String[] args) {
-
+        
         //tengo que poner esto porque sino me tomaba el doble de pixels en la pantalla
         System.setProperty("sun.java2d.uiScale", "1");
         System.out.println("Inicia Zorrito 1.0");
@@ -121,7 +121,7 @@ public class Zorrito {
         boolean centrar =true;
         //setea el efecto de fondo invisible
         boolean sinFondo =false;
-
+                
         //recorre los parámetros
         for (String s : args) {
 
@@ -130,7 +130,7 @@ public class Zorrito {
                 centrar = false;
                 System.out.println("- Personaje no centrado");
             }
-
+           
             //verifica si viene con pajaros customs
             if (s.contains("-pajaros:")){
                 String[] partes = s.split(":");
@@ -143,22 +143,22 @@ public class Zorrito {
                 String[] partes = s.split(":");
                 aguilas = Integer.parseInt(partes[1]);
                 System.out.println("- Aguilas: "+aguilas);
-            }
+            }            
 
             //Verifica que se haya pedido sin fondo
             if ("-sin-fondo".equals(s)){
                 sinFondo = true;
                 System.out.println("- Fondo invisible");
             }
-
+                                    
         }
-
+                
         new Zorrito(conBuffer, size, centrar, sinFondo, aguilas-1);
 
     }
-
+    
     private void capturaPantalla(){
-
+        
         // Crea el objeto Robot.
         Robot robot = null;
         try {
@@ -177,7 +177,7 @@ public class Zorrito {
         try {
             // Guarda la captura de pantalla en un archivo.
             ImageIO.write(screenFullImage, "PNG", new File("screenshot.png"));
-        } catch (IOException ex) {
+        } catch (IOException ex) {           
             ex.printStackTrace();
         }
 
@@ -190,7 +190,7 @@ enum Direccion {
 
 
 class Juego {
-
+        
     //Cantidad de malos
     public int cantidadMalos;
 
@@ -202,17 +202,17 @@ class Juego {
 
     //Centrar personaje
     public boolean sinFondo;
-
+    
     //Variable que indica si terminó el juego
     //0 - andando, 1 - Ganó, 2 - Cazado
     int terminado = 0;
-
+    
     // Timer para mover la imagen cada N milisegundos
     Timer timer = new Timer();
 
     //link al objeto del display
     Display display;
-
+    
     //tiempo entre cada iteración del juego
     private int delay = 50;
 
@@ -230,7 +230,7 @@ class Juego {
 
     //Lista de teclas presionadas
     public Set<Integer> pressedKeys = new HashSet<>();
-
+        
     //Nivel de Zoom
     double zoom=1;
 
@@ -239,10 +239,10 @@ class Juego {
 
     //Lista de personajes
     public ArrayList<Character> personajes = new ArrayList<Character>();
-
+    
     //Personaje principal
     public Character principal;
-
+    
     //Centro general del mapa
     int general_x=0;
     int general_y=0;
@@ -250,12 +250,12 @@ class Juego {
     //posicion de la jaula en el mapa
     int jaulaX = 375;
     int jaulaY = 360;
-
+        
     //Crea el movimiento nulo
     Function<Character, Void> movimientoNulo =(Character c) -> {return null;};
 
     //Crea el movimiento de rebote
-    Function<Character, Void> movimientoRebote =(Character c) -> {
+    Function<Character, Void> movimientoRebote =(Character c) -> { 
 
         //Si está colisionado me lo manda a la jaula.
         if (c.colisionado){
@@ -293,7 +293,7 @@ class Juego {
     };
 
     //Crea el movimiento de cazar
-    Function<Character, Void> movimientoCazar =(Character c) -> {
+    Function<Character, Void> movimientoCazar =(Character c) -> { 
 
         //Si está colisionado me lo manda a la jaula pero lo descoliciona.
         if (c.colisionado){
@@ -304,37 +304,37 @@ class Juego {
         //obtiene la posicion de la presa
         int presaX = c.follow.x;
         int presaY = c.follow.y;
-
+        
         //obtiene la posicion del cazador
         int cazadorX = c.x;
         int cazadorY = c.y;
-
+        
         if (presaX<cazadorX)
             c.x = c.x-c.velocidadX;
-        else
+        else 
             c.x = c.x+c.velocidadX;
 
         if (presaY<cazadorY)
             c.y = c.y-c.velocidadY;
-        else
+        else 
             c.y = c.y+c.velocidadY;
-
+        
         //gira al personaje
         c.angulo = c.angulo + c.rotaAngulo;
         return null;
     };
-
-
-
+    
+    
+    
     public Function<Void, Integer> terminadoFunc(){
         return (Void) -> {return this.terminado;};
     }
-
+    
     public void crearPersonajes(){
 
         //crea los personajes
         personajes.addAll(creaListaDePersonajes());
-
+     
         //trackea los personajes en el display
         this.display.trackeaPersonajes(this.personajes,this.display);
 
@@ -347,11 +347,11 @@ class Juego {
         //crea los personajes
         //Character zorrito = new Character("Zorrito","zorro.png",20,movimientoNulo);
         Character zorrito = new Character("Zorrito","sprites.png",10,movimientoNulo);
-
+        
         //Configuración de los sprites
         zorrito.hasSprites = true;
         //zorrito.spritesArray = new ArrayList<Character.Sprite>();
-        zorrito.spritesArray = new Character.Sprite[8];
+        zorrito.spritesArray = new Character.Sprite[8];        
         zorrito.spritesArray[0] = new Character.Sprite(0, 0, 1098/2, 1932/4);
         zorrito.spritesArray[1] = new Character.Sprite(0, 1932/4, 1098/2, 1932/4);
         zorrito.spritesArray[2] = new Character.Sprite(0, 1932/2, 1098/2, 1932/4);
@@ -360,10 +360,10 @@ class Juego {
         zorrito.spritesArray[5] = new Character.Sprite(1098/2, 1932/4, 1098/2, 1932/4);
         zorrito.spritesArray[6] = new Character.Sprite(1098/2, 1932/2, 1098/2, 1932/4);
         zorrito.spritesArray[7] = new Character.Sprite(1098/2, (1932/4)*3, 1098/2, 1932/4);
-
+                              
         zorrito.x = display.getWidth() / 2;
         zorrito.y = display.getHeight() / 2;
-
+        
         zorrito.setImagenColision("zorro_muerto.png");
 
         //Crea la jaula
@@ -375,11 +375,11 @@ class Juego {
         //Crea el mapa
         Character bosque;
         if (sinFondo){
-            bosque = new Character("Bosque","screenshot.png",1,movimientoNulo);
+            bosque = new Character("Bosque","screenshot.png",1,movimientoNulo);            
         } else {
-            bosque = new Character("Bosque","bosque.png",1,movimientoNulo);
-        }
-
+            bosque = new Character("Bosque","bosque.png",1,movimientoNulo);            
+        }        
+        
         bosque.x = 0;
         bosque.y = 0;
         bosque.drawFromCenter=false;
@@ -394,18 +394,18 @@ class Juego {
         aguila.x = display.getWidth();
         aguila.y = 0;
         aguila.velocidadX = 2;
-        aguila.velocidadY = 2;
+        aguila.velocidadY = 2;        
         aguila.follow = zorrito;
-
+          
         Random random = new Random();
         for (int i=0; i<cantidadAguilas;i++){
             Character enemy = new Character("Aguila"+i,"aguila.png",7,movimientoCazar);
             enemy.x = random.nextInt(display.getWidth());
             enemy.y = random.nextInt(display.getHeight());
             enemy.velocidadX = 2;
-            enemy.velocidadY = 2;
+            enemy.velocidadY = 2;        
             enemy.follow = zorrito;
-            personajesCreados.add(enemy);
+            personajesCreados.add(enemy);    
         }
 
         //agrega los personajes a la lista
@@ -414,14 +414,14 @@ class Juego {
 
         //crea muchos pájaros
         for (Character p : crearEnemigos()) {
-            personajesCreados.add(p);
+            personajesCreados.add(p);    
         }
         personajesCreados.add(jaula);
 
         //Setea a zorrito como personaje pricipal
-        this.principal = zorrito;
-
-        return personajesCreados;
+        this.principal = zorrito;        
+        
+        return personajesCreados; 
 
     }
 
@@ -436,15 +436,15 @@ class Juego {
 
             //pajaro estandar
             Character pajaro = new Character("Pajaro"+i,"pajaro.png",20,movimientoRebote);
-            pajaro.velocidadX = random.nextInt(20) + 1;
+            pajaro.velocidadX = random.nextInt(20) + 1; 
             //System.out.println(pajaro.velocidadX);
-            pajaro.velocidadY = random.nextInt(20) + 1;
+            pajaro.velocidadY = random.nextInt(20) + 1; 
             //System.out.println(pajaro.velocidadY);
             pajaro.avanzando_y = movimientosArriba_Abajo[random.nextInt(2)];
             //System.out.println(pajaro.avanzando_y);
             pajaro.avanzando_x = movimientosIzquierda_Derecha[random.nextInt(2)];
-            //System.out.println(pajaro.avanzando_x);
-
+            //System.out.println(pajaro.avanzando_x);            
+            
             //los pone en la punta de la pantalla
             pajaro.x = display.getWidth();
             pajaro.y = display.getHeight();
@@ -467,7 +467,7 @@ class Juego {
                 PointerInfo pi = MouseInfo.getPointerInfo();
                 Point p = pi.getLocation();
                 mueveSegunMouse(p.x,p.y);
-
+                
                 // Actualiza la posición de la imagen
                 for (Character c : personajes) {
                     c.seMueve();
@@ -486,13 +486,13 @@ class Juego {
                     //No chequea colisión contra el principal.
                     if (c.name.equals(principal.name))
                         continue;
-
+                    
                     if (principal.verificaColision(c)){
                         c.setColision(true);
                         colisionPrincipal = true;
                     } else {
                         c.setColision(false);
-
+                        
                         //al agrear este if me aseguro que es un pajaro
                         if (c.follow==null)
                             vivos++;
@@ -502,7 +502,7 @@ class Juego {
 
                 //Setea al principal como colisionado
                 principal.setColision(colisionPrincipal);
-
+                
                 if (principal.cazado) {
                     timer.cancel();
                     terminado = 2;
@@ -511,77 +511,77 @@ class Juego {
                     timer.cancel();
                     terminado = 1;
                 }
-
+                                               
                 //manda a dibujar con buffer
                 display.bufferedDraw();
             }
-        };
+        };        
     }
 
     private void mueveSegunMouse(int x, int y){
 
-        // Si hay una tecla presionada sigue la orden del teclado por sobre el mouse
+        // Si hay una tecla presionada sigue la orden del teclado por sobre el mouse        
         if (!pressedKeys.isEmpty())
             return;
-
+        
         double px = (general_x+principal.centroX)*zoom;
         double py = (general_y+principal.centroY)*zoom;
-
+        
         double opuesto=0;
         double adyacente=0;
         double sumar=0;
-
+                
         //Calcula el cuadrante en el cual está el mouse
         int cuadrante=0;
         if (px < x & py < y){
             cuadrante=3;
             opuesto = y-py;
-            adyacente = x-px;
+            adyacente = x-px;                       
             sumar = 90;
-        }
+        }            
         if (px > x & py < y){
             cuadrante=4;
             opuesto = px-x;
-            adyacente = y-py;
+            adyacente = y-py;                       
             sumar = 180;
-        }
+        }            
         if (px < x & py > y){
             cuadrante=2;
             opuesto = x-px;
-            adyacente = py-y;
+            adyacente = py-y;            
             sumar = 0;
-        }
+        }            
         if (px > x & py > y){
             cuadrante=1;
             opuesto = py-y;
             adyacente = px-x;
             sumar = 270;
         }
-
+         
         //Si el mouse está muy sobre el personaje, no lo mueve
         if (opuesto < 50 && adyacente < 50){
             noMueve();
             return;
         }
-
+        
         //para evitar la division por cero
         if (adyacente==0)
             adyacente = 1;
-
+                       
         double tangente = opuesto/adyacente;
-        double angulo = Math.toDegrees(Math.atan(tangente));
-        angulo = angulo + sumar;
-
+        double angulo = Math.toDegrees(Math.atan(tangente));                                       
+        angulo = angulo + sumar;                    
+        
         //ver para donde hay que mover:
         if (angulo > 22.5 && angulo < 67.5 ){
             mueveArribaDerecha();
         } else if (angulo > 67.5 && angulo < 112.5 ){
             mueveDerecha();
-        } else if (angulo > 112.5 && angulo < 157.5 ){
+        } else if (angulo > 112.5 && angulo < 157.5 ){            
             mueveAbajoDerecha();
-        } else if (angulo > 157.5 && angulo < 202.5 ){
+        } else if (angulo > 157.5 && angulo < 202.5 ){            
             mueveAbajo();
-        } else if (angulo > 202.5 && angulo < 247.5 ){
+        } else if (angulo > 202.5 && angulo < 247.5 ){            
             mueveAbajoIzquierda();
         } else if (angulo > 247.5 && angulo < 292.5 ){
             mueveIzquierda();
@@ -589,118 +589,118 @@ class Juego {
             mueveArribaIzquierda();
         } else if (angulo > 337.5 || angulo < 22.5 ){
             mueveArriba();
-        }
-
+        }            
+        
         //System.out.println("Cuadrante: "+cuadrante + " x: "+x+" y :"+y+ " opuesto: "+opuesto + " adyacente: "+adyacente+" angulo: "+angulo);
-
+        
     }
-
+       
     private void noMueve(){
         principal.avanzando_x = Direccion.Quieto;
         principal.avanzando_y = Direccion.Quieto;
     }
-
+    
     private void mueveArribaIzquierda(){
         if (centrar){
             general_x  += 4;
-            general_y  += 4;
+            general_y  += 4;                
         }
 
         principal.x -= 4;
-        principal.y -= 4;
-
+        principal.y -= 4;        
+        
         principal.avanzando_x = Direccion.Izquierda;
         principal.avanzando_y = Direccion.Arriba;
-
-    }
-
-    private void mueveAbajoDerecha(){
+        
+    }    
+    
+    private void mueveAbajoDerecha(){    
         if (centrar){
             general_x  -= 4;
             general_y  -= 4;
         }
 
         principal.x += 4;
-        principal.y += 4;
+        principal.y += 4;        
 
         principal.avanzando_x = Direccion.Derecha;
         principal.avanzando_y = Direccion.Abajo;
-
+        
     }
-    private void mueveArribaDerecha(){
+    private void mueveArribaDerecha(){    
         if (centrar){
             general_x  -= 4;
             general_y  += 4;
         }
 
         principal.x += 4;
-        principal.y -= 4;
+        principal.y -= 4;        
 
         principal.avanzando_x = Direccion.Derecha;
         principal.avanzando_y = Direccion.Arriba;
-
+        
     }
-    private void mueveAbajoIzquierda(){
-        if (centrar){
+    private void mueveAbajoIzquierda(){   
+        if (centrar){            
             general_x  += 4;
             general_y  -= 4;
         }
 
         principal.x -= 4;
-        principal.y += 4;
+        principal.y += 4;        
 
         principal.avanzando_x = Direccion.Izquierda;
         principal.avanzando_y = Direccion.Abajo;
-
+        
     }
-    private void mueveIzquierda(){
-        if (centrar){
+    private void mueveIzquierda(){   
+        if (centrar){            
             general_x  += 6;
         }
 
-        principal.x -= 6;
-
+        principal.x -= 6;        
+        
         principal.avanzando_x = Direccion.Izquierda;
         principal.avanzando_y = Direccion.Quieto;
-
+        
     }
-    private void mueveDerecha(){
+    private void mueveDerecha(){   
         if (centrar){
             general_x  -= 6;
         }
 
-        principal.x += 6;
+        principal.x += 6;        
 
         principal.avanzando_x = Direccion.Derecha;
         principal.avanzando_y = Direccion.Quieto;
-
+        
     }
-    private void mueveArriba(){
-        if (centrar){
+    private void mueveArriba(){   
+        if (centrar){            
             general_y  += 6;
         }
 
-        principal.y -= 6;
-
+        principal.y -= 6;        
+        
         principal.avanzando_x = Direccion.Quieto;
         principal.avanzando_y = Direccion.Arriba;
-
+        
     }
-    private void mueveAbajo(){
+    private void mueveAbajo(){   
         if (centrar){
             general_y  -= 6;
         }
 
-        principal.y += 6;
+        principal.y += 6;        
 
         principal.avanzando_x = Direccion.Quieto;
         principal.avanzando_y = Direccion.Abajo;
-
+        
     }
-
+    
     //Ejecuta una acción en base a la tecla que se haya presionado
     public void acciónDeTeclaPresionada() {
-
+        
         // Verifica combinaciones específicas de teclas
         if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_I)) {
             mueveArribaIzquierda();
@@ -709,46 +709,46 @@ class Juego {
         }
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.contains(KeyEvent.VK_I)) {
             mueveArribaDerecha();
-        }
+        } 
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.contains(KeyEvent.VK_K)) {
             mueveAbajoIzquierda();
-        }
+        }               
         else if (pressedKeys.contains(KeyEvent.VK_J) && pressedKeys.size()==1) {
             mueveIzquierda();
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_L) && pressedKeys.size()==1) {
             mueveDerecha();
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_I) && pressedKeys.size()==1) {
             mueveArriba();
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_K) && pressedKeys.size()==1) {
             mueveAbajo();
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_Z) && pressedKeys.size()==1) {
             this.zoom = this.zoom+0.1;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_X) && pressedKeys.size()==1) {
             this.zoom = this.zoom-0.1;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_V) && pressedKeys.size()==1) {
             this.general_x=this.general_x+10;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_C) && pressedKeys.size()==1) {
             this.general_x=this.general_x-10;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_F) && pressedKeys.size()==1) {
             this.general_y=this.general_y+10;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_R) && pressedKeys.size()==1) {
             this.general_y=this.general_y-10;
-        }
+        }           
         else if (pressedKeys.contains(KeyEvent.VK_E) && pressedKeys.size()==1) {
             resetJuego();
         } else if (pressedKeys.contains(KeyEvent.VK_Q) && pressedKeys.size()==1){
             timer.cancel();
             System.out.println("End.");
-            System.exit(0);
+            System.exit(0);            
         }
     }
 
@@ -772,9 +772,9 @@ class Display extends Frame {
     private final MyCanvas canvas;
 
     private final Juego juego;
-
+    
     public Function<Void, Integer> terminadoFunc;
-
+    
     public void bufferedDraw(){
         this.canvas.draw();
     }
@@ -787,7 +787,7 @@ class Display extends Frame {
         for (Character c : personajes) {
             tracker.addImage(c.img, i);
             i++;
-        }
+        }    
         try {
             tracker.waitForAll();
         } catch (InterruptedException e) {
@@ -812,35 +812,35 @@ class Display extends Frame {
 
                 // Activa el modo de pantalla completa.
                 device.setFullScreenWindow(this);
-            }
-
+            }         
+                    
         }
-
+        
         //crea el canvas
         this.canvas = new MyCanvas(this);
-
-        setBackground(Color.BLACK);
-        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.
-        //setSize(1440, 875);
-        add(this.canvas);
+        
+        setBackground(Color.BLACK);      
+        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.         
+        //setSize(1440, 875);        
+        add(this.canvas);        
         setVisible(true);
 
         //setea el ícono
         setIconImage(Toolkit.getDefaultToolkit().getImage("zorro.png"));
-
+        
         //Espera medio segundo a que se maximize la pantalla.
         //para que los getWidth y los getHeigth tomen el valor correcto.
-        //Solo si no usa fondo invisible, sino no hace falta
+        //Solo si no usa fondo invisible, sino no hace falta        
         if (!juego.sinFondo){
             try {
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
-            }
+            }            
         }
-
-        this.juego = juego;
-
+                        
+        this.juego = juego;        
+                               
         //Listener para las teclas
         addKeyListener(new KeyAdapter() {
             @Override
@@ -854,7 +854,7 @@ class Display extends Frame {
                 juego.pressedKeys.remove(e.getKeyCode()); // Elimina la tecla liberada del conjunto
             }
         });
-
+        
         //Listener para cerrar la ventana
         addWindowListener(new WindowAdapter() {
             @Override
@@ -874,7 +874,7 @@ class Display extends Frame {
         }
 
         Display rootDisplay;
-
+        
         private void drawImageCanvas(boolean drawFromCenter, Image imgTemp, int centroX, int centroY, int angulo, int newWidth, int newHeight, Graphics2D g2d, double zoom, int general_x, int general_y, int radio){
 
 
@@ -883,47 +883,47 @@ class Display extends Frame {
 
             //Translada la imagen a la posición del mapa
             tx.translate((general_x+centroX)*zoom, (general_y+centroY)*zoom); // Traslación
-
+            
             //Rota la imagen
             tx.rotate(Math.toRadians(angulo));
 
             //Aplica el zoom
-            tx.scale(zoom, zoom); // Escalado
+            tx.scale(zoom, zoom); // Escalado        
 
             //Aplica la transformación
-            g2d.setTransform(tx);
+            g2d.setTransform(tx);    
 
             //Dibuja la imagen en la nueva posición
             //empieza en la posición (-) with / 2 porque el centro de coordenadas con el que empieza
             //a dibujar es el 0,0 entonces no lo dibujaba centrado, y cuando rotaba lo hacías desde la
             //punta, la variable drawFromCenter es para indicar eso.
             g2d.drawImage(imgTemp, drawFromCenter?-(newWidth/2):0, drawFromCenter?-(newHeight/2):0, newWidth, newHeight, this);
-
+            
             //dibuja un circulo alrededor (para debug)
             /*
-            g2d.setColor(Color.WHITE);
-            g2d.drawOval(-radio, -radio, radio*2, radio*2);
+            g2d.setColor(Color.WHITE);                        
+            g2d.drawOval(-radio, -radio, radio*2, radio*2);            
             */
-
+            
         };
-
+                
         private void drawElementosComunes(Graphics2D g){
 
             //Dibuja los personajes
             for (Character c : this.rootDisplay.juego.personajes){
-                if (c.img!=null){
-
+                if (c.img!=null){      
+                                        
                     //Repinta el personaje
                     drawImageCanvas(c.drawFromCenter, c.getImagen(), c.centroX, c.centroY, c.angulo, c.getWidth(canvas), c.getHeight(canvas), g, this.rootDisplay.juego.zoom, this.rootDisplay.juego.general_x, this.rootDisplay.juego.general_y, c.radio);
-
+                                        
                 }
             }
-
+            
             //vuelve a centrar el centro el 0,0
-            AffineTransform tx = new AffineTransform();
-            tx.translate(0, 0); // Traslación
-            g.setTransform(tx);
-
+            AffineTransform tx = new AffineTransform();        
+            tx.translate(0, 0); // Traslación        
+            g.setTransform(tx);    
+        
             // Define la fuente del texto
             g.setFont(new Font("SansSerif", Font.BOLD, 20));
 
@@ -940,19 +940,19 @@ class Display extends Frame {
                 // Dibuja el texto en el Canvas
                 text = "Status: CAZANDO ";
             }
-
+            
             //imprime el status
             g.drawString(text, 50, 50);
 
             //imprime el cronómetro
             g.setColor(Color.WHITE);
-            g.drawString(obtenerCronometro(), 700, 50);
+            g.drawString(obtenerCronometro(), 700, 50);           
 
             //imprime el zoom
             String printZoom = String.format("%.2f", this.rootDisplay.juego.zoom);
-            g.drawString("Zoom: "+printZoom+"x", 900, 50);
+            g.drawString("Zoom: "+printZoom+"x", 900, 50);            
 
-            //Chequea si el juego está termiando mediante la función enviada. (desacoplata)
+            //Chequea si el juego está termiando mediante la función enviada. (desacoplata)            
             int codigoTerminado = terminadoFunc.apply(null);
             if (codigoTerminado==2) {
                 // Define la fuente del texto
@@ -960,19 +960,19 @@ class Display extends Frame {
                 g.setColor(Color.RED);
                 text = "¡¡CAZADO!!";
                 g.drawString(text, 600, 300);
-            }
+            }            
             if (codigoTerminado==1) {
                 // Define la fuente del texto
                 g.setFont(new Font("SansSerif", Font.BOLD, 100));
                 g.setColor(Color.YELLOW);
                 text = "¡¡GANO!!";
                 g.drawString(text, 600, 300);
-            }
+            } 
 
-
+            
         }
         public void draw() {
-
+                                    
             // Obtén la BufferStrategy actual del Canvas
             BufferStrategy bs = getBufferStrategy();
             if (bs == null) {
@@ -992,19 +992,19 @@ class Display extends Frame {
             // Mejorar la calidad del texto
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
-            g.setColor(Color.BLACK);
+            g.setColor(Color.BLACK);            
             g.fillRect(0, 0, getWidth(), getHeight()); // Dibuja un fondo
-
+            
             //Muestra los elementos comunes (que van con buffer o no)
             drawElementosComunes(g);
-
+            
             g.dispose(); // Liberar los recursos del Graphics
-            bs.show(); // Mostrar el contenido del buffer
-
+            bs.show(); // Mostrar el contenido del buffer    
+            
             // Asegúrate de que la operación de dibujo se completa
             Toolkit.getDefaultToolkit().sync();
-        }
-
+        }        
+                
         private String obtenerCronometro() {
             long tiempoActual = System.currentTimeMillis();
             long diff = tiempoActual-this.rootDisplay.juego.initTimeMillis;
@@ -1027,7 +1027,7 @@ class Character {
     public int fixed_witdh;
     public int fixed_heigth;
     public int width = 0;
-    public int height = 0;
+    public int height = 0;    
     public boolean fixedSize= false;
     public boolean drawFromCenter=true;
     private int scale;
@@ -1045,27 +1045,27 @@ class Character {
     public int angulo = 0;
     public boolean colisiona = true;
     public int numImagen = 0;
-    public boolean cazado = false;
+    public boolean cazado = false;    
     public boolean hasSprites = false;
     private int spritesIndex = 0;
     public Sprite[] spritesArray;
     //public ArrayList<Sprite> spritesArray;
-
+            
     //setea otro caracter para que lo siga con el movimiento
     public Character follow;
-
+    
     //caché de imágenes
     private static HashMap<String, Image> imagenes = new HashMap<String, Image>();
 
     record Sprite(int x, int y, int w, int h){};
-
+    
     /*
     class Sprite {
         int x, y, w, h;
         public Sprite (int x, int y, int w, int h){
             this.x=x; this.y = y; this.w = w; this.h = h;
         }
-
+        
     }
     */
     public Character(String name, String imageFile, int scale, Function<Character, Void> movimientoPersonaje){
@@ -1074,58 +1074,54 @@ class Character {
         if (imagenes.containsKey(imageFile)){
             this.img = imagenes.get(imageFile);
         } else {
-            try {
-                this.img = ImageIO.read(new File(imageFile));
-                imagenes.put(imageFile, this.img);
-            } catch (IOException e) {
-                e.printStackTrace();
-                this.img = null;
-            }
+            this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
+            imagenes.put(imageFile, this.img);
         }
 
+        //this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
         this.scale = scale;
         this.movimiento = movimientoPersonaje;
-        this.name = name;
-
+        this.name = name;    
+                
     };
-
+    
     public void setColision(boolean colision){
         this.colisionado = colision;
-
+        
         //Si está colisionado lo hace girar
         if (colision & !name.equals("Zorrito")){
             this.rotaAngulo = 5;
         } else {
             this.rotaAngulo = 0;
-        }
+        }       
     }
-
+    
     public int getWidth(Canvas canvas){
-
+        
         if (fixedSize){
             return fixed_witdh;
         } else {
-            this.width = img.getWidth(canvas) / scale;
+            this.width = img.getWidth(canvas) / scale;            
             return this.width;
-        }
+        }        
     }
-
+    
     public int getHeight(Canvas canvas){
         if (fixedSize){
             return fixed_heigth;
         } else {
             this.height = img.getHeight(canvas) / scale;
             return this.height;
-        }
+        }        
     }
 
     public void setImagenColision(String imageFileColision){
         if (imageFileColision!=null)
             this.img_colision = Toolkit.getDefaultToolkit().getImage(imageFileColision);
     }
-
+    
     public Image getImagen(){
-
+        
         //Cambia la imagen si está colisionado
         Image imgTemp;
         if (colisionado){
@@ -1153,31 +1149,31 @@ class Character {
         if (hasSprites){
 
             Image croppedImage;
-
+            
             //Verifica si se está moviendo sino devuelve la imagen de que está parado
             if (this.avanzando_x == Direccion.Quieto && this.avanzando_y == Direccion.Quieto){
-                Sprite s = spritesArray[0];
+                Sprite s = spritesArray[0];                
                 croppedImage = cropImage(imgTemp, s.x, s.y, s.w, s.h);
                 spritesIndex = 1;
             } else {
-
+                
                 Sprite s = spritesArray[spritesIndex];
                 croppedImage = cropImage(imgTemp, s.x, s.y, s.w, s.h);
 
                 //cicla el contador de la imagen
                 spritesIndex++;
                 if (spritesIndex==spritesArray.length) spritesIndex = 0;
-
+                
             }
-
+                        
             return croppedImage;
-
+            
         } else {
             return imgTemp;
-        }
+        }               
 
     }
-
+    
     public BufferedImage espejarImagen(BufferedImage img) {
         int width = img.getWidth();
         int height = img.getHeight();
@@ -1196,8 +1192,8 @@ class Character {
         g2d.dispose();
 
         return espejada;
-    }
-
+    }    
+   
     private BufferedImage toBufferedImage(Image img) {
         if (img instanceof BufferedImage) {
             return (BufferedImage) img;
@@ -1214,35 +1210,35 @@ class Character {
     private Image cropImage(Image img, int x, int y, int width, int height) {
         BufferedImage bimg = toBufferedImage(img);
         BufferedImage subImg = bimg.getSubimage(x, y, width, height);
-
+        
         //espeja la imagen si el personaje está yendo para la izequierda
         if (avanzando_x == Direccion.Izquierda)
             return espejarImagen(subImg);
-        else
+        else 
             return subImg;
-    }
-
+    }    
+    
     //Ejecuta la función de movimiento sobre el personaje
     public void seMueve(){
-
+        
         //Aplica el algoritmo de movimiento
         this.movimiento.apply(this);
-
+        
         //Para todos calcula el centro y el radio TODO: Sacar esto de acá
         //La primera ver que aun no se calcularon los valores, no funcione, pero la siguiente si.
-
+        
         //TODO: Fix, sacar esto
         if (name.equals("Bosque")){
             return;
         }
-
+        
         centroX = x+width/2;
         centroY = y+height/2;
-
+        
         //deja el radio más grande si es la primera ver que se calcula
         if (radio==0)
-            radio = (width>height)?width/2:height/2;
-
+            radio = (width>height)?width/2:height/2;    
+        
         if (this.colisionado){
             this.angulo = angulo + rotaAngulo;
         }
@@ -1257,7 +1253,7 @@ class Character {
 
         //si no colisiona, como la jaula, sale así no lo rota.
         if (!c.colisiona) return false;
-
+        
         //Calcula los lados del triángulo
         int lado1 = this.centroX-c.centroX;
         int lado2 = this.centroY-c.centroY;
@@ -1265,12 +1261,12 @@ class Character {
         //da vuelta los valores si son negativos
         if (lado1<0)
             lado1 = c.centroX-this.centroX;
-
+        
         if (lado2<0)
             lado2 = c.centroY-this.centroY;
 
         //calcula la hipotenusa
-        double distancia = Math.sqrt(lado1*lado1 + lado2*lado2);
+        double distancia = Math.sqrt(lado1*lado1 + lado2*lado2);  
 
         //si la distancia es menor a la suma de los radios, hay colisión
         return distancia <(this.radio+c.radio);
