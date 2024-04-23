@@ -1070,14 +1070,22 @@ class Character {
     */
     public Character(String name, String imageFile, int scale, Function<Character, Void> movimientoPersonaje){
 
-        // Optimization by autonomous AI bot
+        /* Original image loading code using Toolkit
+        try {
+            this.img = Toolkit.getDefaultToolkit().getImage(imageFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.img = null;
+        }
+        */
+        // Start of the optimized block by autonomous AI bot
         try {
             this.img = ImageIO.read(new File(imageFile));
         } catch (IOException e) {
             e.printStackTrace();
             this.img = null;
         }
-        imagenes.put(imageFile, this.img);
+        // End of the optimized block
 
         this.scale = scale;
         this.movimiento = movimientoPersonaje;
