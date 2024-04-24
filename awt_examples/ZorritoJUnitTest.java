@@ -13,7 +13,6 @@ public class ZorritoJUnitTest {
 
         // Mocking the creation of Zorrito object to avoid GUI operations
         Zorrito zorrito = new Zorrito(buffer, cantMalos, centrar, sinFondo, aguilas) {
-            @Override
             public void initUI() {
                 // Overriding initUI to prevent GUI operations in headless environment
             }
