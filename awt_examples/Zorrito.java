@@ -336,9 +336,7 @@ class Juego {
         personajes.addAll(creaListaDePersonajes());
 
         //trackea los personajes en el display
-        if (this.display != null) {
-            this.display.trackeaPersonajes(this.personajes,this.display);
-        }
+        this.display.trackeaPersonajes(this.personajes,this.display);
 
     }
 
