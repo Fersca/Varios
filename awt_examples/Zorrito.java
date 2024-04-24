@@ -47,23 +47,19 @@ public class Zorrito {
     Display display;
 
     public Zorrito(boolean buffer, int cantMalos, boolean centrar, boolean sinFondo, int aguilas) {
-
         //Crea los objetos del juego.
         this.juego = new Juego();
 
         //Setea la variable de fondo invisible
         this.juego.sinFondo = sinFondo;
 
-        if (sinFondo){
-            //captura la pantalla
-            capturaPantalla();
+        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+            //Crea el display y lo setea al juego
+            this.display = new Display(juego);
+
+            //linkea el display al juego
+            this.juego.setDisplay(this.display);
         }
-
-        //Crea el display y lo setea al juego
-        this.display = new Display(juego);
-
-        //linkea el display al juego
-        this.juego.setDisplay(this.display);
 
         //carga la cantidad de pajaros
         this.juego.cantidadMalos = cantMalos;
@@ -78,11 +74,12 @@ public class Zorrito {
         this.juego.crearPersonajes();
 
         //Seteo la funcion de terminado
-        this.display.terminadoFunc = juego.terminadoFunc();
+        if (this.display != null) {
+            this.display.terminadoFunc = juego.terminadoFunc();
+        }
 
         //Comienza el juego
         this.juego.comenzar();
-
     }
 
 
@@ -361,8 +358,17 @@ class Juego {
         zorrito.spritesArray[6] = new Character.Sprite(1098/2, 1932/2, 1098/2, 1932/4);
         zorrito.spritesArray[7] = new Character.Sprite(1098/2, (1932/4)*3, 1098/2, 1932/4);
 
-        zorrito.x = display.getWidth() / 2;
-        zorrito.y = display.getHeight() / 2;
+        int displayWidth = 800; // Default width for headless mode
+        int displayHeight = 600; // Default height for headless mode
+
+        // If not in headless mode, use actual display dimensions
+        if (this.display != null) {
+            displayWidth = display.getWidth();
+            displayHeight = display.getHeight();
+        }
+
+        zorrito.x = displayWidth / 2;
+        zorrito.y = displayHeight / 2;
 
         zorrito.setImagenColision("zorro_muerto.png");
 
