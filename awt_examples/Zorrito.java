@@ -390,14 +390,14 @@ class Juego {
         bosque.y = 0;
         bosque.drawFromCenter=false;
         bosque.fixedSize=true;
-        bosque.fixed_witdh=display.getWidth();
-        bosque.fixed_heigth=display.getHeight();
+        bosque.fixed_witdh=displayWidth;
+        bosque.fixed_heigth=displayHeight;
         bosque.colisiona = false;
         personajesCreados.add(bosque);
 
         //crea el aguila, la pone arriba a la derecha
         Character aguila = new Character("Aguila","aguila.png",7,movimientoCazar);
-        aguila.x = display.getWidth();
+        aguila.x = displayWidth;
         aguila.y = 0;
         aguila.velocidadX = 2;
         aguila.velocidadY = 2;
@@ -406,8 +406,8 @@ class Juego {
         Random random = new Random();
         for (int i=0; i<cantidadAguilas;i++){
             Character enemy = new Character("Aguila"+i,"aguila.png",7,movimientoCazar);
-            enemy.x = random.nextInt(display.getWidth());
-            enemy.y = random.nextInt(display.getHeight());
+            enemy.x = random.nextInt(displayWidth);
+            enemy.y = random.nextInt(displayHeight);
             enemy.velocidadX = 2;
             enemy.velocidadY = 2;
             enemy.follow = zorrito;
@@ -419,7 +419,7 @@ class Juego {
         personajesCreados.add(aguila);
 
         //crea muchos pájaros
-        for (Character p : crearEnemigos()) {
+        for (Character p : crearEnemigos(displayWidth, displayHeight)) {
             personajesCreados.add(p);
         }
         personajesCreados.add(jaula);
@@ -431,7 +431,7 @@ class Juego {
 
     }
 
-    private ArrayList<Character> crearEnemigos(){
+    private ArrayList<Character> crearEnemigos(int displayWidth, int displayHeight){
 
         Random random = new Random();
         ArrayList<Character> enemigos = new ArrayList<Character>();
@@ -452,8 +452,8 @@ class Juego {
             //System.out.println(pajaro.avanzando_x);
 
             //los pone en la punta de la pantalla
-            pajaro.x = display.getWidth();
-            pajaro.y = display.getHeight();
+            pajaro.x = displayWidth;
+            pajaro.y = displayHeight;
             enemigos.add(pajaro);
         }
 
