@@ -463,10 +463,12 @@ class Juego {
             @Override
             public void run() {
 
-                //detecta la posicion del mouse para moverlo;
-                PointerInfo pi = MouseInfo.getPointerInfo();
-                Point p = pi.getLocation();
-                mueveSegunMouse(p.x,p.y);
+                if (!GraphicsEnvironment.isHeadless()) {
+                    //detecta la posicion del mouse para moverlo;
+                    PointerInfo pi = MouseInfo.getPointerInfo();
+                    Point p = pi.getLocation();
+                    mueveSegunMouse(p.x,p.y);
+                }
 
                 // Actualiza la posición de la imagen
                 for (Character c : personajes) {
