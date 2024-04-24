@@ -799,74 +799,78 @@ class Display extends Frame {
     }
 
     public Display(Juego juego){
-        super("Zorrito 1.0");
+        if (!GraphicsEnvironment.isHeadless()) {
+            super("Zorrito 1.0");
 
-        if (juego.sinFondo){
+            if (juego.sinFondo){
+                // Obtiene el entorno gráfico y el dispositivo gráfico predeterminados.
+                GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                GraphicsDevice device = env.getDefaultScreenDevice();
 
-            // Obtiene el entorno gráfico y el dispositivo gráfico predeterminados.
-            GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            GraphicsDevice device = env.getDefaultScreenDevice();
+                // Intenta establecer el modo de pantalla completa.
+                if (device.isFullScreenSupported()) {
+                    // Oculta la barra de título y otros elementos de la ventana.
+                    //setUndecorated(true);
 
-            // Intenta establecer el modo de pantalla completa.
-            if (device.isFullScreenSupported()) {
-                // Oculta la barra de título y otros elementos de la ventana.
-                //setUndecorated(true);
+                    // Activa el modo de pantalla completa.
+                    device.setFullScreenWindow(this);
+                }
 
-                // Activa el modo de pantalla completa.
-                device.setFullScreenWindow(this);
             }
 
-        }
+            //crea el canvas
+            this.canvas = new MyCanvas(this);
 
-        //crea el canvas
-        this.canvas = new MyCanvas(this);
+            setBackground(Color.BLACK);
+            setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.
+            //setSize(1440, 875);
+            add(this.canvas);
+            setVisible(true);
 
-        setBackground(Color.BLACK);
-        setExtendedState(Frame.MAXIMIZED_BOTH); // Maximiza la ventana.
-        //setSize(1440, 875);
-        add(this.canvas);
-        setVisible(true);
+            //setea el ícono
+            setIconImage(Toolkit.getDefaultToolkit().getImage("zorro.png"));
 
-        //setea el ícono
-        setIconImage(Toolkit.getDefaultToolkit().getImage("zorro.png"));
-
-        //Espera medio segundo a que se maximize la pantalla.
-        //para que los getWidth y los getHeigth tomen el valor correcto.
-        //Solo si no usa fondo invisible, sino no hace falta
-        if (!juego.sinFondo){
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+            //Espera medio segundo a que se maximize la pantalla.
+            //para que los getWidth y los getHeigth tomen el valor correcto.
+            //Solo si no usa fondo invisible, sino no hace falta
+            if (!juego.sinFondo){
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
+
+            //Listener para las teclas
+            addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
+                    juego.acciónDeTeclaPresionada();
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    juego.pressedKeys.remove(e.getKeyCode()); // Elimina la tecla liberada del conjunto
+                }
+            });
+
+            //Listener para cerrar la ventana
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent we) {
+                    juego.timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
+                    System.out.println("End.");
+                    System.exit(0);
+                }
+            });
+
+        } else {
+            // Headless environment setup if necessary...
         }
 
         this.juego = juego;
-
-        //Listener para las teclas
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                juego.pressedKeys.add(e.getKeyCode()); // Añade la tecla presionada al conjunto
-                juego.acciónDeTeclaPresionada();
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                juego.pressedKeys.remove(e.getKeyCode()); // Elimina la tecla liberada del conjunto
-            }
-        });
-
-        //Listener para cerrar la ventana
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent we) {
-                juego.timer.cancel(); // Asegúrate de cancelar el timer cuando cierres la ventana
-                System.out.println("End.");
-                System.exit(0);
-            }
-        });
-
+        // Any non-GUI initialization can go here...
     }
 
     private class MyCanvas extends Canvas {
