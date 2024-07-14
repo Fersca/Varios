@@ -1,9 +1,18 @@
 Cómo correrlo?
+--------------
 
 gradlew run --> corre
 gradlew jar --> crea Jar
-graslew nativeBuild --> crea nativo 
 
+
+Native Compile:
+-------
+
+En linux, 
+
+funciona bien el plugIn:
+
+    graslew nativeBuild --> crea nativo 
 
 Para hacer que funcione la compilación de GraalVM, tuve que instalar los plugins en build.gradle
 y Además, instalar esto:
@@ -11,6 +20,24 @@ y Además, instalar esto:
 https://www.cyberithub.com/how-to-install-zlib-package-on-ubuntu-20-04-lts-focal-fossa/
 
 --> sudo apt install zlib1g-dev
+
+En mac ----
+No pude hacer andar el plugIn, pero desde la línea de comando pude hacer:
+
+    native-image --enable-preview --no-fallback -jar app-all.jar
+
+    Dejé esto mismo en un script el root del proyecto. "nativeCompileFer.sh" 
+
+Par que eso funcione, hay que generar el shadowJar, el cual arma un fat jar llamado app-all.jar dentro 
+del directorio app/build/libs
+Luego se ejecuta el comando native-image, se pone enable-preview para habilitar los virtual threads en la version actual de la graalvm
+que es la 19, y se pone --no-fallback porque para algunas funciones requería un fallback a la jvm.
+
+Para instalar native-imave se use:
+gu install native-image
+gu es un programa para instalar cosas en graalvm
+
+
 
 
 
