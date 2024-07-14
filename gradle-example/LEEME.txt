@@ -8,7 +8,8 @@ gradlew jar --> crea Jar
 Native Compile:
 -------
 
-En linux, 
+En linux
+-------- 
 
 funciona bien el plugIn:
 
@@ -21,7 +22,8 @@ https://www.cyberithub.com/how-to-install-zlib-package-on-ubuntu-20-04-lts-focal
 
 --> sudo apt install zlib1g-dev
 
-En mac ----
+En mac 
+----
 No pude hacer andar el plugIn, pero desde la línea de comando pude hacer:
 
     native-image --enable-preview --no-fallback -jar app-all.jar
@@ -37,7 +39,13 @@ Para instalar native-imave se use:
 gu install native-image
 gu es un programa para instalar cosas en graalvm
 
+En windows
+----------
 
+Tuve que instalar el visual studio 2022, y además el Visual studio build tools con el SDK
+Una vez hecho eso pudo funcionar el mismo script que se usa para mac, el cual se ejecuta de la linea de comando
+no me funciona el plugin.
+Hice un bat para poder ejecutarlo: nativeCompileFer.bat
 
 
 
