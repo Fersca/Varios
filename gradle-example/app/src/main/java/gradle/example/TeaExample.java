@@ -13,14 +13,14 @@ public class TeaExample {
         tea.greetings();
         var document = HTMLDocument.current();
         var div = document.createElement("div");
-        div.appendChild(document.createTextNode("TeaVM generated element"));
+        div.appendChild(document.createTextNode("Hola Fer desde Java Class con TeaVM en un div"));
         document.getBody().appendChild(div);      
         
     }
 
     private void greetings() {
         //Esto aparece en la consola del browser.
-        System.out.println("Hola Fer con Tea");
+        System.out.println("Hola Fer con Tea en la consola");
     }
     
 }

@@ -5,7 +5,7 @@ gradlew run --> corre
 gradlew jar --> crea Jar sin nada
 gradlew shadowJar --> crea rl shadow Jar (fat jar)
 gradlew nativeBuild --> Solo anda en linux (pero es mejor usar el script que hice)
-
+graslew generateJavaScript --> genera el archivo js que luego se linkea desde el tea_index.html
 
 Native Compile:
 -------
