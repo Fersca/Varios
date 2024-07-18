@@ -2,7 +2,9 @@ Cómo correrlo?
 --------------
 
 gradlew run --> corre
-gradlew jar --> crea Jar
+gradlew jar --> crea Jar sin nada
+gradlew shadowJar --> crea rl shadow Jar (fat jar)
+gradlew nativeBuild --> Solo anda en linux (pero es mejor usar el script que hice)
 
 
 Native Compile:

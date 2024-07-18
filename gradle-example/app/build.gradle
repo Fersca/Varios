@@ -20,7 +20,7 @@ plugins {
     id 'java'
     
     //Plugin para compilar nativo con graalvm
-    id 'org.graalvm.buildtools.native' version '0.9.12'
+    id 'org.graalvm.buildtools.native' version '0.10.2'
     
     //Para TeaVM
     // https://www.teavm.org/docs/tooling/gradle.html
@@ -99,7 +99,7 @@ graalvmNative {
 tasks.named('run') {
     outputs.upToDateWhen { false }
 }
-
+/* lo saco cuando deshabilito el plugin */
 teavm.js {
     addedToWebApp = true
     mainClass = "gradle.example.TeaExample"
