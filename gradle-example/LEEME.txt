@@ -4,7 +4,7 @@ Cómo correrlo?
 gradlew run --> corre
 gradlew jar --> crea Jar sin nada
 gradlew shadowJar --> crea rl shadow Jar (fat jar)
-gradlew nativeBuild --> Solo anda en linux (pero es mejor usar el script que hice)
+gradlew nativeBuild --> Solo anda en linux y Mac (pero es mejor usar el script que hice)
 graslew generateJavaScript --> genera el archivo js que luego se linkea desde el tea_index.html
 
 Native Compile:
@@ -26,7 +26,9 @@ https://www.cyberithub.com/how-to-install-zlib-package-on-ubuntu-20-04-lts-focal
 
 En mac 
 ----
-No pude hacer andar el plugIn, pero desde la línea de comando pude hacer:
+Ahora anda la compilación nativa con el plug-in luego de actualizar gradle y todos los plugins.
+
+Igual desde la línea de comando se puede correr esto por si no anda:
 
     native-image --enable-preview --no-fallback -jar app-all.jar
 
