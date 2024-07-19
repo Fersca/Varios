@@ -5,37 +5,21 @@
  */
 package gradle.example;
 
-//import para gson
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-//imports para httprequest
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 //imports estandars
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//Imports para jetty
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+//Fersca Libs
+import com.fersca.lib.HttpContext;
+import com.fersca.lib.Server;
+import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.getJson;
 
 /**
  * La idea es probar todo lo necesario para poder hacer una Api rest:
@@ -72,100 +56,82 @@ public class App {
             }
             """;
 
-        var jsonMap = j.processJson(json);
+        var jsonMap = json(json);
 
         System.out.println(m);
         System.out.println(jsonMap.get("name"));
         System.out.println(jsonMap.get("age"));
         
         //get the json map from url
-        var jsonMap2 = j.getJson("https://api.mercadolibre.com/users/20",false);        
+        var jsonMap2 = getJson("https://api.mercadolibre.com/users/20",false);        
         System.out.println(jsonMap2.get("nickname"));
         
-        var jsonMap3 = j.getJson("https://api.mercadolibre.com/users/10",true);        
+        var jsonMap3 = getJson("https://api.mercadolibre.com/users/10",true);        
         System.out.println(jsonMap3.get("nickname"));        
                 
         //Concurrency Example
         j.concurrency();        
         
         //http server
-        j.createHttpServer();
+        Server.createHttpServer();
+
+        
+        //Add the request handlers      
+        Server.addController("/user/fernando", App::procesaUsuario);     
+        Server.addController("/user/fernando/json", App::procesaUsuarioJson);
+        Server.addController("/headers", App::procesaHeaders);        
         
         //waits 10 seconds
         System.out.println("Waiting 10 seconds until shutdown");
         Thread.sleep(10000);
         
         //shutdown http server
-        j.shutdownWebserver();
+        Server.shutdownWebserver();
         
         System.exit(0);
     }
-
-    private Server server;
     
-    protected void createHttpServer() throws Exception {
+    private static void procesaUsuario(HttpContext context) {
+        String mensage = "Ejecutó el métedoto procesaUsuario";
+        context.write(mensage);
+        System.out.println(mensage);
+    };
 
-        // Create a Server instance.
-        server = new Server();
-
-        // The HTTP configuration object.
-        HttpConfiguration httpConfig = new HttpConfiguration();
-        // Configure the HTTP support, for example:
-        httpConfig.setSendServerVersion(false);        
+    private static void procesaUsuarioJson(HttpContext context) {
+        String mensage = "Ejecutó el métedoto procesaUsuarioJson";
         
-        // The ConnectionFactory for HTTP/1.1.
-        HttpConnectionFactory http11 = new HttpConnectionFactory(httpConfig);        
-        
-        // Create a ServerConnector instance on port 8080.
-        ServerConnector connector1 = new ServerConnector(server, http11);
-        connector1.setPort(8080);
-        server.addConnector(connector1);
-
-        // Set a simple Handler to handle requests/responses.
-        server.setHandler(new AbstractHandler()
-        {
-            @Override
-            public void handle(String target, Request jettyRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
-            {
-                // Mark the request as handled so that it
-                // will not be processed by other handlers.
-                jettyRequest.setHandled(true);
-                response.setStatus(200);
-                response.setContentType("text/html; charset=UTF-8");
-
-                // Write a Hello World response.
-                response.getWriter().print(
-                    """ 
-                    <!DOCTYPE html> 
-                    <html>
-                    <head>
-                      <title>Jetty Hello World Handler</title>
-                    </head>
-                    <body>
-                      <p>Hello World</p>
-                    </body>
-                    </html>
-                    """        
-                );                
+        Map<String, Object> user = new HashMap<>();
+        user.put("nombre", "Fernando");
+        user.put("apellido", "Scasserra");
+        user.put("edad", 42);
+        user.put("hombre", true);
+        user.put("padres", new String[]{"Mirta", "Norberto"});
                 
-                System.out.println("Request Handled");
-            }
-        });
+        context.write(user);
+        System.out.println(mensage);
+    };
 
-        // Start the Server so it starts accepting connections from clients.
-        server.start();                
-        System.out.println("Server started");
+    private static void procesaHeaders(HttpContext context) {
+
+        String mensaje ="""
+                        <br>                                
+                        <h4>Lista de Headers</h4>
+                        """;
         
-    }
+        context.print(mensaje);
+        
+        Enumeration<String> lista = context.getRequest().getHeaderNames();        
+        while (lista.hasMoreElements()) {
+            String header = lista.nextElement();
+            context.print("<br>Header: " + header +" --- "+ context.getRequest().getHeader(header));
+        }                                     
+                                
+        String nombreParam = context.getParameter("nombre");
 
-    protected void shutdownWebserver(){
-        try {
-            System.out.println("Shutting down server");
-            server.stop();
-        } catch (Exception ex) {
-            System.out.println("Error while closing webserver");
-        }
-    }
+        context.write("<br>Nombre: "+nombreParam);
+    };
+    
+    
     
     private class RunableImpl implements Runnable {
         public void run() {
@@ -248,92 +214,5 @@ public class App {
     protected String greetings() {
         return "Hola Fer";
     }
-
-    @SuppressWarnings("rawtypes")
-	protected Map processJson(String jsonString) {
-
-        Gson gson = new Gson();
-        Map<String, Object> map = gson.fromJson(jsonString, new TypeToken<Map<String, Object>>() {
-        }.getType());
-
-        return map;
-
-    }
     
-    @SuppressWarnings("rawtypes")
-	protected Map getJson(String url, boolean async) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
-        if (async)
-            return processJson(httpCliAsync(url));
-        else
-            return processJson(httpCli(url));
-    }
-    
-    protected String httpCli(String url) throws URISyntaxException, IOException, InterruptedException{
-
-            //Create the builder
-            HttpRequest.Builder b = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .headers("Accept", "application/json")
-                .timeout(Duration.ofSeconds(10))
-                .GET();        
-            
-            //create the request object
-            HttpRequest request = b.build();          
-            
-            //create an http client
-            HttpClient client = HttpClient.newHttpClient();
-                        
-            //execute the request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
-            
-            //return the body content
-            return response.body();
-       
-    }
-    
-    protected String httpCliAsync(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
-
-            //Create the builder
-            HttpRequest.Builder b = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .headers("Accept", "application/json")
-                .timeout(Duration.ofSeconds(10))
-                .GET();        
-            
-            //create the request object
-            HttpRequest request = b.build();          
-                   
-            //create the executor service
-            ExecutorService executorService = Executors.newFixedThreadPool(2);
-            
-            //create the client with executor
-            HttpClient cliAsync = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build();
-            
-            //ejecute the request with the client in async way
-            CompletableFuture<HttpResponse<String>> response1 = cliAsync.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
-            var time1 = System.currentTimeMillis();
-            System.out.println("Processing request");
-
-            //Wait for the future to be available
-            HttpResponse<String> response = response1.get();
-            
-            var time2 = System.currentTimeMillis();
-                        
-            var diff = time2-time1;
-            System.out.println(diff);           
-            
-            String body = response.body();    
-            
-            //Close the thread pool
-            executorService.shutdownNow();
-
-            return body;
-       
-    }
-    
-
 }
-
