@@ -20,6 +20,8 @@ import com.fersca.lib.HttpContext;
 import com.fersca.lib.Server;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.getJson;
+import static com.fersca.lib.HttpCli.getFutureJson;
+import static com.fersca.lib.HttpCli.FutureJson;
 
 /**
  * La idea es probar todo lo necesario para poder hacer una Api rest:
@@ -63,10 +65,14 @@ public class App {
         System.out.println(jsonMap.get("age"));
         
         //get the json map from url
-        var jsonMap2 = getJson("https://api.mercadolibre.com/users/20",false);        
+        var jsonMap2 = getJson("https://api.mercadolibre.com/users/20");        
         System.out.println(jsonMap2.get("nickname"));
         
-        var jsonMap3 = getJson("https://api.mercadolibre.com/users/10",true);        
+        //get the json map with an async call
+        FutureJson fJson = getFutureJson("https://api.mercadolibre.com/users/10");                
+        
+        //wait until json is available
+        var jsonMap3 = fJson.getJson();        
         System.out.println(jsonMap3.get("nickname"));        
                 
         //Concurrency Example

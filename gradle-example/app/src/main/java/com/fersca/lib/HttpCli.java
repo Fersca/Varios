@@ -14,6 +14,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,24 +25,28 @@ public class HttpCli {
  
     private static final Gson gson = new Gson();
     
-    @SuppressWarnings("rawtypes")
     public static Map json(String jsonString) {
 
-        Map<String, Object> map = gson.fromJson(jsonString, new TypeToken<Map<String, Object>>() {
-        }.getType());
-
-        return map;
+        return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
 
     }
 
-    @SuppressWarnings("rawtypes")
-    public static Map getJson(String url, boolean async) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
-        if (async)
-            return json(httpCliAsync(url));
-        else
-            return json(httpCli(url));
+    public static Map getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return json(httpCli(url));
     }
 
+    public static FutureJson getFutureJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        
+        var response = httpCliAsync(url);
+        FutureJson fResponse = new FutureJson(response);        
+        return fResponse;
+    }
+    
+    //create an http client
+    private static HttpClient client;
+    private static HttpClient cliAsync;
+    private static ExecutorService executorService;
+    
     private static String httpCli(String url) throws URISyntaxException, IOException, InterruptedException{
 
         //Create the builder
@@ -53,9 +59,9 @@ public class HttpCli {
         //create the request object
         HttpRequest request = b.build();          
 
-        //create an http client
-        HttpClient client = HttpClient.newHttpClient();
-
+        if (client==null)
+            client = HttpClient.newHttpClient();
+        
         //execute the request
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
 
@@ -64,7 +70,39 @@ public class HttpCli {
 
     }
 
-    private static String httpCliAsync(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+    public static class FutureJson  {
+        
+        private long time1;
+        private CompletableFuture<HttpResponse<String>> response;
+        
+        public FutureJson(CompletableFuture<HttpResponse<String>> response){
+           time1 = System.currentTimeMillis();
+           this.response = response;
+        }
+        
+        public Map getJson(){
+            
+            //Wait for the future to be available
+            HttpResponse<String> response=null;
+            try {
+                response = this.response.get();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(HttpCli.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(HttpCli.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            long time2 = System.currentTimeMillis();
+
+            long diff = time2-time1;
+            System.out.println(diff);           
+
+            return json(response.body());    
+            
+        }
+    }
+    
+    private static CompletableFuture<HttpResponse<String>> httpCliAsync(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
 
         //Create the builder
         HttpRequest.Builder b = HttpRequest.newBuilder()
@@ -77,35 +115,18 @@ public class HttpCli {
         HttpRequest request = b.build();          
 
         //create the executor service
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        if (executorService==null)
+            executorService = Executors.newFixedThreadPool(3);
 
         //create the client with executor
-        HttpClient cliAsync = HttpClient.newBuilder()
-                .executor(executorService)
-                .build();
+        if (cliAsync==null)
+            cliAsync = HttpClient.newBuilder().executor(executorService).build();
 
         //ejecute the request with the client in async way
         CompletableFuture<HttpResponse<String>> response1 = cliAsync.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
-        var time1 = System.currentTimeMillis();
-        System.out.println("Processing request");
-
-        //Wait for the future to be available
-        HttpResponse<String> response = response1.get();
-
-        var time2 = System.currentTimeMillis();
-
-        var diff = time2-time1;
-        System.out.println(diff);           
-
-        String body = response.body();    
-
-        //Close the thread pool
-        executorService.shutdownNow();
-
-        return body;
+        return response1;
 
     }
-    
     
 }
