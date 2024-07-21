@@ -14,9 +14,19 @@ plugins {
     id 'application'
     
     //Esto es para crear un Fat Jar
+    id 'com.github.johnrengelman.shadow' version '8.1.1' 
     // https://imperceptiblethoughts.com/shadow/introduction/#benefits-of-shadow
     // Genera dentro del directorio build/distributions un file que se llama -shadow.tar el cual tiene 1 solo -jar 
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    // Este plugin tira un warning en la version 9 de gradle porque dice que usa un método que se va a deprecar    
+    /*
+     * The CopyProcessingSpec.setFileMode(Integer) method has been deprecated. 
+     * This is scheduled to be removed in Gradle 9.0. Please use the filePermissions(Action) method instead. 
+     * 
+     * 
+     * En teoría hay un pull request hecho que va a fixear este tema
+     * */
+    
+    
     id 'java'
     
     //PlugIn de jacoco para el test coverage
@@ -83,16 +93,27 @@ jar {
 }
 
 graalvmNative {
+    
      binaries.all {
          resources.autodetect()
          
          //En teoría esto es para activar los features preview (virtual threads) en momento de compilar
          //https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html 
-         buildArgs.add('--enable-preview')
+         buildArgs.add('--enable-preview')         
         
+        //Error: Darwin native toolchain (x86_64) implies native-image target architecture class jdk.vm.ci.amd64.AMD64 but configured native-image target architecture is class jdk.vm.ci.aarch64.AArch64.
+        //Error: To prevent native-toolchain checking provide command-line option -H:-CheckToolchain
+                
+        /*
+         * https://github.com/oracle/graal/issues/4694
+         * En esa página dice que el problema está con que el compilador switchea de arquitectura de x86 a arm.
+         * cuando ejecuto el comando arch o file sobre los archivos me dicen que están todos en arm, por eso funciona desde la terminal
+         * se ve que cuando ejecuta gradle, no es así, y lo toma como x86
+         * */
      }
-
-     toolchainDetection = true
+          
+    toolchainDetection = true
+     
 }
 
 /*
@@ -140,6 +161,7 @@ test {
 
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:unchecked" //<< "-Xlint:deprecation"
+    options.compilerArgs.add('--enable-preview')
 }
 
 jacocoTestReport {

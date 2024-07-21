@@ -241,4 +241,8 @@ eval "set -- $(
         tr '\n' ' '
     )" '"$@"'
 
+echo "Datos de la ejecución"
+echo "---------------------"
+echo "Comando java: " $JAVACMD
+echo "Argumentos:   " "$@"
 exec "$JAVACMD" "$@"

@@ -11,6 +11,7 @@ public class TeaExample {
     public static void main(String[] args) {
         TeaExample tea = new TeaExample();
         tea.greetings();
+
         var document = HTMLDocument.current();
         var div = document.createElement("div");
         div.appendChild(document.createTextNode("Hola Fer desde Java Class con TeaVM en un div"));
