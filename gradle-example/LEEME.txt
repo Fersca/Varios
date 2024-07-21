@@ -3,7 +3,9 @@ Cómo correrlo?
 
 gradlew run --> corre
 gradlew jar --> crea Jar sin nada
+gradlew test -- ejecuta los test con code coverage
 gradlew shadowJar --> crea rl shadow Jar (fat jar)
+gradlew clean build -- limpia y hace un build con los test
 gradlew nativeBuild --> genera el compilado en todos los OS's
 graslew generateJavaScript --> genera el archivo js que luego se linkea desde el tea_index.html
 

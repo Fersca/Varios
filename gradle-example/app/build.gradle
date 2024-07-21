@@ -19,6 +19,9 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
     
+    //PlugIn de jacoco para el test coverage
+    id 'jacoco'
+    
     //Plugin para compilar nativo con graalvm
     id 'org.graalvm.buildtools.native' version '0.10.2'
     
@@ -26,6 +29,10 @@ plugins {
     // https://www.teavm.org/docs/tooling/gradle.html
     id "org.teavm" version "0.8.1"
     
+}
+
+jacoco {
+    toolVersion = "0.8.12" // Última version al 20/7/2024 https://github.com/jacoco/jacoco/releases
 }
 
 repositories {
@@ -99,6 +106,7 @@ graalvmNative {
 tasks.named('run') {
     outputs.upToDateWhen { false }
 }
+
 /* lo saco cuando deshabilito el plugin */
 teavm.js {
     addedToWebApp = true
@@ -108,3 +116,114 @@ teavm.js {
     targetFileName = "example.js"
 }
 
+test {
+
+    useJUnit() // Configura Gradle para usar JUnit 4
+    
+    // Configuración del logging de pruebas
+    testLogging {
+        // Mostrar eventos de pruebas: passed, skipped, failed
+        events "passed", "skipped", "failed"
+        
+        // Mostrar resultados detallados en la consola
+        showStandardStreams = true
+
+        // Formato completo de excepción para mostrar detalles en caso de error
+        exceptionFormat = 'full'
+    }
+    
+    // Forzar la ejecución de las pruebas
+    outputs.upToDateWhen { false }
+    finalizedBy jacocoTestReport
+    
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" //<< "-Xlint:deprecation"
+}
+
+jacocoTestReport {
+    
+    dependsOn test // El reporte de JaCoCo depende de que las pruebas se ejecuten primero
+    
+    reports {
+        xml.required = true // Habilitar el reporte XML
+        csv.required = false
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+        //Se agrega esta línea así la puede analizar la última tarea que la muestra en la línea de comando
+        xml.outputLocation = layout.buildDirectory.file('jacoco/jacocoTestReport.xml')        
+    }
+}
+
+
+/*
+ * Esta es una tarea personalizada que se agrega para poder ver el code coverage que hace Jacoco
+ * pero en la línea de comando cuando se corren los test en la consola 
+ *   def reportFile = file("${buildDir}/jacoco/jacocoTestReport.xml")
+*/
+       
+import javax.xml.parsers.SAXParserFactory
+import org.xml.sax.helpers.DefaultHandler
+import org.xml.sax.EntityResolver
+import org.xml.sax.InputSource
+import groovy.xml.XmlParser
+
+task printCoverageReport {
+
+    dependsOn jacocoTestReport
+
+    doLast {
+
+        def reportFile = file("${buildDir}/jacoco/jacocoTestReport.xml")
+
+        if (reportFile.exists()) {
+
+            // Configurar SAXParserFactory para permitir DOCTYPE y deshabilitar validación DTD
+            SAXParserFactory factory = SAXParserFactory.newInstance()
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", true)
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", true)
+            factory.setNamespaceAware(true)
+
+            def saxParser = factory.newSAXParser()
+
+            // Configurar el XmlParser con un EntityResolver para ignorar la validación DTD
+            def parser = new XmlParser(saxParser)
+            parser.setEntityResolver(new EntityResolver() {
+                @Override
+                InputSource resolveEntity(String publicId, String systemId) {
+                    if (systemId.contains("report.dtd")) {
+                        return new InputSource(new StringReader(""))
+                    }
+                    return null
+                }
+            })
+
+            def report = parser.parse(reportFile)
+
+            def counter = report.counter.find { it.@type == 'INSTRUCTION' }
+            def missed = counter.@missed.toInteger()
+            def covered = counter.@covered.toInteger()
+            def total = missed + covered
+            def coverage = (covered / total) * 100
+
+            // Códigos de escape ANSI para rojo y negrita
+            def redBold = "\033[1;31m"
+            def reset = "\033[0m"
+
+            println "${redBold}Total Coverage: ${String.format('%.2f', coverage)}%${reset}"
+
+            
+        } else {
+
+            println "No coverage report found."
+        }
+    }
+}
+
+// Ejecutar printCoverageReport después de test
+test.finalizedBy printCoverageReport
+
+// Asegurarse de que printCoverageReport se ejecute también al final de build
+build.dependsOn printCoverageReport

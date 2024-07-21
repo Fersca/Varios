@@ -49,6 +49,7 @@ public class Server {
         jettyServer.setHandler(new AbstractHandler()
         {
             @Override
+            @SuppressWarnings("unchecked")
             public void handle(String target, Request jettyRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
             {
                 // Mark the request as handled so that it
