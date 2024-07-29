@@ -28,6 +28,8 @@ plugins {
     
     
     id 'java'
+
+    id 'pmd'
     
     //PlugIn de jacoco para el test coverage
     id 'jacoco'
@@ -79,6 +81,13 @@ dependencies {
     */
     implementation 'org.slf4j:slf4j-nop:2.0.7'
 
+}
+
+pmd {
+    consoleOutput = true
+    toolVersion = "7.0.0"
+    rulesMinimumPriority = 5
+    ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
 }
 
 application {

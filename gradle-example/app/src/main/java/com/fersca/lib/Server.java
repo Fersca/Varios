@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -19,7 +20,7 @@ public class Server {
 
     private static org.eclipse.jetty.server.Server jettyServer;
     
-    private static final HashMap<String, Consumer<HttpContext>> urls = new HashMap<>();
+    private static final Map<String, Consumer<HttpContext>> urls = new HashMap<>();
     
     public static void createHttpServer() throws Exception {
 

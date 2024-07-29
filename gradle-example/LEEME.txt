@@ -9,6 +9,10 @@ gradlew clean build -- limpia y hace un build con los test
 gradlew nativeBuild --> genera el compilado para linux y windows, dejó de anda en mac, ver detalle
 graslew generateJavaScript --> genera el archivo js que luego se linkea desde el tea_index.html
 
+gradlew pmdMain --> Lo que hace es ejecutar el analizador de código estatico PMD (https://pmd.github.io/)
+                --> Está este plugin para Netbeans que tengo que ver como instalar (https://github.com/sqe-team/sqe)
+                Parece que hay uno que se llama sonarlint que es mejor, pero no estoy pudiendo instalar el plugin de netbeans
+
 Native Compile:
 -------
 
