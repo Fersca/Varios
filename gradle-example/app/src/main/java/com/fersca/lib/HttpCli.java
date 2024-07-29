@@ -43,7 +43,7 @@ public class HttpCli {
     }
     
     //create an http client
-    private static HttpClient client;
+    private static final HttpClient client = HttpClient.newHttpClient();;
     private static HttpClient cliAsync;
     private static ExecutorService executorService;
     
@@ -58,9 +58,6 @@ public class HttpCli {
 
         //create the request object
         HttpRequest request = b.build();          
-
-        if (client==null)
-            client = HttpClient.newHttpClient();
         
         //execute the request
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        

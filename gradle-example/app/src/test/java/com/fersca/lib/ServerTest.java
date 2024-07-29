@@ -1,11 +1,24 @@
 package com.fersca.lib;
 
+import com.fersca.lib.HttpCli.FutureJson;
+import static com.fersca.lib.HttpCli.getFutureJson;
+import static com.fersca.lib.HttpCli.getJson;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import com.fersca.lib.Server;
+import java.util.Enumeration;
+import java.util.HashMap;
 import static org.junit.Assert.*;
+
 
 /**
  *
@@ -26,6 +39,7 @@ public class ServerTest {
     
     @Before
     public void setUp() {
+        
     }
     
     @After
@@ -56,4 +70,129 @@ public class ServerTest {
         assertEquals(jsonMap.get("age"),33.0);
                
     }
+    
+    @Test
+    public void test_get_json_from_url() {
+        
+        //get the json map from url
+        Map jsonMap2 = null;        
+        try {
+            jsonMap2 = getJson("https://api.mercadolibre.com/users/20");
+        } catch (Exception ex) {
+            fail("Error getting content from url");
+        }
+        
+        String nickname = jsonMap2.get("nickname").toString();
+                
+        assertEquals("MPAGO_MLB",nickname);
+        
+    }
+    
+    @Test
+    public void test_get_json_from_url_async(){
+
+        //get the json map with an async call
+        FutureJson fJson = null;                
+        try {
+            fJson = getFutureJson("https://api.mercadolibre.com/users/10");
+        } catch (Exception ex) {
+            fail("Error getting content from url in async way");
+        }
+        
+        //wait until json is available
+        var jsonMap3 = fJson.getJson();        
+        String nickname = jsonMap3.get("nickname").toString();                
+        assertEquals("ANGEL_TEST10",nickname);
+        
+    }
+    
+    @Test
+    public void test_webserver_cretion_and_adding_a_controller(){
+
+        try {
+            //http server
+            Server.createHttpServer();
+        } catch (Exception ex) {
+            Logger.getLogger(ServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        //Add the request handlers      
+        Server.addController("/ping", ServerTest::pong);     
+        //Add the request handlers for json     
+        Server.addController("/pingJson", ServerTest::pongJson);     
+        
+        
+        String status = Server.serverStatus();
+        assertEquals("STARTED",status);
+                
+    }
+
+    @Test
+    public void test_ping_to_webserver(){
+
+        //get the json map from url
+        Map jsonMap2 = null;        
+        try {
+            jsonMap2 = getJson("http://localhost:8080/ping");
+        } catch (Exception ex) {
+            fail("Error getting content from url");
+        }
+        
+        String responseMessage = jsonMap2.get("status").toString();
+                
+        assertEquals("pong",responseMessage);                
+    }
+
+    @Test
+    public void test_ping_to_webserver_get_json(){
+
+        //get the json map from url
+        Map jsonMap2 = null;        
+        try {
+            jsonMap2 = getJson("http://localhost:8080/pingJson?nombre=fernando");
+        } catch (Exception ex) {
+            fail("Error getting content from url");
+        }
+        
+        String responseMessage = jsonMap2.get("status").toString();
+                
+        assertEquals("fernando",responseMessage);                
+    }
+    
+    @Test
+    public void test_shutdown_the_werserver(){
+               
+        //shutdown http server
+        Server.shutdownWebserver();
+        String status = Server.serverStatus();
+        assertEquals("STOPPED",status);
+        
+    }
+    
+    private static void pong(HttpContext context) {
+        String part1 = "{\"status\""; 
+        String part2 = ":\"pong\"}"; 
+        context.print(part1);
+        context.write(part2);
+        System.out.println(part1+part2);
+    };
+
+    private static void pongJson(HttpContext context) {
+
+        Enumeration<String> lista = context.getRequest().getHeaderNames();        
+        while (lista.hasMoreElements()) {
+            String header = lista.nextElement();
+            System.out.println("Header: " + header +" --- "+ context.getRequest().getHeader(header));
+        }                                                                    
+        
+        String nombreParam = context.getParameter("nombre");
+        assertEquals(nombreParam, "fernando");
+        
+        Map<String, Object> user = new HashMap<>();
+        user.put("status", nombreParam);
+                
+        context.write(user);
+
+    };
+    
 }

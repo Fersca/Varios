@@ -86,7 +86,14 @@ public class Server {
         System.out.println("Server started");
         
     }
-
+    
+    public static String serverStatus(){
+        if (jettyServer!=null)
+            return jettyServer.getState();
+        else
+            return "null";
+    }
+        
     public static void addController(String name, Consumer<HttpContext> controller){
         urls.put(name, controller);
     }
