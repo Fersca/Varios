@@ -101,7 +101,7 @@ public class App {
         String mensage = "Ejecutó el métedoto procesaUsuario";
         context.write(mensage);
         System.out.println(mensage);
-    };
+    }
 
     private static void procesaUsuarioJson(HttpContext context) {
         String mensage = "Ejecutó el métedoto procesaUsuarioJson";
@@ -115,7 +115,7 @@ public class App {
                 
         context.write(user);
         System.out.println(mensage);
-    };
+    }
 
     private static void procesaHeaders(HttpContext context) {
 
@@ -135,9 +135,7 @@ public class App {
         String nombreParam = context.getParameter("nombre");
 
         context.write("<br>Nombre: "+nombreParam);
-    };
-    
-    
+    }
     
     private class RunableImpl implements Runnable {
         public void run() {
