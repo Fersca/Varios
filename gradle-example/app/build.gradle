@@ -31,6 +31,9 @@ plugins {
 
     id 'pmd'
     
+    //https://plugins.gradle.org/plugin/se.solrike.sonarlint    
+    id "se.solrike.sonarlint" version "2.0.0"
+    
     //PlugIn de jacoco para el test coverage
     id 'jacoco'
     
@@ -81,6 +84,9 @@ dependencies {
     */
     implementation 'org.slf4j:slf4j-nop:2.0.7'
 
+    //De sonarlint (Solo chequea Java)
+    sonarlintPlugins 'org.sonarsource.java:sonar-java-plugin:7.30.1.34514'
+        
 }
 
 pmd {
@@ -98,6 +104,20 @@ application {
 jar {
   manifest {
     attributes 'Main-Class': 'gradle.example.App'
+  }
+}
+
+// Example to configure HTML report
+sonarlintMain {
+  reports {
+    text.enabled = false // default false
+    html {
+      enabled = true // default false
+      // default location build/reports/sonarlint/sonarlintMain.html
+      outputLocation = layout.buildDirectory.file('my_sonarlint_super_report.html')
+    }
+    xml.enabled = false // default false
+    sarif.enabled = false // default false
   }
 }
 

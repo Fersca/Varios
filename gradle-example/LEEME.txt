@@ -11,7 +11,18 @@ graslew generateJavaScript --> genera el archivo js que luego se linkea desde el
 
 gradlew pmdMain --> Lo que hace es ejecutar el analizador de código estatico PMD (https://pmd.github.io/)
                 --> Está este plugin para Netbeans que tengo que ver como instalar (https://github.com/sqe-team/sqe)
-                Parece que hay uno que se llama sonarlint que es mejor, pero no estoy pudiendo instalar el plugin de netbeans
+
+gradlew sonarlintMain --> Ejecuta el análisis de código estático con sonarlint. deja el reporte
+                            (my_sonarlint_super_report.html) en la carperta de build
+
+                PlugIn de sonarlint para netbeans:
+                ----------------------------------
+                Parece que hay uno que se llama sonarlint que es mejor.
+                Me lo pude bajar de: https://plugins.netbeans.apache.org/catalogue/?id=21 y lo instalé a mano en netbeans
+                Es absolutamente magnífico, boton derecho en el proyecto, analizar con sonarlint, luego de un rato te lo analiza y en el código
+                te muestra flechitas rojas con su explicación.
+
+TODO: Ver como hacer para que cuando haga un build no me corra los linters
 
 Native Compile:
 -------
