@@ -1,13 +1,12 @@
 package com.fersca.lib;
 
 import com.google.gson.Gson;
-import gradle.example.App;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static com.fersca.lib.Logger.println;
 
 /**
  *
@@ -28,7 +27,7 @@ public class HttpContext {
             this.response.getWriter().print(message);                
 
         } catch (IOException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            println(Level.SEVERE, ex);
         }
     }
 
@@ -45,12 +44,12 @@ public class HttpContext {
             this.write();                
 
         } catch (IOException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            println(Level.SEVERE, ex);
         }
     }
     // Crear una instancia de Gson
     private static final Gson gson = new Gson();
-    public void write(Map json){
+    public void write(Map<String, Object> json){
         try {
 
             // Convertir el mapa a un string JSON
@@ -63,7 +62,7 @@ public class HttpContext {
 
 
         } catch (IOException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            println(Level.SEVERE, ex);
         }
     }
 

@@ -28,10 +28,12 @@ plugins {
     
     
     id 'java'
-
+    
+    //TODO: Configurar Checkstyle (https://docs.gradle.org/current/userguide/checkstyle_plugin.html)
     id 'pmd'
     
     //https://plugins.gradle.org/plugin/se.solrike.sonarlint    
+    //https://github.com/Lucas3oo/sonarlint-gradle-plugin
     id "se.solrike.sonarlint" version "2.0.0"
     
     //PlugIn de jacoco para el test coverage
@@ -93,6 +95,7 @@ pmd {
     consoleOutput = true
     toolVersion = "7.0.0"
     rulesMinimumPriority = 5
+    ignoreFailures = true //para que el build no falle si hay errores
     ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
 }
 
@@ -105,6 +108,23 @@ jar {
   manifest {
     attributes 'Main-Class': 'gradle.example.App'
   }
+}
+
+sonarlint {
+  //excludeRules = ['java:S1186']
+  //includeRules = ['java:S1176', 'java:S1696', 'java:S4266']
+  //ignoreFailures = false
+  maxIssues = 15 // default 0
+  //reportsDir = 'someFolder' // default build/reports/sonarlint
+  // note that rule parameter names are case sensitive
+  /*
+  ruleParameters = [
+    'java:S1176' : [
+      'forClasses':'**.api.**',      // need javadoc for public methods in package matching 'api'
+      'exclusion': '**.private.**'] // do not need javadoc for classes under 'private'. Default is **.internal.**
+  ]
+  */
+  showIssues = true // default true
 }
 
 // Example to configure HTML report

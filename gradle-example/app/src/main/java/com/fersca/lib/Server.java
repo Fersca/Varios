@@ -11,12 +11,16 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import static com.fersca.lib.Logger.println;
 
 /**
  *
  * @author Fernando.Scasserra
  */
 public class Server {
+
+    //constructor privado para evitar el publico por default en una clase static que se usa como utils
+    private Server(){}
 
     private static org.eclipse.jetty.server.Server jettyServer;
     
@@ -74,17 +78,17 @@ public class Server {
                 response.getWriter().println("Query String: " + queryString);
                 */
                 
-                Consumer metodo = urls.get(request.getRequestURI());
+                Consumer<HttpContext> metodo = urls.get(request.getRequestURI());
                 HttpContext context = new HttpContext(request, response);
                 metodo.accept(context);                               
 
-                System.out.println("Request Handled");
+                println("Request Handled");
             }
         });
 
         // Start the Server so it starts accepting connections from clients.
         jettyServer.start();
-        System.out.println("Server started");
+        println("Server started");
         
     }
     
@@ -101,10 +105,10 @@ public class Server {
     
     public static void shutdownWebserver(){
         try {
-            System.out.println("Shutting down server");
+            println("Shutting down server");
             jettyServer.stop();
         } catch (Exception ex) {
-            System.out.println("Error while closing webserver");
+            println("Error while closing webserver");
         }
     }
 

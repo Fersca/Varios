@@ -15,35 +15,38 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static com.fersca.lib.Logger.println;
+import java.util.HashMap;
 
 /**
  *
  * @author Fernando.Scasserra
  */
 public class HttpCli {
- 
+     
+    //constructor privado para evitar el publico por default en una clase static que se usa como utils
+    private HttpCli(){}
+    
     private static final Gson gson = new Gson();
     
-    public static Map json(String jsonString) {
+    public static Map<String, Object> json(String jsonString) {
 
         return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
 
     }
 
-    public static Map getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+    public static Map<String, Object> getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         return json(httpCli(url));
     }
 
     public static FutureJson getFutureJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         
         var response = httpCliAsync(url);
-        FutureJson fResponse = new FutureJson(response);        
-        return fResponse;
+        return new FutureJson(response);        
     }
     
     //create an http client
-    private static final HttpClient client = HttpClient.newHttpClient();;
+    private static final HttpClient client = HttpClient.newHttpClient();
     private static HttpClient cliAsync;
     private static ExecutorService executorService;
     
@@ -69,32 +72,37 @@ public class HttpCli {
 
     public static class FutureJson  {
         
-        private long time1;
-        private CompletableFuture<HttpResponse<String>> response;
+        private final long time1;
+        private final CompletableFuture<HttpResponse<String>> response;
         
         public FutureJson(CompletableFuture<HttpResponse<String>> response){
            time1 = System.currentTimeMillis();
            this.response = response;
         }
         
-        public Map getJson(){
+        public Map<String, Object> getJson(){
             
             //Wait for the future to be available
-            HttpResponse<String> response=null;
+            HttpResponse<String> resp=null;
             try {
-                response = this.response.get();
+                resp = this.response.get();
             } catch (InterruptedException ex) {
-                Logger.getLogger(HttpCli.class.getName()).log(Level.SEVERE, null, ex);
+                println(Level.SEVERE, ex);
+                // Hay que manejar la interrupted exception
+                Thread.currentThread().interrupt();                
             } catch (ExecutionException ex) {
-                Logger.getLogger(HttpCli.class.getName()).log(Level.SEVERE, null, ex);
+                println(Level.SEVERE, ex);
             }
 
             long time2 = System.currentTimeMillis();
 
             long diff = time2-time1;
-            System.out.println(diff);           
-
-            return json(response.body());    
+            println(String.valueOf(diff));
+            
+            if (resp!=null)
+                return json(resp.body());
+            else
+                return new HashMap<>();
             
         }
     }

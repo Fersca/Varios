@@ -22,6 +22,9 @@ import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.getJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.FutureJson;
+import static com.fersca.lib.Logger.println;
+import static com.fersca.lib.Logger.setLogLevel;
+import java.util.logging.Level;
 
 /**
  * La idea es probar todo lo necesario para poder hacer una Api rest:
@@ -37,18 +40,19 @@ import static com.fersca.lib.HttpCli.FutureJson;
  * 
  */
 public class App {
-    
-    
+        
     public String getGreeting() {
         return "Hello World!";
     }
 
     public static void main(String[] args) throws  Exception {
-
+               
+        setLogLevel(Level.INFO);
+        
         var j = new App();
         var m = j.greetings();
 
-        System.out.println(m);
+        println(m);
 
         //Test Json Parsing
         String json = """
@@ -60,20 +64,20 @@ public class App {
 
         var jsonMap = json(json);
 
-        System.out.println(m);
-        System.out.println(jsonMap.get("name"));
-        System.out.println(jsonMap.get("age"));
+        println(m);
+        println(jsonMap.get("name"));
+        println(jsonMap.get("age"));
         
         //get the json map from url
         var jsonMap2 = getJson("https://api.mercadolibre.com/users/20");        
-        System.out.println(jsonMap2.get("nickname"));
+        println(jsonMap2.get("nickname"));
         
         //get the json map with an async call
         FutureJson fJson = getFutureJson("https://api.mercadolibre.com/users/10");                
         
         //wait until json is available
         var jsonMap3 = fJson.getJson();        
-        System.out.println(jsonMap3.get("nickname"));        
+        println(jsonMap3.get("nickname"));        
                 
         //Concurrency Example
         j.concurrency();        
@@ -88,7 +92,7 @@ public class App {
         Server.addController("/headers", App::procesaHeaders);        
         
         //waits 10 seconds
-        System.out.println("Waiting 10 seconds until shutdown");
+        println("Waiting 10 seconds until shutdown");
         Thread.sleep(10000);
         
         //shutdown http server
@@ -100,7 +104,7 @@ public class App {
     private static void procesaUsuario(HttpContext context) {
         String mensage = "Ejecutó el métedoto procesaUsuario";
         context.write(mensage);
-        System.out.println(mensage);
+        println(mensage);
     }
 
     private static void procesaUsuarioJson(HttpContext context) {
@@ -114,7 +118,7 @@ public class App {
         user.put("padres", new String[]{"Mirta", "Norberto"});
                 
         context.write(user);
-        System.out.println(mensage);
+        println(mensage);
     }
 
     private static void procesaHeaders(HttpContext context) {
@@ -139,7 +143,7 @@ public class App {
     
     private class RunableImpl implements Runnable {
         public void run() {
-            System.out.println("Asynchronous task 0");
+            println("Asynchronous task 0");
         }
     } 
     
@@ -147,7 +151,7 @@ public class App {
 	private class CallableImpl implements Callable {
         @Override
         public String call() throws InterruptedException {
-            System.out.println("Asynchronous Callable task 0");
+            println("Asynchronous Callable task 0");
             Thread.sleep(1000);
             return "Callable 0";
         }
@@ -157,66 +161,68 @@ public class App {
     private void concurrency() throws InterruptedException, ExecutionException {
         
         //Create an executor service with 10 threads
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        //Uso el try with resourses para que se cierre el executor
+        try (ExecutorService executorService = Executors.newFixedThreadPool(10)){
+                  
+            //One way to create a runnable is throught a class definition.
+            var r0 = new RunableImpl();
+            executorService.execute(r0);
 
-        //One way to create a runnable is throught a class definition.
-        var r0 = new RunableImpl();
-        executorService.execute(r0);
+            //Another way it to creathe the class inline in the parameter call.
+            executorService.execute(new Runnable() {
+                public void run() {
+                    println("Asynchronous task 1");
+                }
+            });        
 
-        //Another way it to creathe the class inline in the parameter call.
-        executorService.execute(new Runnable() {
-            public void run() {
-                System.out.println("Asynchronous task 1");
-            }
-        });        
-        
-        //Another way is to create an inline object and assign it to a varieble
-        var r2 = new Runnable() {
-            public void run() {
-                System.out.println("Asynchronous task 2");
-            }
-        };        
-        
-        executorService.execute(r2);
-        
-        //Another way is with lambda expressions
-        Runnable r3 = () -> {
-            System.out.println("Asynchronous task 3");
-        };        
-        
-        executorService.execute(r3);
-        
-        //other way is to send the lambda directly in the execution
-        executorService.execute(() -> {
-            System.out.println("Asynchronous task 4");
-        });        
-        
-        //Send a Callable task (the callable return a value)
-        var c1 = new CallableImpl();
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-		Future f1 = executorService.submit(c1);
-        var futureValue = f1.get();
-        System.out.println("Valor futuro: "+futureValue);
-        
-        //Smallest way -->
-        @SuppressWarnings("rawtypes")
-		Callable c2 = () -> {
-            System.out.println("Asynchronous Callable task 2");
-            return "Callable task 2";
-        };        
+            //Another way is to create an inline object and assign it to a varieble
+            var r2 = new Runnable() {
+                public void run() {
+                    println("Asynchronous task 2");
+                }
+            };        
 
-        @SuppressWarnings("unchecked")
-		var future2 = executorService.submit(c2);
-        System.out.println("Valor futuro: "+future2.get());
+            executorService.execute(r2);
 
-        
-        //Shutdown the executor
-        executorService.shutdown();
-                
+            //Another way is with lambda expressions
+            Runnable r3 = () -> {
+                println("Asynchronous task 3");
+            };        
+
+            executorService.execute(r3);
+
+            //other way is to send the lambda directly in the execution
+            executorService.execute(() -> {
+                println("Asynchronous task 4");
+            });        
+
+            //Send a Callable task (the callable return a value)
+            var c1 = new CallableImpl();
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+                    Future f1 = executorService.submit(c1);
+            var futureValue = f1.get();
+            println("Valor futuro: "+futureValue);
+
+            //Smallest way -->
+            @SuppressWarnings("rawtypes")
+                    Callable c2 = () -> {
+                println("Asynchronous Callable task 2");
+                return "Callable task 2";
+            };        
+
+            @SuppressWarnings("unchecked")
+                    var future2 = executorService.submit(c2);
+            println("Valor futuro: "+future2.get());
+
+
+            //Shutdown the executor
+            executorService.shutdown();
+        } 
+               
     }
 
     protected String greetings() {
         return "Hola Fer";
     }
-    
+ 
 }

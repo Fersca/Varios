@@ -3,6 +3,8 @@ package com.fersca.lib;
 import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.getJson;
+import static com.fersca.lib.Logger.setLogLevel;
+import static com.fersca.lib.Logger.println;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -39,7 +41,7 @@ public class ServerTest {
     
     @Before
     public void setUp() {
-        
+        setLogLevel(Level.INFO);
     }
     
     @After
@@ -174,7 +176,7 @@ public class ServerTest {
         String part2 = ":\"pong\"}"; 
         context.print(part1);
         context.write(part2);
-        System.out.println(part1+part2);
+        println(Level.INFO,part1+part2);
     };
 
     private static void pongJson(HttpContext context) {
@@ -182,7 +184,7 @@ public class ServerTest {
         Enumeration<String> lista = context.getRequest().getHeaderNames();        
         while (lista.hasMoreElements()) {
             String header = lista.nextElement();
-            System.out.println("Header: " + header +" --- "+ context.getRequest().getHeader(header));
+            println("Header: " + header +" --- "+ context.getRequest().getHeader(header));
         }                                                                    
         
         String nombreParam = context.getParameter("nombre");
