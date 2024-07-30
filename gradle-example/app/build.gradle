@@ -29,7 +29,12 @@ plugins {
     
     id 'java'
     
-    //TODO: Configurar Checkstyle (https://docs.gradle.org/current/userguide/checkstyle_plugin.html)
+    //Configurar Checkstyle (https://docs.gradle.org/current/userguide/checkstyle_plugin.html)   
+    //Para que funcione tuve que bajarme dos archivos xml en donde estaba la configuración de sun y gogole.
+    //Los tuve que poner en un directorio de configuración en el root del proyecto: {root}/config/checkstyle/checkstyle.xml
+    //termina dejandp un reporte en el directorio de reportes.
+    id 'checkstyle'
+    
     id 'pmd'
     
     //https://plugins.gradle.org/plugin/se.solrike.sonarlint    
@@ -46,6 +51,19 @@ plugins {
     // https://www.teavm.org/docs/tooling/gradle.html
     id "org.teavm" version "0.8.1"
     
+}
+
+checkstyle {
+    toolVersion = "10.12.4"
+}
+checkstyleMain {
+    //para que no falle el build
+    ignoreFailures = true
+}
+
+checkstyleTest {
+    //para que no falle el build
+    ignoreFailures = true
 }
 
 jacoco {
