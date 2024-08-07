@@ -14,12 +14,14 @@ import static com.fersca.lib.Logger.println;
  */
 public class HttpContext {
     
-    public HttpContext (HttpServletRequest request, HttpServletResponse response){
+    public HttpContext (HttpServletRequest request, HttpServletResponse response, Map<String, Object> args){
         this.request = request;
         this.response = response;
+        this.args = args;
     }
     private final HttpServletRequest request;
     private final HttpServletResponse response;
+    private Map<String, Object> args = null;
 
     public void print(String message){
 
@@ -35,7 +37,7 @@ public class HttpContext {
         this.response.setStatus(200);
         this.response.setContentType("text/html; charset=UTF-8");
         this.response.setCharacterEncoding("UTF-8");                                
-    }
+    }    
 
     public void write(String message){
 
@@ -72,6 +74,35 @@ public class HttpContext {
     
     public HttpServletRequest getRequest(){
         return this.request;
+    }
+    public Map<String, Object> getArgs(){
+        return this.args;
+    }
+
+    public void notSupported() {
+        this.response.setStatus(405);
+        this.response.setContentType("text/html; charset=UTF-8");
+        this.response.setCharacterEncoding("UTF-8");                                
+    }
+
+    public String getUrlPath(int i) {
+        // si pongo /users/12 me pone en la pos 0 nada, en la 1 users en la 2 "12"
+        String[] split = request.getRequestURI().split("/");
+        return split[i];
+
+    }
+
+    private static final String htmlNotFound="""
+                       <html>
+                       <h2> 404 Element not found: ##ELEMENT## </h2>
+                       </html>
+                       """;
+
+    public void notFound(String message) {        
+        this.write(htmlNotFound.replaceAll("##ELEMENT##", message));
+        this.response.setStatus(400);
+        this.response.setContentType("text/html; charset=UTF-8");
+        this.response.setCharacterEncoding("UTF-8");                                                                   
     }
 
 

@@ -5,10 +5,7 @@ import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.getJson;
 import static com.fersca.lib.Logger.setLogLevel;
 import static com.fersca.lib.Logger.println;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -16,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.fersca.lib.Server;
 import java.util.Enumeration;
 import java.util.HashMap;
 import static org.junit.Assert.*;
@@ -119,9 +115,9 @@ public class ServerTest {
         }
         
         //Add the request handlers      
-        Server.addController("/ping", ServerTest::pong);     
+        Server.addController("/ping", ServerTest::pong,null);     
         //Add the request handlers for json     
-        Server.addController("/pingJson", ServerTest::pongJson);     
+        Server.addController("/pingJson", ServerTest::pongJson,null);     
         
         
         String status = Server.serverStatus();

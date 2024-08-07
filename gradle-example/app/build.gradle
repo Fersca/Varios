@@ -119,7 +119,8 @@ pmd {
 
 application {
     // Define the main class for the application.
-    mainClass = 'gradle.example.App'
+    //mainClass = 'gradle.example.App'
+    mainClass = 'com.fersca.apicreator.Api'
 }
 
 jar {

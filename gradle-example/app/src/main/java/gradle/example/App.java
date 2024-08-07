@@ -87,9 +87,9 @@ public class App {
 
         
         //Add the request handlers      
-        Server.addController("/user/fernando", App::procesaUsuario);     
-        Server.addController("/user/fernando/json", App::procesaUsuarioJson);
-        Server.addController("/headers", App::procesaHeaders);        
+        Server.addController("/user/fernando", App::procesaUsuario,null);     
+        Server.addController("/user/fernando/json", App::procesaUsuarioJson,null);
+        Server.addController("/headers", App::procesaHeaders,null);        
         
         //waits 10 seconds
         println("Waiting 10 seconds until shutdown");
