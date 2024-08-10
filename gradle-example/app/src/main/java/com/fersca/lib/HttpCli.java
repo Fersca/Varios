@@ -39,6 +39,13 @@ public class HttpCli {
         return json(httpCli(url));
     }
 
+    public static Map<String, Object> postJson(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return json(httpPostCli(url,jsonStrig));
+    }
+    public static String post(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return httpPostCli(url,jsonStrig);
+    }
+
     public static FutureJson getFutureJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         
         var response = httpCliAsync(url);
@@ -69,7 +76,26 @@ public class HttpCli {
         return response.body();
 
     }
+    
+    private static String httpPostCli(String url, String jsonBody) throws URISyntaxException, IOException, InterruptedException{
 
+        //Create the builder
+        HttpRequest.Builder b = HttpRequest.newBuilder()
+            .uri(new URI(url))
+            .headers("Accept", "application/json", "Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(10))
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody));        
+
+        //create the request object
+        HttpRequest request = b.build();          
+
+        //execute the request
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
+
+        //return the body content
+        return response.body();
+    }
+    
     public static class FutureJson  {
         
         private final long time1;

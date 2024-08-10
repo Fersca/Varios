@@ -2,7 +2,10 @@ package com.fersca.lib;
 
 import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
+import static com.fersca.lib.HttpCli.postJson;
+import static com.fersca.lib.HttpCli.post;
 import static com.fersca.lib.HttpCli.getJson;
+import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.Logger.setLogLevel;
 import static com.fersca.lib.Logger.println;
 import java.util.Map;
@@ -142,19 +145,30 @@ public class ServerTest {
     }
 
     @Test
-    public void test_ping_to_webserver_get_json(){
+    public void test_ping_to_webserver_with_post(){
 
+        String body = """
+                      {"name":"fer"}
+                      """;
+        
         //get the json map from url
         Map jsonMap2 = null;        
         try {
-            jsonMap2 = getJson("http://localhost:8080/pingJson?nombre=fernando");
+            jsonMap2 = postJson("http://localhost:8080/pingJson?nombre=fernando",body);
         } catch (Exception ex) {
             fail("Error getting content from url");
         }
         
         String responseMessage = jsonMap2.get("status").toString();
+        String method = jsonMap2.get("method").toString();
+        String bodyResp = jsonMap2.get("body").toString();
+        
+        var bodyInJson = json(bodyResp);
+        var name =bodyInJson.get("name");
                 
         assertEquals("fernando",responseMessage);                
+        assertEquals("POST",method);                
+        assertEquals("fer",name);                        
     }
     
     @Test
@@ -166,6 +180,33 @@ public class ServerTest {
         assertEquals("STOPPED",status);
         
     }
+
+    @Test
+    public void test_post_to_external_api(){
+               
+        String body = """
+{ 
+  "prompt":"quiero que me digas cual es la distancia de la tierra a la luna, la mejor aproximación que puedas solo devuelvemen un número"
+}
+                      """;
+        
+        //get the json map from url
+        Map<String, Object> jsonMap2 = null;        
+        try {
+            jsonMap2 = postJson("https://postman-echo.com/post",body);
+        } catch (Exception ex) {
+            fail("Error getting content from url");
+        }
+                
+        @SuppressWarnings("unchecked")
+        var responseMessage = (Map<String, Object>)jsonMap2.get("json");      
+        
+        String content = responseMessage.get("prompt").toString();
+        
+        String expected = "quiero que me digas cual es la distancia de la tierra a la luna, la mejor aproximación que puedas solo devuelvemen un número";
+        assertEquals(expected,content);                
+        
+    }   
     
     private static void pong(HttpContext context) {
         String part1 = "{\"status\""; 
@@ -186,8 +227,15 @@ public class ServerTest {
         String nombreParam = context.getParameter("nombre");
         assertEquals(nombreParam, "fernando");
         
+        String method = context.getRequest().getMethod();
+        
         Map<String, Object> user = new HashMap<>();
-        user.put("status", nombreParam);
+        user.put("status", nombreParam);        
+        user.put("method", method);
+        
+        if ("POST".equals(method)){
+            user.put("body", context.getBody());
+        }
                 
         context.write(user);
 

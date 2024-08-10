@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import static com.fersca.lib.Logger.println;
+import java.io.BufferedReader;
+import java.util.stream.Collectors;
+import static com.fersca.lib.HttpCli.json;
+import java.util.logging.Logger;
 
 /**
  *
@@ -104,7 +108,21 @@ public class HttpContext {
         this.response.setContentType("text/html; charset=UTF-8");
         this.response.setCharacterEncoding("UTF-8");                                                                   
     }
-
+    
+    public Map<String, Object> getJsonBody(){
+        return json(getBody());
+    }
+    
+    public String getBody()  {
+        BufferedReader reader=null;
+        try {
+            reader = this.request.getReader();
+        } catch (IOException ex) {
+            Logger.getLogger(HttpContext.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
+        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+    }
 
 }
     

@@ -4,17 +4,22 @@ import static com.fersca.apicreator.DynamicJavaRunner.compile;
 import static com.fersca.apicreator.DynamicJavaRunner.execute;
 import static com.fersca.lib.Logger.println;
 import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.postJson;
 import com.fersca.lib.HttpContext;
 import static com.fersca.lib.Logger.println;
 import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -45,40 +50,198 @@ public class Api {
         
     }
 
-    private static Object getCalculatedValue(String api, String field) {
+    private static final Set<String> compiledWorkingClasses = new HashSet<>();
+    
+    private static Object getCalculatedValue(String api, String field, Map<String, Object> parameters, String description, Map<String, Object> parametersWithTypes) {
         
-        //busca el archivo que contiene el script para el campo de la api especificada.
+        //nombre del código
+        String className =api + "_"+ field;
+        
+        //Si ya está compilado y funciona, cachea el código.
+        if (!compiledWorkingClasses.contains(className)){
 
-        // Especifica el directorio que deseas leer
-        File scriptFile = new File(rootPath+"/apis/"+api+"/"+field+".sc");
-        Path filePath = Paths.get(scriptFile.getAbsolutePath());
-        
-        try {
+            //genera el codigo fuente
+            String sourceCode = generateSourceCode(api, field, parametersWithTypes, description);
             
-            // Leer el contenido del archivo de texto
-            String sourceCode = Files.readString(filePath);
-            String className = field;
-            String methodName = "getMessage";                        
-            
+            //guarda el código generado
+            File scriptFile = new File(rootPath+"/apis/"+api+"/"+field+"_generated.sc");
+            Path filePath = Paths.get(scriptFile.getAbsolutePath());
+            try {
+                Files.writeString(filePath, sourceCode);
+            } catch (IOException ex) {
+                Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+                return "Error storing code for "+api+"/"+field;
+            }
+                       
             // Compilar el código fuente
             boolean isCompiled = compile(sourceCode, className);
-            if (isCompiled) {
-                // Ejecutar la clase compilada y capturar el valor de retorno del método
-                Object result = execute(className, methodName);
-                System.out.println("Resultado del método: " + result);
-                return result;
-            } else {
-                return "Script compile error.";
+            if (!isCompiled) {
+                 return "Script compile for "+api+"/"+field+" error.";
             }
-                                                                   
-        } catch (IOException ex) {
-            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-            return "Script error.";
-        }              
-        
+            
+        }
+
+        String methodName = "getMessage";                        
+        //Ejecuta el código ya compilado en la JVM
+        Object result = execute(className, methodName, parameters);        
+        System.out.println("Resultado del método: " + result);
+        if (result!=null){
+            //compilación y ejecución correcta, cachea la compilación así no se hace de nuevo.
+            compiledWorkingClasses.add(className);
+            return result;
+        } else {
+            //Lo saca por si estaba antes ya cacheado, no debería pasar pero quizás por datos ratos en el runtime.
+            compiledWorkingClasses.remove(className);
+            return "Runtime error for "+api+"/"+field+" error.";
+        }
+                    
     }
 
     private static final String rootPath = "/Users/Fernando.Scasserra/code/Varios/gradle-example/app/";
+
+    private static String generateSourceCode(String api, String field, Map<String, Object> parametersWithTypes, String description) {
+        
+        String sourceCode = 
+"""
+import java.util.Map;
+                            
+public class ##CLASS_NAME## {
+
+    public static Object getMessage(Map<String, Object> parametros) {
+
+        ##PARAMETERS##
+
+        Object result;
+        //// Begin AI-Code ////
+        
+        ##AI_CODE##
+                                                                                                                                                    
+        //// End AI-Code   ////
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("");
+    }
+}                                                    
+""";
+        
+        String parametersCode = generateParametersCode(parametersWithTypes);
+        
+        String aiCode = generateAiCode(parametersWithTypes, description);
+
+        sourceCode = sourceCode.replaceAll("##CLASS_NAME##", api+"_"+field);
+        sourceCode = sourceCode.replaceAll("##PARAMETERS##", parametersCode);        
+        sourceCode = sourceCode.replaceAll("##AI_CODE##", aiCode);                        
+                
+        return sourceCode;
+        
+    }
+
+    private static String generateParametersCode(Map<String, Object> parametersWithTypes) {
+
+        String parametersCode = "";
+        for (String field : parametersWithTypes.keySet()) {
+
+            //obtiene el tipo del dato del campo
+            String valueType = (String)parametersWithTypes.get(field);
+
+            //Según sea el value type lo pone en el json final y calcula los campos calculados real time
+            switch (valueType) {
+                case "Number" -> parametersCode+="\nDouble "+field+" = (Double) parametros.get(\""+field+"\"); //From code";
+                case "String" -> parametersCode+="\nString "+field+" = (String) parametros.get(\""+field+"\"); //From code";
+                case "Boolean" -> parametersCode+="\nboolean "+field+" = (Boolean) parametros.get(\""+field+"\"); //From code";
+                default -> println("Tipo inválido: "+field + "("+valueType+")");
+            }                            
+        }                    
+        
+        return parametersCode;        
+        
+    }
+
+    private static String generateAiCode(Map<String, Object> parametersWithTypes, String description) {
+        
+        String variablesCode = "";
+        for (String field : parametersWithTypes.keySet()) {
+
+            //obtiene el tipo del dato del campo
+            String valueType = (String)parametersWithTypes.get(field);
+
+            //Según sea el value type lo pone en el json final y calcula los campos calculados real time
+            switch (valueType) {
+                case "Number" -> variablesCode+="\nDouble "+field+";";
+                case "String" -> variablesCode+="\nString "+field+";";
+                case "Boolean" -> variablesCode+="\nboolean "+field+";";
+                default -> println("Tipo inválido: "+field + "("+valueType+")");
+            }                            
+        }                    
+
+        String prompt = """
+    En java tengo el siguiente código en el metodo de una clase
+
+    public static Object getMessage() {
+
+        ##VARIABLES##
+                                                                                                                                                                                                                                                                        
+        Object result;
+
+        //##CODE##
+                                                                                                                                                                                          
+        return result;
+                        
+    }
+    
+    Como se puede ver tengo algunas variables (por el momebto no importa su contenido, luego las completaré, las cuales estás disponibles para utilizar.
+    También hay disponile un objeto result, el cual se devuelve en el método.
+    Tu eres un developers java senior, el cual tiene que devolver el código que pondrías en donde dice ##CODE## para que el siguiente método se comporte como la siguiente descripción:
+    "##DESCRIPTION##"                                                                        
+    
+    Quiero que me des exactamente el código que hay que hacer para que esa descripción sea cierta, no quiero que me des ninguna explicación de como hacerlo, ya que la respuesta que
+    me des quierero copiarla y pegarla en el código anterior en reemplazo del fragmento que dice ##CODE## con lo cual tienen que devolverme una cadena de caracteres
+    que represente un fragmento de código, el mismo puede tener varias líneas, lo importante es que dejes el cálculo, ya sea un número o un texto, en el objeto result.                             
+ 
+""";
+        prompt = prompt.replaceAll("##VARIABLES##", variablesCode);
+        prompt = prompt.replaceAll("##DESCRIPTION##", description);
+        
+        String code = executePrompt(prompt);
+        
+        return code;
+        
+    }
+
+    private static String executePrompt(String prompt) {
+        println("-----------PROMPT------------");        
+        println(prompt);
+        println("-----------END------------");                
+        
+        /*
+        String code = 
+        """
+        result =  name + " is " + age + " years oldss, holds a degree in " + degrees + ", and is " + (adult ? "an adult" : "not an adult") + ".";
+        """;
+        */
+        String code = "result = name.toUpperCase() + \" - tiene \" + age.intValue() + \" años\";";
+        
+        String url="http://localhost:1234/v1/completions";
+        
+        String jsonString=
+                """
+                {"prompt":"quiero que me digas cual es la distancia de la tierra a la luna"}                          
+                """;
+        
+        Map<String, Object> jsonResponse;
+        
+        try {
+            jsonResponse = postJson(url, jsonString);
+        } catch (Exception ex) {
+            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+            println("Error pegándole al llm local");
+        }
+
+        return code;
+                
+    }
     
     private void startWebserver() throws IOException, Exception {
 
@@ -120,6 +283,9 @@ public class Api {
         String domain = (String)structure.get("domain");
         
         @SuppressWarnings("unchecked")
+        var onlineCalculations = (Map<String, Object>) arguments.get("online_calculations");
+        
+        @SuppressWarnings("unchecked")
         //Obtiene los métodos soportados en esta api                
         ArrayList<String> supportedMethods = (ArrayList<String>) structure.get("accept");
         
@@ -153,14 +319,14 @@ public class Api {
                     
                     //obtiene el tipo del dato del campo
                     String valueType = (String)fields.get(field);
-                    String valueFromDB = (String)jsonFromDB.get(field);
+                    Object valueFromDB = jsonFromDB.get(field);
                    
                     //Según sea el value type lo pone en el json final y calcula los campos calculados real time
                     switch (valueType) {
-                        case "Number" -> finalJson.put(field, Integer.valueOf(valueFromDB));
-                        case "String" -> finalJson.put(field, valueFromDB);
-                        case "Boolean" -> finalJson.put(field, Boolean.valueOf(valueFromDB));
-                        case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field));
+                        case "Number" -> finalJson.put(field, (Double)valueFromDB);
+                        case "String" -> finalJson.put(field, (String)valueFromDB);
+                        case "Boolean" -> finalJson.put(field, (Boolean)valueFromDB);
+                        case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field, jsonFromDB,(String)onlineCalculations.get(field), fields));
                         default -> println("Tipo inválido: "+field + "("+valueType+")");
                     }                            
                 }                    
@@ -227,15 +393,15 @@ public class Api {
     private void startDB() {
         String json = """
                         {
-                        "id":"22",
+                        "id":22,
                         "name":"Fernando",
-                        "age":"42",
-                        "adult":"true",
+                        "age":42,
+                        "adult":true,
                         "degrees": "Engineering"
                         }                                            
                       """;
         DB.put(22, json);
-                
+                        
     }
 
 

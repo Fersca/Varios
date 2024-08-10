@@ -12,10 +12,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Map;
+import static com.fersca.lib.Logger.println;
 
 public class DynamicJavaRunner {
 
     public static boolean compile(String sourceCode, String className) {
+                
         try {
             // Escribe el código fuente en un archivo .java
             FileWriter writer = new FileWriter(className + ".java");
@@ -37,7 +40,7 @@ public class DynamicJavaRunner {
         }
     }
 
-    public static Object execute(String className, String methodName) {
+    public static Object execute(String className, String methodName, Map<String, Object> parameters) {
         try {
             
             // Directorio hardcodeado donde se espera que estén las clases compiladas
@@ -45,10 +48,12 @@ public class DynamicJavaRunner {
             
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{hardcodedOutDir.toURI().toURL()});
             Class<?> cls = Class.forName(className, true, classLoader);
-                                    
+            Method[] methods = cls.getMethods();
+                        
             // Encuentra y ejecuta el método especificado
-            Method method = cls.getMethod(methodName);
-            return method.invoke(null);
+            Method method = cls.getMethod(methodName, Map.class);
+            
+            return method.invoke(null,parameters);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
