@@ -4,6 +4,7 @@ import static com.fersca.apicreator.DynamicJavaRunner.compile;
 import static com.fersca.apicreator.DynamicJavaRunner.execute;
 import static com.fersca.lib.Logger.println;
 import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.jsonString;
 import static com.fersca.lib.HttpCli.postJson;
 import com.fersca.lib.HttpContext;
 import static com.fersca.lib.Logger.println;
@@ -11,6 +12,7 @@ import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,6 +58,11 @@ public class Api {
         
         //nombre del código
         String className =api + "_"+ field;
+        
+        /*
+        TODO: Ver si se puede detectar al inicio cuáles clases ya están compiladas así no se genera de nuevo el código.
+        Creo que no va a quedar otra que ver los archivos que ya están generados y de alguna manera limpiarlos y listo.
+        */
         
         //Si ya está compilado y funciona, cachea el código.
         if (!compiledWorkingClasses.contains(className)){
@@ -215,15 +222,13 @@ public class ##CLASS_NAME## {
         println(prompt);
         println("-----------END------------");                
         
-        /*
         String code = 
         """
         result =  name + " is " + age + " years oldss, holds a degree in " + degrees + ", and is " + (adult ? "an adult" : "not an adult") + ".";
         """;
-        */
-        String code = "result = name.toUpperCase() + \" - tiene \" + age.intValue() + \" años\";";
         
-        String url="http://localhost:1234/v1/completions";
+        /*
+        String url="http://127.0.0.1:1234/v1/completions";
         
         String jsonString=
                 """
@@ -238,9 +243,51 @@ public class ##CLASS_NAME## {
             Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
             println("Error pegándole al llm local");
         }
-
+        */
+        
         return code;
                 
+    }
+
+    private static void deleteFile(String domain, String key) {
+
+        Path filePath = Paths.get(rootPath+"/db/"+domain+"/"+key+".json");
+        try {
+            Files.delete(filePath);
+        } catch (IOException ex) {
+            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    private static void saveJsonFile(String domain, String key, String jsonString) {
+
+        Path filePath = Paths.get(rootPath+"/db/"+domain+"/"+key+".json");
+        try {
+            Files.write(filePath, jsonString.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException ex) {
+            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                
+    }
+
+    private static Integer nextIDforDomain(String domain) {
+        
+        Set<String> keys = DB.keySet();
+        Integer maxKey = 0;
+        
+        for (String key : keys){
+            String[] splits = key.split("_");
+            String keyDomain = splits[0];
+            Integer keyNumber = Integer.valueOf(splits[1]);
+            if (keyDomain.equals(domain)){
+                if (keyNumber>maxKey){
+                    maxKey = keyNumber;
+                }
+            }
+        }
+                
+        return maxKey+1;
     }
     
     private void startWebserver() throws IOException, Exception {
@@ -270,7 +317,7 @@ public class ##CLASS_NAME## {
     }
     
     //Base de datos de mentira de jsons
-    private static final HashMap<Integer, Object> DB = new HashMap<>();
+    private static final HashMap<String, Object> DB = new HashMap<>();
     
     private static void generalController(HttpContext context) {
 
@@ -283,7 +330,7 @@ public class ##CLASS_NAME## {
         String domain = (String)structure.get("domain");
         
         @SuppressWarnings("unchecked")
-        var onlineCalculations = (Map<String, Object>) arguments.get("online_calculations");
+        var onlineCalculations = (Map<String, Object>) arguments.get("get_online_calculations");
         
         @SuppressWarnings("unchecked")
         //Obtiene los métodos soportados en esta api                
@@ -294,18 +341,19 @@ public class ##CLASS_NAME## {
                
         //valida que el método esté soportado por la definición, sino devuelve un 405 (not supported)
         if (!supportedMethods.contains(method)){
+            println("Method: "+method+" not supported");
             context.notSupported();
             return;
         }
-       
-        Integer key= Integer.valueOf(context.getUrlPath(2));
-        
+              
         //---> Para el caso del GET:
         
         if ("GET".equals(method)){
+
+            Integer key= Integer.valueOf(context.getUrlPath(2));            
             
             //ir a buscar el Json guardado en la base de datos para el ID identificado.
-            Object element = DB.get(key);
+            Object element = DB.get(domain+"_"+key);
             
             //si existe el elemento en la base de datos
             if (element!=null){               
@@ -338,9 +386,86 @@ public class ##CLASS_NAME## {
                 context.notFound(""+key);
             }
             
-            //Verificar si hay algún dato que se calcule en real time.
+        } else if ("DELETE".equals(method)){
+            
+            Integer key= Integer.valueOf(context.getUrlPath(2));            
+            
+            //Buscar el elemento en la DB
+            Object element = DB.get(domain+"_"+key);
+                        
+            //si existe lo elimina                
+            if (element!=null){               
+                
+                //Lo elimina del cache
+                DB.remove(domain+"_"+key);
+                
+                //Lo elimina del disco.
+                deleteFile(domain, key.toString());
 
-            //Aplicar el algoritmo de real time para ese campo el cual debería estar guardado dentro de la configuración de los algoritmos del dominio.            
+                //Devuelve el json generado en base a los campos y los datos de la DB
+                context.write("Element: "+domain+ " "+key.toString()+ " deleted");                
+            } else {
+                //Si no existe, devuelve un not_fount                
+                context.notFound(key.toString());
+            }
+                    
+        } else if ("POST".equals(method) || "PUT".equals(method)){
+            
+            //Obtiene el contenido del body, lo paso a json.
+            var postedJson = (Map<String, Object>)context.getJsonBody();
+                                                           
+            //Se crea el mapa final que se va a devolver
+            Map<String, Object> finalJson = new HashMap<>();
+
+            //va creando el json final en base a lo que viene en los fields               
+            for (String field : fields.keySet()) {
+
+                //ignora si viene el campo ID
+                if ("id".equals(field))
+                    continue;
+
+                //obtiene el tipo del dato del campo
+                String valueType = (String)fields.get(field);
+                Object valueFromPost = postedJson.get(field);
+
+                //Según sea el value type lo pone en el json final y calcula los campos calculados real time
+                switch (valueType) {
+                    case "Number" -> finalJson.put(field, (Double)valueFromPost);
+                    case "String" -> finalJson.put(field, (String)valueFromPost);
+                    case "Boolean" -> finalJson.put(field, (Boolean)valueFromPost);
+                    default -> println("Tipo inválido: "+field + "("+valueType+")");
+                }                            
+            }        
+            
+            Integer key=null;
+            
+            //Si es un post genera un nuevo ID
+            if (method.equals("POST")){
+                key = nextIDforDomain(domain);                            
+            } else { 
+                //Si es un put, utiliza el ID que viene en el body
+                key= Integer.valueOf(context.getUrlPath(2));
+            }
+            
+            //guarda la key en el campo "id"
+            finalJson.put("id", key);                
+            
+            //pasa el json a string para guardarlo
+            String jsonInString = jsonString(finalJson);
+            
+            //Guardo el json en el disco.
+            saveJsonFile(domain, key.toString(), jsonInString);
+
+            //lo guarda en el cache
+            DB.put(domain+"_"+key, jsonInString);
+            
+            //Devuelve el json generado en base a los campos y los datos de la DB
+            context.created(finalJson);                
+            
+            /*
+            TODO: Pensar si tiene sentido hacer un get para que se ejecuten las compilaciones.
+            */
+                                                    
         }
         
         
@@ -390,22 +515,49 @@ public class ##CLASS_NAME## {
         return fileContents;
     }
 
+    /**
+     * Lee el contenido del directorio donde se guardan los json y los deja en memoria
+     */
     private void startDB() {
-        String json = """
-                        {
-                        "id":22,
-                        "name":"Fernando",
-                        "age":42,
-                        "adult":true,
-                        "degrees": "Engineering"
-                        }                                            
-                      """;
-        DB.put(22, json);
                         
+        // Especifica el directorio que deseas leer
+        File directory = new File(rootPath+"db");
+        
+        ArrayList<File> domains = new ArrayList<>();
+
+        //genera la lista de domains                            
+        File[] directories = directory.listFiles();
+        // Itera sobre los archivos y directorios encontrados
+        if (directories != null) {
+            for (File dir : directories) {
+                if (dir.isDirectory()){
+                    domains.add(dir);
+                }                                        
+            }
+        } 
+        
+        //Por cada domain, busca los archivos y los guarda en la DB
+        for (File domain : domains){
+
+            //genera la lista de domains                            
+            File[] files = domain.listFiles();
+            // Itera sobre los archivos y directorios encontrados
+            if (files != null) {
+                for (File file : files) {
+                    String keyName = domain.getName()+"_"+file.getName().split("\\.")[0];
+                    Path filePath = Paths.get(file.getAbsolutePath());
+                    String content;
+                    
+                    //si hay algun error no lo guarda en la DB.
+                    try {
+                        content = Files.readString(filePath);
+                        DB.put(keyName, content);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }                            
+        }                                       
     }
-
-
-    
 }
-
-

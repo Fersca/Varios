@@ -34,6 +34,11 @@ public class HttpCli {
         return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
 
     }
+    public static String jsonString(Map<String, Object> jsonString) {
+
+        return gson.toJson(jsonString);
+
+    }
 
     public static Map<String, Object> getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         return json(httpCli(url));
@@ -94,6 +99,7 @@ public class HttpCli {
 
         //return the body content
         return response.body();
+        
     }
     
     public static class FutureJson  {

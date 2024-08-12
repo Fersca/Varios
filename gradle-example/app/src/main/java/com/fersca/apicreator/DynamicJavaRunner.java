@@ -33,6 +33,7 @@ public class DynamicJavaRunner {
             
             // Compila el archivo .java
             int result = compiler.run(null, null, null, className + ".java");
+            
             return result == 0;
         } catch (IOException e) {
             e.printStackTrace();

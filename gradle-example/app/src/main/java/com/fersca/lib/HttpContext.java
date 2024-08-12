@@ -55,6 +55,7 @@ public class HttpContext {
     }
     // Crear una instancia de Gson
     private static final Gson gson = new Gson();
+    
     public void write(Map<String, Object> json){
         try {
 
@@ -72,6 +73,12 @@ public class HttpContext {
         }
     }
 
+    public void created(Map<String, Object> json){
+        this.write(json);
+        //Overwrite the 200 with 201
+        this.response.setStatus(201);                        
+    }
+       
     public String getParameter(String param){
         return this.request.getParameter(param);
     }
@@ -84,6 +91,7 @@ public class HttpContext {
     }
 
     public void notSupported() {
+        this.write("Method not supported");
         this.response.setStatus(405);
         this.response.setContentType("text/html; charset=UTF-8");
         this.response.setCharacterEncoding("UTF-8");                                
@@ -122,6 +130,13 @@ public class HttpContext {
             return "";
         }
         return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    public void conflict() {
+        this.write("The resource already exists.");
+        this.response.setStatus(409);
+        this.response.setContentType("text/html; charset=UTF-8");
+        this.response.setCharacterEncoding("UTF-8");                                                                           
     }
 
 }

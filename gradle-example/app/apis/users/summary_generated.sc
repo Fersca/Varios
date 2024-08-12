@@ -14,7 +14,8 @@ String degrees = (String) parametros.get("degrees"); //From code
         Object result;
         //// Begin AI-Code ////
 
-        result = name.toUpperCase() + " - tiene " + age.intValue() + " años";
+        result =  name + " is " + age + " years oldss, holds a degree in " + degrees + ", and is " + (adult ? "an adult" : "not an adult") + ".";
+
 
         //// End AI-Code   ////
         return result;

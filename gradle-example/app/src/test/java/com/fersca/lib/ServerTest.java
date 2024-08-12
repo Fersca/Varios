@@ -1,5 +1,6 @@
 package com.fersca.lib;
 
+import com.fersca.apicreator.Api;
 import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.postJson;
@@ -110,6 +111,10 @@ public class ServerTest {
     @Test
     public void test_webserver_cretion_and_adding_a_controller(){
 
+        if (Server.serverStatus().equals("STARTED")){
+            Server.shutdownWebserver();
+        }
+        
         try {
             //http server
             Server.createHttpServer();
@@ -207,6 +212,40 @@ public class ServerTest {
         assertEquals(expected,content);                
         
     }   
+    
+    
+    /*
+    @Test
+    public void test_post_to_local_llm(){
+               
+        String body = """
+{ 
+  "prompt":"quiero que me digas cual es la distancia de la tierra a la luna, la mejor aproximación que puedas solo devuelvemen un número"
+}
+                      """;
+        
+        //get the json map from url
+        Map<String, Object> jsonMap2 = null;        
+        try {
+            jsonMap2 = postJson("http://localhost:8082/v1/completions",body);
+            //jsonMap2 = postJson("http://localhost:8082/fer",body);
+        } catch (Exception ex) {
+            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);            
+            fail("Error getting content from url");
+        }
+                
+        @SuppressWarnings("unchecked")
+        //var responseMessage = (Map<String, Object>)jsonMap2.get("json");      
+        
+        //String content = responseMessage.get("prompt").toString();
+        String content = jsonMap2.get("message").toString();
+        
+        //String expected = "quiero que me digas cual es la distancia de la tierra a la luna, la mejor aproximación que puedas solo devuelvemen un número";
+        assertEquals("hola",content);                
+        
+    }   
+
+    */
     
     private static void pong(HttpContext context) {
         String part1 = "{\"status\""; 
