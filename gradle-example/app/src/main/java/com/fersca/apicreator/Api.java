@@ -44,7 +44,6 @@ public class Api {
         
         Api api = new Api();
         
-        api.startDB();
         api.startWebserver();        
              
         //Generar una API -->
@@ -104,7 +103,7 @@ public class Api {
                     
     }
 
-    private static final String rootPath = "/Users/Fernando.Scasserra/code/Varios/gradle-example/app/";
+    protected static final String rootPath = "/Users/Fernando.Scasserra/code/Varios/gradle-example/app/";
 
     private static String generateSourceCode(String api, String field, Map<String, Object> parametersWithTypes, String description) {
         
@@ -251,7 +250,7 @@ public class ##CLASS_NAME## {
 
     private static void deleteFile(String domain, String key) {
 
-        Path filePath = Paths.get(rootPath+"/db/"+domain+"/"+key+".json");
+        Path filePath = Paths.get(rootPath+"db/"+domain+"/"+key+".json");
         try {
             Files.delete(filePath);
         } catch (IOException ex) {
@@ -260,9 +259,16 @@ public class ##CLASS_NAME## {
         
     }
 
-    private static void saveJsonFile(String domain, String key, String jsonString) {
-
-        Path filePath = Paths.get(rootPath+"/db/"+domain+"/"+key+".json");
+    protected static void saveJsonFile(String domain, String key, String jsonString, Directory type) {
+        
+        Path filePath;
+        
+        if (type==Directory.DOMAIN){
+            filePath = Paths.get(rootPath+"db/"+domain+"/"+key+".json");
+        } else {
+            filePath = Paths.get(rootPath+"apis/"+domain+"api.def");
+        }
+        
         try {
             Files.write(filePath, jsonString.getBytes(StandardCharsets.UTF_8));
         } catch (IOException ex) {
@@ -270,7 +276,7 @@ public class ##CLASS_NAME## {
         }
                 
     }
-
+    
     private static Integer nextIDforDomain(String domain) {
         
         Set<String> keys = DB.keySet();
@@ -295,7 +301,7 @@ public class ##CLASS_NAME## {
         println("Inicia el webserever");
         
         //Leer cada archivo de configuración de la ruta donde están las apis y por cada uno de ellos hacer:
-        ArrayList<Map<String, Object>> files = readFiles(rootPath+"apis");
+        ArrayList<Map<String, Object>> files = readAPIDefinitionFiles(rootPath+"apis");
                 
         //Crear el webserver        
         Server.createHttpServer();
@@ -311,13 +317,50 @@ public class ##CLASS_NAME## {
 
             //Add the request handlers      
             Server.addController("/"+domain, Api::generalController, apiDescription);     
+             
+            //carga el contenido de los jsons en memoria
+            uploadDBDomain(domain);
+            
+            //Check if the directory exists in the DB, it not create it.
+            assureDirectory(domain,Directory.DOMAIN);
+            
+            //Check if the directory for compiled calculated files, if not create it.
+            assureDirectory(domain,Directory.DEFINITION);
             
         }       
                 
     }
     
+    private void uploadDBDomain(String domain) {
+        
+        // Especifica el directorio que deseas leer
+        File directory = new File(rootPath+"db/"+domain);
+        
+        //genera la lista de domains                            
+        File[] files = directory.listFiles();
+        // Itera sobre los archivos y directorios encontrados
+        if (files != null) {
+            for (File file : files) {
+                String keyName = domain+"_"+file.getName().split("\\.")[0];
+                Path filePath = Paths.get(file.getAbsolutePath());
+                String content;
+
+                //si hay algun error no lo guarda en la DB.
+                try {
+                    content = Files.readString(filePath);
+                    DB.put(keyName, content);
+                } catch (IOException ex) {
+                    Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }                                                   
+        
+    }
+    
+    
     //Base de datos de mentira de jsons
-    private static final HashMap<String, Object> DB = new HashMap<>();
+    protected static final HashMap<String, Object> DB = new HashMap<>();
     
     private static void generalController(HttpContext context) {
 
@@ -382,7 +425,7 @@ public class ##CLASS_NAME## {
                 //Devuelve el json generado en base a los campos y los datos de la DB
                 context.write(finalJson);                
             } else {
-                //Devuelce not fount
+                //Devuelce not found
                 context.notFound(""+key);
             }
             
@@ -411,6 +454,25 @@ public class ##CLASS_NAME## {
                     
         } else if ("POST".equals(method) || "PUT".equals(method)){
             
+            Integer key=null;
+            
+            //Si es un post genera un nuevo ID para ese dominio
+            if (method.equals("POST")){
+                key = nextIDforDomain(domain);                            
+            } else { 
+                //Si es un put, utiliza el ID que viene en el body
+                key= Integer.valueOf(context.getUrlPath(2));
+                
+                //Verifica que exista ese elemento
+                Object element = DB.get(domain+"_"+key);
+
+                //Si no existe, devuelve not found              
+                if (element==null){
+                    //Devuelce not found
+                    context.notFound(""+key);                   
+                }
+            }
+                        
             //Obtiene el contenido del body, lo paso a json.
             var postedJson = (Map<String, Object>)context.getJsonBody();
                                                            
@@ -436,17 +498,7 @@ public class ##CLASS_NAME## {
                     default -> println("Tipo inválido: "+field + "("+valueType+")");
                 }                            
             }        
-            
-            Integer key=null;
-            
-            //Si es un post genera un nuevo ID
-            if (method.equals("POST")){
-                key = nextIDforDomain(domain);                            
-            } else { 
-                //Si es un put, utiliza el ID que viene en el body
-                key= Integer.valueOf(context.getUrlPath(2));
-            }
-            
+                        
             //guarda la key en el campo "id"
             finalJson.put("id", key);                
             
@@ -454,7 +506,7 @@ public class ##CLASS_NAME## {
             String jsonInString = jsonString(finalJson);
             
             //Guardo el json en el disco.
-            saveJsonFile(domain, key.toString(), jsonInString);
+            saveJsonFile(domain, key.toString(), jsonInString, Directory.DOMAIN);
 
             //lo guarda en el cache
             DB.put(domain+"_"+key, jsonInString);
@@ -481,7 +533,7 @@ public class ##CLASS_NAME## {
     };
     
     
-    protected ArrayList<Map<String, Object>> readFiles(String path) throws IOException {
+    protected ArrayList<Map<String, Object>> readAPIDefinitionFiles(String path) throws IOException {
         
         // Especifica el directorio que deseas leer
         File directory = new File(path);
@@ -500,10 +552,17 @@ public class ##CLASS_NAME## {
                     // Lee el archivo y pasa el contenido a Json
                     Path filePath = Paths.get(file.getAbsolutePath());
                     String content = Files.readString(filePath);
-                    var jsonContent = json(content);
-                                        
-                    // Guarda el nombre del archivo y el contenido en el mapa                    
-                    fileContents.add(jsonContent);
+                    
+                    try {
+                        var jsonContent = json(content);
+                        // Guarda el nombre del archivo y el contenido en el mapa                    
+                        fileContents.add(jsonContent);                        
+                    } catch (Exception e){
+                        println("Error parsing json: ---->");
+                        println(content);
+                        e.printStackTrace();
+                        continue;
+                    }             
                                         
                 }
             } else {
@@ -515,49 +574,41 @@ public class ##CLASS_NAME## {
         return fileContents;
     }
 
-    /**
-     * Lee el contenido del directorio donde se guardan los json y los deja en memoria
-     */
-    private void startDB() {
-                        
+    protected static enum Directory {
+        DOMAIN,
+        DEFINITION
+    }
+
+    protected static void createAPIDefinition(String domain, String jsonString) throws IOException{
+        
+        //crea el directorio donde estaran las compilaciones de los campos de la api
+        assureDirectory(domain, Directory.DEFINITION);
+        
+        //guarda el file con la definición de la api
+        saveJsonFile(domain, domain, jsonString, Directory.DEFINITION);
+    }
+    
+    protected static void assureDirectory(String name, Directory type) throws IOException {
+        
+        String path;
+        
+        if (type==Directory.DOMAIN){
+            path = rootPath+"db/"+name;
+        } else {
+            path = rootPath+"apis/"+name;
+        }
+        
         // Especifica el directorio que deseas leer
-        File directory = new File(rootPath+"db");
+        File directory = new File(path);
         
-        ArrayList<File> domains = new ArrayList<>();
-
-        //genera la lista de domains                            
-        File[] directories = directory.listFiles();
-        // Itera sobre los archivos y directorios encontrados
-        if (directories != null) {
-            for (File dir : directories) {
-                if (dir.isDirectory()){
-                    domains.add(dir);
-                }                                        
-            }
-        } 
+        // Verifica que el objeto File es un directorio
+        if (directory.exists() && directory.isDirectory()) {
+            return;            
+        }
         
-        //Por cada domain, busca los archivos y los guarda en la DB
-        for (File domain : domains){
-
-            //genera la lista de domains                            
-            File[] files = domain.listFiles();
-            // Itera sobre los archivos y directorios encontrados
-            if (files != null) {
-                for (File file : files) {
-                    String keyName = domain.getName()+"_"+file.getName().split("\\.")[0];
-                    Path filePath = Paths.get(file.getAbsolutePath());
-                    String content;
-                    
-                    //si hay algun error no lo guarda en la DB.
-                    try {
-                        content = Files.readString(filePath);
-                        DB.put(keyName, content);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                }
-            }                            
-        }                                       
+        //Crea el directorio si no existe
+        Path filePath = Paths.get(directory.getAbsolutePath());        
+        Files.createDirectories(filePath);
+        
     }
 }

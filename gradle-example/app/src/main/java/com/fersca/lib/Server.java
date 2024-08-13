@@ -86,7 +86,7 @@ public class Server {
                     html = html.replaceAll("##APIS##", apiMessage);
                     
                     response.getWriter().print(html);                
-                    response.setStatus(400);
+                    response.setStatus(404);
                     response.setContentType("text/html; charset=UTF-8");
                     response.setCharacterEncoding("UTF-8");                                                    
                 } else {

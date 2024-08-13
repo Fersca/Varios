@@ -1,0 +1,16 @@
+{
+"structure":{
+    "domain": "planes",
+    "accept":["GET"],
+    "fields":{
+        "id":"Number",
+        "name":"String",
+        "seats":"Number"
+    }
+},
+"post_validations":{
+    "name":"No puede tener más de 5 caracrteres"
+},
+"get_online_calculations":{
+}
+}

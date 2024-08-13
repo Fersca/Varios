@@ -41,14 +41,22 @@ public class HttpCli {
     }
 
     public static Map<String, Object> getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
-        return json(httpCli(url));
+        HttpResult result = httpCli(url);        
+        return json(result.body());
     }
 
-    public static Map<String, Object> postJson(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
-        return json(httpPostCli(url,jsonStrig));
+    
+    public static HttpResult get(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return httpCli(url);        
     }
-    public static String post(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+    
+    public static Map<String, Object> postJson(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        HttpResult result = httpPostCli(url,jsonStrig);
+        return json(result.body());
+    }
+    public static HttpResult post(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         return httpPostCli(url,jsonStrig);
+        
     }
 
     public static FutureJson getFutureJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
@@ -62,7 +70,9 @@ public class HttpCli {
     private static HttpClient cliAsync;
     private static ExecutorService executorService;
     
-    private static String httpCli(String url) throws URISyntaxException, IOException, InterruptedException{
+    public static record HttpResult(String body, Integer statusCode){};
+    
+    private static HttpResult httpCli(String url) throws URISyntaxException, IOException, InterruptedException{
 
         //Create the builder
         HttpRequest.Builder b = HttpRequest.newBuilder()
@@ -77,12 +87,12 @@ public class HttpCli {
         //execute the request
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
 
-        //return the body content
-        return response.body();
+        HttpResult result = new HttpResult(response.body(),response.statusCode());
+        return result;
 
     }
     
-    private static String httpPostCli(String url, String jsonBody) throws URISyntaxException, IOException, InterruptedException{
+    private static HttpResult httpPostCli(String url, String jsonBody) throws URISyntaxException, IOException, InterruptedException{
 
         //Create the builder
         HttpRequest.Builder b = HttpRequest.newBuilder()
@@ -97,8 +107,8 @@ public class HttpCli {
         //execute the request
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
 
-        //return the body content
-        return response.body();
+        HttpResult result = new HttpResult(response.body(),response.statusCode());
+        return result;
         
     }
     

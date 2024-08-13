@@ -1,0 +1,19 @@
+{
+"structure":{
+    "domain": "animals",
+    "accept":["GET", "POST", "PUT","DELETE"],
+    "fields":{
+        "id":"Number",
+        "name":"String",
+        "age":"Number",
+        "mamal":"Boolean"
+    }
+},
+"post_validations":{
+    "name":"No puede tener más de 5 caracrteres",
+    "age":"Es un numero de 1 a 100"
+},
+"get_online_calculations":{
+    "summary":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad"
+}
+}
