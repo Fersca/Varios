@@ -58,6 +58,21 @@ public class HttpCli {
         return httpPostCli(url,jsonStrig);
         
     }
+    public static HttpResult put(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return httpPutCli(url,jsonStrig);        
+    }
+    public static HttpResult delete(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        return httpDeleteCli(url);        
+    }
+    public static Map<String, Object> deleteJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        HttpResult result = httpDeleteCli(url);
+        return json(result.body());
+    }
+    
+    public static Map<String, Object> putJson(String url, String jsonStrig) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
+        HttpResult result = httpPutCli(url,jsonStrig);
+        return json(result.body());
+    }
 
     public static FutureJson getFutureJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
         
@@ -111,6 +126,47 @@ public class HttpCli {
         return result;
         
     }
+
+    private static HttpResult httpPutCli(String url, String jsonBody) throws URISyntaxException, IOException, InterruptedException{
+
+        //Create the builder
+        HttpRequest.Builder b = HttpRequest.newBuilder()
+            .uri(new URI(url))
+            .headers("Accept", "application/json", "Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(10))
+            .PUT(HttpRequest.BodyPublishers.ofString(jsonBody));        
+
+        //create the request object
+        HttpRequest request = b.build();          
+
+        //execute the request
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
+
+        HttpResult result = new HttpResult(response.body(),response.statusCode());
+        return result;
+        
+    }
+
+    private static HttpResult httpDeleteCli(String url) throws URISyntaxException, IOException, InterruptedException{
+
+        //Create the builder
+        HttpRequest.Builder b = HttpRequest.newBuilder()
+            .uri(new URI(url))
+            .headers("Accept", "application/json", "Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(60))
+            .DELETE();        
+
+        //create the request object
+        HttpRequest request = b.build();          
+
+        //execute the request
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());                        
+
+        HttpResult result = new HttpResult(response.body(),response.statusCode());
+        return result;
+        
+    }
+    
     
     public static class FutureJson  {
         

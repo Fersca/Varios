@@ -2,16 +2,13 @@ package com.fersca.apicreator;
 
 import static com.fersca.apicreator.DynamicJavaRunner.compile;
 import static com.fersca.apicreator.DynamicJavaRunner.execute;
-import static com.fersca.lib.Logger.println;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.jsonString;
-import static com.fersca.lib.HttpCli.postJson;
 import com.fersca.lib.HttpContext;
 import static com.fersca.lib.Logger.println;
 import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -266,7 +262,7 @@ public class ##CLASS_NAME## {
         if (type==Directory.DOMAIN){
             filePath = Paths.get(rootPath+"db/"+domain+"/"+key+".json");
         } else {
-            filePath = Paths.get(rootPath+"apis/"+domain+"api.def");
+            filePath = Paths.get(rootPath+"apis/"+domain+".api.def");
         }
         
         try {
@@ -424,15 +420,23 @@ public class ##CLASS_NAME## {
                 
                 //Devuelve el json generado en base a los campos y los datos de la DB
                 context.write(finalJson);                
+                return;
             } else {
                 //Devuelce not found
                 context.notFound(""+key);
+                return;
             }
             
         } else if ("DELETE".equals(method)){
-            
-            Integer key= Integer.valueOf(context.getUrlPath(2));            
-            
+
+            Integer key;
+            try {
+                key = Integer.valueOf(context.getUrlPath(2));
+            } catch (NumberFormatException e){
+                context.badRequest("Delete should have a numeric ID in the URL");
+                return;                                        
+            }
+                        
             //Buscar el elemento en la DB
             Object element = DB.get(domain+"_"+key);
                         
@@ -447,9 +451,11 @@ public class ##CLASS_NAME## {
 
                 //Devuelve el json generado en base a los campos y los datos de la DB
                 context.write("Element: "+domain+ " "+key.toString()+ " deleted");                
+                return;
             } else {
                 //Si no existe, devuelve un not_fount                
                 context.notFound(key.toString());
+                return;
             }
                     
         } else if ("POST".equals(method) || "PUT".equals(method)){
@@ -458,18 +464,32 @@ public class ##CLASS_NAME## {
             
             //Si es un post genera un nuevo ID para ese dominio
             if (method.equals("POST")){
+
+                //Si es un post, no tiene que venir con el ID ni nada luego del dominio, 
+                //con lo cual algo en la posicion 2 deberia ser siempre null
+                String element = context.getUrlPath(2);                                
+                if (element!=null){
+                    context.badRequest("Post should not have ID in the URL");
+                    return;
+                }
                 key = nextIDforDomain(domain);                            
             } else { 
-                //Si es un put, utiliza el ID que viene en el body
-                key= Integer.valueOf(context.getUrlPath(2));
-                
+
+                try {
+                    key = Integer.valueOf(context.getUrlPath(2));
+                } catch (NumberFormatException e){
+                    context.badRequest("Put should have a numeric ID in the URL");
+                    return;                                        
+                }
+                                                
                 //Verifica que exista ese elemento
                 Object element = DB.get(domain+"_"+key);
 
                 //Si no existe, devuelve not found              
                 if (element==null){
                     //Devuelce not found
-                    context.notFound(""+key);                   
+                    context.notFound(""+key);
+                    return;
                 }
             }
                         
@@ -512,7 +532,13 @@ public class ##CLASS_NAME## {
             DB.put(domain+"_"+key, jsonInString);
             
             //Devuelve el json generado en base a los campos y los datos de la DB
-            context.created(finalJson);                
+            if (method.equals("POST")){
+                context.created(finalJson);  
+            } else {
+                context.ok(finalJson);  
+            }
+            
+            return;
             
             /*
             TODO: Pensar si tiene sentido hacer un get para que se ejecuten las compilaciones.

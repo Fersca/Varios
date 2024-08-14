@@ -69,7 +69,7 @@ public class Server {
                 if (controlador==null){
                     String html="""
                                    <html>
-                                   <h2> 404 Domain not found: ##DOMAIN## </h2>
+                                   <h2> 400 Domain not found: ##DOMAIN## </h2>
                                    <h3> Available APIs </h3>
                                    <br>
                                    <table>
@@ -86,7 +86,7 @@ public class Server {
                     html = html.replaceAll("##APIS##", apiMessage);
                     
                     response.getWriter().print(html);                
-                    response.setStatus(404);
+                    response.setStatus(400);
                     response.setContentType("text/html; charset=UTF-8");
                     response.setCharacterEncoding("UTF-8");                                                    
                 } else {

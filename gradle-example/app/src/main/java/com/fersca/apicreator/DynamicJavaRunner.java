@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
-import static com.fersca.lib.Logger.println;
 
 public class DynamicJavaRunner {
 

@@ -1,9 +1,10 @@
 package com.fersca.apicreator;
 
 
-import com.fersca.lib.Server;
 import static com.fersca.lib.HttpCli.get;
 import static com.fersca.lib.HttpCli.post;
+import static com.fersca.lib.HttpCli.delete;
+import static com.fersca.lib.HttpCli.put;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.apicreator.Api.DB;
 import static com.fersca.apicreator.Api.rootPath;
@@ -11,16 +12,12 @@ import static com.fersca.apicreator.Api.saveJsonFile;
 import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
 import static com.fersca.apicreator.Api.Directory;
-import static com.fersca.lib.HttpCli.HttpResult;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -209,8 +206,11 @@ public class ApiTest {
     
         try {
      
-            String domain = "animales";
+            String domain = "animals";
             String key = "34";
+
+            //se asegura que se borre
+            delete("http://localhost:8080/"+domain+"/"+key);                        
             
             //debería devolver 404
             var result = get("http://localhost:8080/"+domain+"/"+key);                        
@@ -220,7 +220,7 @@ public class ApiTest {
             assertNull(DB.get(domain+"_"+key));
                         
             //No tiene que haber un file con ese dato
-            assertFalse(fileExists(domain,key));
+            assertFalse(fileExists(domain,key,Directory.DOMAIN));
             
         } catch (Exception ex) {
             Logger.getLogger(ApiTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -228,8 +228,13 @@ public class ApiTest {
                     
     }
  
-    private boolean fileExists(String domain, String key){        
-        String filePathString = rootPath+domain+"/"+key+".json"; 
+    private boolean fileExists(String domain, String key, Directory type){        
+        String filePathString;
+        if (type.equals(Directory.DOMAIN))
+            filePathString = rootPath+"/db/"+domain+"/"+key+".json"; 
+        else
+            filePathString = rootPath+domain+"/"+key+".json"; 
+        
         Path filePath = Paths.get(filePathString);
         return Files.exists(filePath);                
     }
@@ -280,37 +285,245 @@ public class ApiTest {
         assertEquals("405", result.statusCode().toString());
                                                       
     }
-    
-    
-        //Verificar de alguna manera otra vez ese GET y que sea devuelto desde el Caché (ver si viene con un header de cache para identificarlo o un flag).
-
-        //Hacer un GET de un recurso que tenga un campo calculado y ver si genera el archivo con el script.
-    
-        //Hacer un GET de un recurso que tiene un campo calculado y ver si se compila correctamente y se ejecuta el script.            
+        
+    //TODO: Hacer un GET de un recurso que tenga un campo calculado y ver si genera el archivo con el script.
+    @Test
+    public void test_get_with_calculated_field_should_return_valid_json_with_correct_calculation() throws Exception {
+        
+        
+        
+    }
+    //TODO: Hacer un GET de un recurso que tiene un campo calculado y ver si se compila correctamente y se ejecuta el script.            
 
     //POSTs Use cases    
     
-        //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.
-
-        //Hacer un POST de un elemento para un domain que no tenga el directorio y ver si lo crea.
+    //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.
+    @Test
+    public void test_creation_of_new_element_in_a_domain() throws Exception {
     
-        //Hacer un POST con un ID en la URl y que no lo deje para no forzar ID
+   
+        String domain = "animals";
 
+        String jsonString = """
+                            {
+                            "name":"Tiger",
+                            "age":3,
+                            "mamal":true
+                            }
+                            """;
+        
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/"+domain, jsonString);                        
+        
+        //debería devolveme 201 created
+        assertEquals("201", result.statusCode().toString());
+        
+        var tigerJson = json(result.body());
+        
+        Integer key = ((Double)tigerJson.get("id")).intValue();
+        
+        //debería devolver 200
+        var resultGet = get("http://localhost:8080/"+domain+"/"+key);                        
+        assertEquals("200", resultGet.statusCode().toString());
+
+        var animal =json(resultGet.body());
+
+        assertEquals("Tiger", animal.get("name"));
+
+        //Tiene que estar en la DB y chequea el valor del json
+        @SuppressWarnings("unchecked")
+        Object dbElement = DB.get(domain+"_"+key);
+        var jsonFromDB = json((String)dbElement);
+        assertEquals("Tiger", jsonFromDB.get("name"));
+        
+        assertTrue(fileExists(domain, key.toString(),Directory.DOMAIN));
+                                                      
+    }
+   
+    //Hacer un POST con un ID en la URl y que no lo deje para no forzar ID
+    @Test
+    public void test_creation_of_new_element_with_id_in_URL_should_fail() throws Exception {
+    
+   
+        String domain = "animals";
+
+        String jsonString = """
+                            {
+                            "name":"Tiger",
+                            "age":3,
+                            "mamal":true
+                            }
+                            """;
+        
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/"+domain+"/7", jsonString);                        
+        
+        //debería devolveme 400 forbidden
+        assertEquals("400", result.statusCode().toString());
+                                                              
+    }
+
+    //Hacer un POST con un domain que no existe debería dar bad request
+    @Test
+    public void test_creation_of_new_element_with_a_not_valid_domain() throws Exception {
+    
+   
+        String domain = "houses";
+
+        String jsonString = """
+                            {
+                            "name":"Chalet"
+                            }
+                            """;
+        
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/"+domain, jsonString);                        
+        
+        //debería devolveme 400 forbidden
+        assertEquals("400", result.statusCode().toString());
+                                                              
+    }
+    
+    
     //PUTs Use cases    
     
-        //Hacer un PUT a un elemento que exita con un dato nuevo, pedir de nuevo el elemento, ver que viene actualizado y que se haya actualizado el archivo.
+    //Hacer un PUT a un elemento que exita con un dato nuevo, pedir de nuevo el elemento, ver que viene actualizado y que se haya actualizado el archivo.
+    @Test
+    public void test_update_element_should_work() throws Exception {
     
-        //Si se hace un PUT sin ID no tiene que dejarlo
-    
-        //Hacer un PUT a un recurso que no exita y que te diga Not-Found.
+   
+        String domain = "animals";
 
+        String jsonString = """
+                            {
+                            "name":"Shark",
+                            "age":4,
+                            "mamal":false
+                            }
+                            """;
+        
+        //hago el post (cosa que noe esta permitida)
+        var result = put("http://localhost:8080/"+domain+"/2", jsonString);                        
+        
+        //debería devolveme 200 updated
+        assertEquals("200", result.statusCode().toString());
+        
+        //verifica que el json de respuesta tenga el nombre correcto
+        var sharkJson = json(result.body());        
+        String name = ((String)sharkJson.get("name"));
+        assertEquals("Shark", name);
+       
+        //verifica que en el get funcione
+        var resultGet = get("http://localhost:8080/"+domain+"/2");                        
+        assertEquals("200", resultGet.statusCode().toString());
+
+        var animal =json(resultGet.body());
+
+        assertEquals("Shark", animal.get("name"));
+
+        //Tiene que estar en la DB y chequea el valor del json
+        @SuppressWarnings("unchecked")
+        Object dbElement = DB.get(domain+"_2");
+        var jsonFromDB = json((String)dbElement);
+        assertEquals("Shark", jsonFromDB.get("name"));        
+                                                      
+    }
+
+    //Si se hace un PUT sin ID no tiene que dejarlo    
+    @Test
+    public void test_update_without_element_id_should_not_work() throws Exception {
+       
+        String domain = "animals";
+
+        String jsonString = """
+                            {
+                            "name":"Shark",
+                            "age":4,
+                            "mamal":false
+                            }
+                            """;
+        
+        var result = put("http://localhost:8080/"+domain, jsonString);                        
+        
+        //debería devolveme 400 updated
+        assertEquals("400", result.statusCode().toString());
+                                                                      
+    }
+
+    //Hacer un PUT a un recurso que no exita y que te diga Not-Found.
+    @Test
+    public void test_update_to_non_existing_element_should_fail() throws Exception {
+       
+        String domain = "animals";
+
+        String jsonString = """
+                            {
+                            "name":"Shark",
+                            "age":4,
+                            "mamal":false
+                            }
+                            """;
+        
+        var result = put("http://localhost:8080/"+domain+"/100", jsonString);                        
+        
+        //debería devolveme 404 updated
+        assertEquals("404", result.statusCode().toString());
+                                                                      
+    }
+    
     //DELETE Use cases        
     
-        //Hacer un delete de un elemento que no exsita y ver si devuelve 409.
-
-        //Hacer un delete de un elemento que exista, ver que no haya que dado en el caché ni en el file.
-    
-        //Que no se pueda hacer un Delete sin ponerle el ID en la URL
+    //Hacer un delete de un elemento que no exsita y ver si devuelve 409.
+    @Test
+    public void test_delete_non_existing_element_should_not_work() throws Exception {
        
+        String domain = "animals";
+        
+        var result = delete("http://localhost:8080/"+domain+"/100");                        
+        
+        //debería devolveme 404 updated
+        assertEquals("404", result.statusCode().toString());
+                                                                      
+    }
+
+    //Hacer un delete de un elemento que exista, ver que no haya que dado en el caché ni en el file.
+    @Test
+    public void test_delete_existing_element_should_work() throws Exception {
     
+   
+        String domain = "animals";
+        
+        var result = delete("http://localhost:8080/"+domain+"/4");                        
+        
+        //debería devolveme 200 created
+        assertEquals("200", result.statusCode().toString());
+                
+        //debería devolver 404
+        var resultGet = get("http://localhost:8080/"+domain+"/4");                        
+        assertEquals("404", resultGet.statusCode().toString());
+
+        //No tiene que estar en la DB
+        @SuppressWarnings("unchecked")
+        Object dbElement = DB.get(domain+"_4");
+        assertNull(dbElement);
+                
+        //no debería estar el archivo
+        assertFalse(fileExists(domain, "4",Directory.DOMAIN));
+                                                      
+    }
+
+    
+    //Que no se pueda hacer un Delete sin ponerle el ID en la URL
+    @Test
+    public void test_delete_without_element_id_should_not_work() throws Exception {
+       
+        String domain = "animals";
+        
+        var result = delete("http://localhost:8080/"+domain);                        
+        
+        //debería devolveme 400 updated
+        assertEquals("400", result.statusCode().toString());
+                                                                      
+    }
+           
 }

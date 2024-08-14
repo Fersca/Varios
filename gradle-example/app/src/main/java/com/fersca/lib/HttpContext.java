@@ -99,8 +99,11 @@ public class HttpContext {
 
     public String getUrlPath(int i) {
         // si pongo /users/12 me pone en la pos 0 nada, en la 1 users en la 2 "12"
-        String[] split = request.getRequestURI().split("/");
-        return split[i];
+        String[] split = request.getRequestURI().split("/");        
+        if (split.length>=(i+1))
+            return split[i];
+        else
+            return null;
 
     }
 
@@ -112,7 +115,7 @@ public class HttpContext {
 
     public void notFound(String message) {        
         this.write(htmlNotFound.replaceAll("##ELEMENT##", message));
-        this.response.setStatus(400);
+        this.response.setStatus(404);
         this.response.setContentType("text/html; charset=UTF-8");
         this.response.setCharacterEncoding("UTF-8");                                                                   
     }
@@ -137,6 +140,19 @@ public class HttpContext {
         this.response.setStatus(409);
         this.response.setContentType("text/html; charset=UTF-8");
         this.response.setCharacterEncoding("UTF-8");                                                                           
+    }
+
+    public void badRequest(String message) {
+        this.write(message);
+        this.response.setStatus(400);
+        this.response.setContentType("text/html; charset=UTF-8");
+        this.response.setCharacterEncoding("UTF-8");                                                                           
+    }
+
+    public void ok(Map<String, Object> json) {
+        this.write(json);
+        this.response.setStatus(200);                        
+
     }
 
 }

@@ -1,10 +1,8 @@
 package com.fersca.lib;
 
-import com.fersca.apicreator.Api;
 import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.postJson;
-import static com.fersca.lib.HttpCli.post;
 import static com.fersca.lib.HttpCli.getJson;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.Logger.setLogLevel;
