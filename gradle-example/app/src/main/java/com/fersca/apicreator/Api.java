@@ -39,7 +39,7 @@ public class Api {
         */
         
         Api api = new Api();
-        
+
         api.startWebserver();        
              
         //Generar una API -->
@@ -66,7 +66,7 @@ public class Api {
             String sourceCode = generateSourceCode(api, field, parametersWithTypes, description);
             
             //guarda el código generado
-            File scriptFile = new File(rootPath+"/apis/"+api+"/"+field+"_generated.sc");
+            File scriptFile = new File(rootPath+"/apis_calculated_fields_code/"+api+"/"+field+"_generated.sc");
             Path filePath = Paths.get(scriptFile.getAbsolutePath());
             try {
                 Files.writeString(filePath, sourceCode);
@@ -99,8 +99,11 @@ public class Api {
                     
     }
 
-    protected static final String rootPath = "/Users/Fernando.Scasserra/code/Varios/gradle-example/app/";
+    protected static final String rootPath;
 
+    static {
+        rootPath = System.getProperty("user.dir")+"/";
+    }
     private static String generateSourceCode(String api, String field, Map<String, Object> parametersWithTypes, String description) {
         
         String sourceCode = 
@@ -621,7 +624,7 @@ public class ##CLASS_NAME## {
         if (type==Directory.DOMAIN){
             path = rootPath+"db/"+name;
         } else {
-            path = rootPath+"apis/"+name;
+            path = rootPath+"apis_calculated_fields_code/"+name;
         }
         
         // Especifica el directorio que deseas leer

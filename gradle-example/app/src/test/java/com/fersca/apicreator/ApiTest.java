@@ -39,6 +39,10 @@ public class ApiTest {
     
     @BeforeClass
     public static void setUpClass() throws IOException {                                
+        
+        //fuerza la creación de los directorios (por si es la primera ves que corre)
+
+        
         //Crea los jsons de ejemplo
         String animals = "animals";
         String planes = "planes";
@@ -146,7 +150,8 @@ public class ApiTest {
         //crea la definición de la api
         createAPIDefinition(animals, animalsAPIDefinition);
         createAPIDefinition(planes, planesAPIDefinition);
-        
+
+        //inicia la app y levanta todos los files de las configuraciones
         String[] args = {""};
         try {        
             Api.main(args);
@@ -180,7 +185,7 @@ public class ApiTest {
     public void test_read_files_with_json_content() throws IOException {
     
         Api api = new Api();
-        ArrayList<Map<String, Object>> files = api.readAPIDefinitionFiles("/Users/Fernando.Scasserra/code/Varios/gradle-example/app/apis/test");
+        ArrayList<Map<String, Object>> files = api.readAPIDefinitionFiles(rootPath+"apis/test");
         
         //debería tener un solo elemento
         assertEquals(files.size(),1);
