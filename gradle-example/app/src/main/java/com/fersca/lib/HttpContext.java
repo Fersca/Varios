@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.util.stream.Collectors;
 import static com.fersca.lib.HttpCli.json;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 /**
@@ -98,7 +99,9 @@ public class HttpContext {
     public String getParameter(String param){
         return this.request.getParameter(param);
     }
-    
+    public Enumeration<String> getParameterNames(){
+        return this.request.getParameterNames();
+    }    
     public HttpServletRequest getRequest(){
         return this.request;
     }

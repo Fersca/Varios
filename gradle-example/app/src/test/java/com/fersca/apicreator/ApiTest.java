@@ -373,6 +373,96 @@ public class ApiTest {
         assertEquals("400", result.statusCode().toString());
                         
     }
+
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_search_for_a_string_field() throws Exception {
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/animals/search?name=Fish");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var animals =jsonArray(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals(1,animals.size());
+        
+        var animal = animals.get(0);        
+        
+        //verifica que sea el nombre correcto
+        assertEquals("Fish", animal.get("name"));        
+                        
+    }
+
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_search_for_non_existing_field_and_non_existing_value_shuld_return_200_with_empty_array() throws Exception {
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/animals/search?name=Fishaaaa");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var animals =jsonArray(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals(0,animals.size());
+
+        //debería devolver 200
+        result = get("http://localhost:8080/animals/search?nameeeeee=Fish");                        
+        assertEquals("400", result.statusCode().toString());
+                                
+    }
+
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_search_for_number_and_boolean_fields() throws Exception {
+        
+        //Filtra por un animal que tiene 10 años (El leon)
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/animals/search?age=10");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var animals =jsonArray(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals(1,animals.size());
+        
+        var animal = animals.get(0);        
+        
+        //verifica que sea el nombre correcto
+        assertEquals("Lion", animal.get("name"));        
+
+        //Filtra por los que no son mamiferos (hay 2)
+        
+        //debería devolver 200
+        result = get("http://localhost:8080/animals/search?mamal=false");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        animals =jsonArray(result.body());
+        
+        //Debería haber 2
+        assertEquals(2,animals.size());
+
+        //Buscar un animal que no sea mamifero y tenga 4 años (Shark)
+        
+        //debería devolver 200
+        result = get("http://localhost:8080/animals/search?mamal=false&age=2");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        animals =jsonArray(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals(1,animals.size());
+        
+        animal = animals.get(0);        
+        
+        //verifica que sea el nombre correcto
+        assertEquals("Snake", animal.get("name"));                
+        
+        
+    }
+
     
     //POSTs Use cases    
     

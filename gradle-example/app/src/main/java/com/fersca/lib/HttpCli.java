@@ -91,13 +91,15 @@ public class HttpCli {
     
     public static record HttpResult(String body, Integer statusCode){};
     
+    private static final int TIMEOUT = 120;
+    
     private static HttpResult httpCli(String url) throws URISyntaxException, IOException, InterruptedException{
 
         //Create the builder
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json")
-            .timeout(Duration.ofSeconds(10))
+            .timeout(Duration.ofSeconds(TIMEOUT))
             .GET();        
 
         //create the request object
@@ -117,7 +119,7 @@ public class HttpCli {
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json", "Content-Type", "application/json")
-            .timeout(Duration.ofSeconds(10))
+            .timeout(Duration.ofSeconds(TIMEOUT))
             .POST(HttpRequest.BodyPublishers.ofString(jsonBody));        
 
         //create the request object
@@ -137,7 +139,7 @@ public class HttpCli {
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json", "Content-Type", "application/json")
-            .timeout(Duration.ofSeconds(10))
+            .timeout(Duration.ofSeconds(TIMEOUT))
             .PUT(HttpRequest.BodyPublishers.ofString(jsonBody));        
 
         //create the request object
@@ -157,7 +159,7 @@ public class HttpCli {
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json", "Content-Type", "application/json")
-            .timeout(Duration.ofSeconds(10))
+            .timeout(Duration.ofSeconds(TIMEOUT))
             .DELETE();        
 
         //create the request object
@@ -215,7 +217,7 @@ public class HttpCli {
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json")
-            .timeout(Duration.ofSeconds(10))
+            .timeout(Duration.ofSeconds(TIMEOUT))
             .GET();        
 
         //create the request object

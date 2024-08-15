@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -322,7 +323,9 @@ public class ##CLASS_NAME## {
         return maxKey+1;
     }
 
-    private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations) {
+    private record TuplaFieldValue(String field, String value){}
+    
+    private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
 
         //Lista de elementos a devolver
         ArrayList<Map<String,Object>> elementsArray = new ArrayList<>();
@@ -338,7 +341,77 @@ public class ##CLASS_NAME## {
             if (elementDomain.equals(domain)){                
                 //busca cada elemento y lo agrega al array
                 var calculatedJson = getElement(domain, key, fields, onlineCalculations);
-                elementsArray.add(calculatedJson);                                
+                                
+                // Chequea si el json tiene que ser agregado a la lista por tener los campos de filtro.
+                // Primero verifico si viene el campo de los filtros con algo dentro.
+                // Activo un flag de que el json cumple
+                // Recorro la lista de filtros
+                // Por cada filtro me fijo si el campo está en el json
+                // Si el campo está en el json y tiene el valor del filtro, dejo un flag de bien activo
+                // Si no está o no cumple con el valor, pongo el flag en negativo y corto el bucle
+                // al finalizar el bucle si el flag está en positivo, lo agrego al array de elementos correctos
+                                
+                if (filtros==null){
+                    //agrego el elemebto al array final
+                    elementsArray.add(calculatedJson);                                                    
+                } else {
+                                                                                                  
+                    boolean jsonCorrecto = true;
+                                        
+                    for (TuplaFieldValue tupla : filtros){                        
+                        if (calculatedJson.containsKey(tupla.field)){
+                                                                                   
+                            //voy a buscar el tipo de dato que debería tener el campo al mapa de filtros
+                            String valueType = (String)fields.get(tupla.field);
+
+                            //Segun el tipo de dato que sea, hago la conversion y la comparación
+                            switch (valueType) {
+                                case "Number" -> {
+                                    //comparacion de Doubles
+                                    Double fieldValue = (Double)calculatedJson.get(tupla.field);
+                                    if (!fieldValue.equals(Double.parseDouble(tupla.value))){
+                                        jsonCorrecto = false;
+                                        break;                           
+                                    }
+                                }
+                                case "String" -> {
+                                    //comparacion de String
+                                    String fieldValue = (String)calculatedJson.get(tupla.field);
+                                    if (!fieldValue.equals(tupla.value)){
+                                        jsonCorrecto = false;
+                                        break;
+                                    }                                    
+                                }
+                                case "Boolean" -> {
+                                    //comparacion de Doubles
+                                    Boolean fieldValue = (Boolean)calculatedJson.get(tupla.field);
+                                    if (!fieldValue.equals(Boolean.parseBoolean(tupla.value))){
+                                        jsonCorrecto = false;
+                                        break;                           
+                                    }                                    
+                                }
+                                case "Calculated" -> {
+                                    //comparacion de String
+                                    String fieldValue = (String)calculatedJson.get(tupla.field);
+                                    if (!fieldValue.equals(tupla.value)){
+                                        jsonCorrecto = false;
+                                        break;
+                                    }                                                                        
+                                }
+                                default -> println("Tipo inválido: "+ tupla.field + "("+valueType+")");
+                            }                            
+                                                                                    
+                        } else {
+                            jsonCorrecto = false;
+                            break;                            
+                        }                        
+                    }
+                    
+                    //el json cumple con los filtros
+                    if (jsonCorrecto){
+                        elementsArray.add(calculatedJson);                                                                            
+                    }                    
+                }                                
             }            
         }
                         
@@ -501,20 +574,48 @@ public class ##CLASS_NAME## {
                 } else {
                     //Devuelce not found
                     context.notFound(""+key);
-                }               
-            } else if (idKey==null&&key.length()>0){
+                }                               
+            } else if (idKey==null&&key.length()>0){ //No viene una key numerica, pero hay un comando
                 //Verifica si es un comando
                 switch (key){
                     case "all" -> {
                         //arma un json con todos los elementos
-                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations);
+                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations,null);
                         context.write(finalJsonArray);                
                     }
+                    case "search" -> {
+                        
+                        //crea un array con los filtros que se han pasado para bucar
+                        ArrayList<TuplaFieldValue> filtros = new ArrayList<>();           
+                                                                        
+                        Enumeration<String> enumeration = context.getParameterNames();
+                        
+                        var fieldNames = fields.keySet();
+                        
+                        // Recorrer la enumeración y crea el array de tuplas (podría pasarse el mapa entero, pero ya hice esto...)
+                        while (enumeration.hasMoreElements()) {
+                            String parameter = enumeration.nextElement();
+                            
+                            //Verifica si los parametros de los filtros son campos validos, sino devuelve directamente un bad request
+                            if (!fieldNames.contains(parameter)){
+                                context.badRequest("Invalid filter field "+parameter+", it is not present in the json structure");
+                                return;
+                            }
+                            
+                            String parameterValue = context.getParameter(parameter);
+                            TuplaFieldValue tupla = new TuplaFieldValue(parameter, parameterValue);
+                            filtros.add(tupla);
+                        }                        
+                      
+                        //arma un json con todos los elementos que corresponden a los filtros
+                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros);
+                        context.write(finalJsonArray);                
+                    }                   
                     default -> {
                         context.badRequest("Command "+key+" not available");
                     } 
                 }
-            }
+            } 
                                   
         } else if ("DELETE".equals(method)){
 
