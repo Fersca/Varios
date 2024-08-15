@@ -36,7 +36,7 @@ public class Api {
         en esa configuración, con lo cual la configuración en realidad lo que hace es preparar una URL de los dominios
         y algoritmos a utilizar cuando se ejecuta esa URL
         
-        */
+        */       
         
         Api api = new Api();
 
@@ -62,6 +62,10 @@ public class Api {
         //Si ya está compilado y funciona, cachea el código.
         if (!compiledWorkingClasses.contains(className)){
 
+            if (description==null){
+                return "Missing prompt for "+api+"/"+field+" calculated field.";
+            }
+            
             //genera el codigo fuente
             String sourceCode = generateSourceCode(api, field, parametersWithTypes, description);
             
@@ -133,7 +137,7 @@ public class ##CLASS_NAME## {
         
         String parametersCode = generateParametersCode(parametersWithTypes);
         
-        String aiCode = generateAiCode(parametersWithTypes, description);
+        String aiCode = generateAiCode(parametersWithTypes, description, api, field);
 
         sourceCode = sourceCode.replaceAll("##CLASS_NAME##", api+"_"+field);
         sourceCode = sourceCode.replaceAll("##PARAMETERS##", parametersCode);        
@@ -164,7 +168,7 @@ public class ##CLASS_NAME## {
         
     }
 
-    private static String generateAiCode(Map<String, Object> parametersWithTypes, String description) {
+    private static String generateAiCode(Map<String, Object> parametersWithTypes, String description, String apiName, String apiField) {
         
         String variablesCode = "";
         for (String field : parametersWithTypes.keySet()) {
@@ -209,20 +213,56 @@ public class ##CLASS_NAME## {
         prompt = prompt.replaceAll("##VARIABLES##", variablesCode);
         prompt = prompt.replaceAll("##DESCRIPTION##", description);
         
-        String code = executePrompt(prompt);
+        String code = executePrompt(prompt, apiName, apiField);
         
         return code;
         
     }
 
-    private static String executePrompt(String prompt) {
+    private static String executePrompt(String prompt, String apiName, String apiField) {
         println("-----------PROMPT------------");        
         println(prompt);
         println("-----------END------------");                
         
-        String code = 
+        String code;
+        
+        /// *** JUST FOR TESTING PURPOSE *** ///        
+        if ("planes".equals(apiName)){            
+            switch (apiField){                
+                case "test_summary" ->  {
+                    //código correcto.
+                    code =
+                            """
+                            result =  name + " is " + age + " years old.";
+                            """;
+                    return code;
+                }
+                case "test_nickname" ->  {
+                    //variable namee con dos e para que no compile
+                    code =
+                            """
+                            result =  namee + " is " + age + " years old.";
+                            """;
+                    return code;
+                }                
+                case "test_color" ->  {
+                    //pongo un código que compila pero va a fallar en runtime
+                    code =
+                            """
+                            int num = 3-3;
+                            int calculo = 1/num;
+                            result =  name + " is " + calculo + " years old.";
+                            """;
+                    return code;
+                }                
+                
+            }                 
+        }                
+        /// *** END *** ///
+        
+        code = 
         """
-        result =  name + " is " + age + " years oldss, holds a degree in " + degrees + ", and is " + (adult ? "an adult" : "not an adult") + ".";
+        result =  name + " is " + age + " years old and very good";
         """;
         
         /*
@@ -383,7 +423,6 @@ public class ##CLASS_NAME## {
                
         //valida que el método esté soportado por la definición, sino devuelve un 405 (not supported)
         if (!supportedMethods.contains(method)){
-            println("Method: "+method+" not supported");
             context.notSupported();
             return;
         }

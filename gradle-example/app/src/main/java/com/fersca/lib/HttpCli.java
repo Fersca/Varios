@@ -153,7 +153,7 @@ public class HttpCli {
         HttpRequest.Builder b = HttpRequest.newBuilder()
             .uri(new URI(url))
             .headers("Accept", "application/json", "Content-Type", "application/json")
-            .timeout(Duration.ofSeconds(60))
+            .timeout(Duration.ofSeconds(10))
             .DELETE();        
 
         //create the request object

@@ -135,13 +135,6 @@ public class HttpContext {
         return reader.lines().collect(Collectors.joining(System.lineSeparator()));
     }
 
-    public void conflict() {
-        this.write("The resource already exists.");
-        this.response.setStatus(409);
-        this.response.setContentType("text/html; charset=UTF-8");
-        this.response.setCharacterEncoding("UTF-8");                                                                           
-    }
-
     public void badRequest(String message) {
         this.write(message);
         this.response.setStatus(400);

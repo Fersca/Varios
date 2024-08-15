@@ -16,6 +16,9 @@ import java.util.Map;
 
 public class DynamicJavaRunner {
 
+    //constructor privado para evitar el publico por default en una clase static que se usa como utils
+    private DynamicJavaRunner(){}
+        
     public static boolean compile(String sourceCode, String className) {
                 
         try {

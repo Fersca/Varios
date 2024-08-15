@@ -12,6 +12,8 @@ import static com.fersca.apicreator.Api.saveJsonFile;
 import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
 import static com.fersca.apicreator.Api.Directory;
+import static com.fersca.apicreator.Api.rootPath;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,15 +35,26 @@ import static org.junit.Assert.*;
  * @author Fernando.Scasserra
  */
 public class ApiTest {
+
+    private static void deleteDirectory(File dir) throws IOException {
+        File[] files = dir.listFiles();
+        if (files != null) { // Si es un directorio
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        dir.delete();       
+    }
     
     public ApiTest() {
     }
     
     @BeforeClass
-    public static void setUpClass() throws IOException {                                
-        
-        //fuerza la creación de los directorios (por si es la primera ves que corre)
-
+    public static void setUpClass() throws IOException {                                        
         
         //Crea los jsons de ejemplo
         String animals = "animals";
@@ -87,11 +100,16 @@ public class ApiTest {
                          {
                          "id":1,
                          "name":"Boing 747",
-                         "seats":200
+                         "seats":200,
+                         "age":20,
+                         "for_water":false
                          }
                          """;        
         
-        
+        //borra el directorio donde se deja el codigo calculado
+        File directory = new File(rootPath+"apis_calculated_fields_code"); // Reemplaza con la ruta de tu directorio       
+        deleteDirectory(directory);
+                
         //grea los diretorio de los dominios
         assureDirectory(animals, Directory.DOMAIN);
         assureDirectory(planes, Directory.DOMAIN);
@@ -135,13 +153,23 @@ public class ApiTest {
                             "fields":{
                                 "id":"Number",
                                 "name":"String",
-                                "seats":"Number"
+                                "seats":"Number",
+                                "age":"Number",
+                                "for_water":"Boolean",
+                                "example_invalid_type":"Invalido",
+                                "test_summary":"Calculated",
+                                "test_nickname":"Calculated",
+                                "test_color":"Calculated",
+                                "test_version":"Calculated"
                             }    
                         },
                         "post_validations":{
                             "name":"No puede tener más de 5 caracrteres"
                         },
                         "get_online_calculations":{
+                            "test_summary":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad",
+                            "test_nickname":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad",
+                            "test_color":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad"                                                                          
                         }
                         }                               
                                """;
@@ -291,15 +319,26 @@ public class ApiTest {
                                                       
     }
         
-    //TODO: Hacer un GET de un recurso que tenga un campo calculado y ver si genera el archivo con el script.
+    //Hacer un GET de un recurso que tenga un campo calculado y ver si genera el archivo con el script.
     @Test
-    public void test_get_with_calculated_field_should_return_valid_json_with_correct_calculation() throws Exception {
+    public void test_get_with_calculated_field_with_correct_compile_missing_and_runtime_errors() throws Exception {
         
-        
-        
-    }
-    //TODO: Hacer un GET de un recurso que tiene un campo calculado y ver si se compila correctamente y se ejecuta el script.            
+        String domain = "planes";
+        String key = "1";
 
+        //debería devolver 200
+        var result = get("http://localhost:8080/"+domain+"/"+key);                        
+        assertEquals("200", result.statusCode().toString());
+
+        var plane =json(result.body());
+
+        assertEquals("Boing 747 is 20.0 years old.", plane.get("test_summary"));
+        assertEquals("Script compile for planes/test_nickname error.", plane.get("test_nickname"));
+        assertEquals("Runtime error for planes/test_color error.", plane.get("test_color"));
+        assertEquals("Missing prompt for planes/test_version calculated field.", plane.get("test_version"));        
+                        
+    }
+       
     //POSTs Use cases    
     
     //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.
