@@ -3,7 +3,10 @@
  */
 package gradle.example;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Test;
+import org.junit.Assert;
 import static org.junit.Assert.*;
 
 public class AppTest {
@@ -11,4 +14,20 @@ public class AppTest {
         App classUnderTest = new App();
         assertNotNull("app should have a greeting", classUnderTest.getGreeting());
     }
+    
+    @Test
+    public void test_the_running_app_just_for_code_coverage(){
+        //inicia la app y levanta todos los files de las configuraciones
+        String[] args = {""};
+        try {        
+            App.main(args);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Logger.getLogger(AppTest.class.getName()).log(Level.SEVERE, null, ex);            
+            Assert.fail();              
+        }        
+        
+    }
+    
+    
 }

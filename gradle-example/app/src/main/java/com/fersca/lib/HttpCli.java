@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import static com.fersca.lib.Logger.println;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  *
@@ -30,10 +31,13 @@ public class HttpCli {
     private static final Gson gson = new Gson();
     
     public static Map<String, Object> json(String jsonString) {
-
         return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
-
     }
+    
+    public static ArrayList<Map<String, Object>> jsonArray(String jsonString) {
+        return gson.fromJson(jsonString, new TypeToken<ArrayList<Map<String, Object>>>(){}.getType());
+    }
+    
     public static String jsonString(Map<String, Object> jsonString) {
 
         return gson.toJson(jsonString);

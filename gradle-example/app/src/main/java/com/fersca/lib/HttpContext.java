@@ -10,6 +10,7 @@ import static com.fersca.lib.Logger.println;
 import java.io.BufferedReader;
 import java.util.stream.Collectors;
 import static com.fersca.lib.HttpCli.json;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +63,6 @@ public class HttpContext {
             // Convertir el mapa a un string JSON
             String jsonString = gson.toJson(json);                
             this.response.getWriter().print(jsonString);
-
             this.response.setStatus(200);
             this.response.setContentType("application/json; utf-8");
             this.response.setCharacterEncoding("UTF-8");
@@ -73,6 +73,22 @@ public class HttpContext {
         }
     }
 
+    public void write(ArrayList<Map<String, Object>> jsonArray){
+        try {
+
+            // Convertir el mapa a un string JSON
+            String jsonString = gson.toJson(jsonArray);                            
+            this.response.getWriter().print(jsonString);
+            this.response.setStatus(200);
+            this.response.setContentType("application/json; utf-8");
+            this.response.setCharacterEncoding("UTF-8");
+
+        } catch (IOException ex) {
+            println(Level.SEVERE, ex);
+        }
+    }
+    
+    
     public void created(Map<String, Object> json){
         this.write(json);
         //Overwrite the 200 with 201

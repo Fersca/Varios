@@ -6,13 +6,14 @@ import static com.fersca.lib.HttpCli.post;
 import static com.fersca.lib.HttpCli.delete;
 import static com.fersca.lib.HttpCli.put;
 import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.jsonArray;
 import static com.fersca.apicreator.Api.DB;
-import static com.fersca.apicreator.Api.rootPath;
 import static com.fersca.apicreator.Api.saveJsonFile;
 import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
 import static com.fersca.apicreator.Api.Directory;
 import static com.fersca.apicreator.Api.rootPath;
+import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -193,6 +194,7 @@ public class ApiTest {
     
     @AfterClass
     public static void tearDownClass() {
+        Server.shutdownWebserver();        
     }
     
     @Before
@@ -339,6 +341,39 @@ public class ApiTest {
                         
     }
        
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_get_all_elements_from_a_domain() throws Exception {
+        
+        String domain = "planes";
+
+        //debería devolver 200
+        var result = get("http://localhost:8080/"+domain+"/all");                        
+        assertEquals("200", result.statusCode().toString());
+
+        var planes =jsonArray(result.body());
+
+        var plane = planes.get(0);
+        
+        assertEquals("Boing 747 is 20.0 years old.", plane.get("test_summary"));
+        assertEquals("Script compile for planes/test_nickname error.", plane.get("test_nickname"));
+        assertEquals("Runtime error for planes/test_color error.", plane.get("test_color"));
+        assertEquals("Missing prompt for planes/test_version calculated field.", plane.get("test_version"));        
+                        
+    }
+
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_an_invalid_command() throws Exception {
+        
+        String domain = "planes";
+
+        //debería devolver 200
+        var result = get("http://localhost:8080/"+domain+"/fer");                        
+        assertEquals("400", result.statusCode().toString());
+                        
+    }
+    
     //POSTs Use cases    
     
     //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.

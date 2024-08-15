@@ -18,10 +18,11 @@ import java.util.concurrent.Future;
 //Fersca Libs
 import com.fersca.lib.HttpContext;
 import com.fersca.lib.Server;
-import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.getJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.FutureJson;
+import static com.fersca.lib.HttpCli.get;
+import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.Logger.println;
 import static com.fersca.lib.Logger.setLogLevel;
 import java.util.logging.Level;
@@ -87,18 +88,19 @@ public class App {
 
         
         //Add the request handlers      
-        Server.addController("/user/fernando", App::procesaUsuario,null);     
-        Server.addController("/user/fernando/json", App::procesaUsuarioJson,null);
+        Server.addController("/fernando", App::procesaUsuario,null);     
+        Server.addController("/json", App::procesaUsuarioJson,null);
         Server.addController("/headers", App::procesaHeaders,null);        
         
-        //waits 10 seconds
-        println("Waiting 10 seconds until shutdown");
-        Thread.sleep(10000);
+        //debería devolver 200
+        var result = get("http://localhost:8080/json");                        
+
+        result = get("http://localhost:8080/fernando");                        
+        result = get("http://localhost:8080/headers");                        
         
         //shutdown http server
         Server.shutdownWebserver();
         
-        System.exit(0);
     }
     
     private static void procesaUsuario(HttpContext context) {

@@ -48,9 +48,10 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.2'
     
     //Para TeaVM
+    /*
     // https://www.teavm.org/docs/tooling/gradle.html
     id "org.teavm" version "0.8.1"
-    
+    */
 }
 
 checkstyle {
@@ -197,6 +198,7 @@ tasks.named('run') {
 }
 
 /* lo saco cuando deshabilito el plugin */
+/*
 teavm.js {
     addedToWebApp = true
     mainClass = "gradle.example.TeaExample"
@@ -204,7 +206,7 @@ teavm.js {
     // this is also optional, default value is <project name>.js
     targetFileName = "example.js"
 }
-
+*/
 test {
 
     useJUnit() // Configura Gradle para usar JUnit 4

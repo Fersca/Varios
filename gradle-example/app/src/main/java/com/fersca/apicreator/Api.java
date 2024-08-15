@@ -27,24 +27,11 @@ import java.util.logging.Logger;
 public class Api {
     
     public static void main(String[] args) throws IOException, Exception {
-        
-        /* --> Para hostear la API previamente generada:
-        
-        Leer el archivo de configuración.
-        Cada archivo representa una api distinta. La cual tiene especificada la estructura, las acciones y filtros.
-        Luego de leer la configuración, debería prepararse una api genérica que esté preparada a recibir los métodos que estén
-        en esa configuración, con lo cual la configuración en realidad lo que hace es preparar una URL de los dominios
-        y algoritmos a utilizar cuando se ejecuta esa URL
-        
-        */       
-        
+                
         Api api = new Api();
-
-        api.startWebserver();        
-             
-        //Generar una API -->
-        //---------------------
         
+        api.startWebserver();        
+                     
     }
 
     private static final Set<String> compiledWorkingClasses = new HashSet<>();
@@ -334,6 +321,30 @@ public class ##CLASS_NAME## {
                 
         return maxKey+1;
     }
+
+    private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations) {
+
+        //Lista de elementos a devolver
+        ArrayList<Map<String,Object>> elementsArray = new ArrayList<>();
+        
+        //recorre todos los elementos
+        for (String element : DB.keySet()){
+            
+            //si el elemento es del dominio buscado, lo guarda en el array
+            String[] split = element.split("_");
+            String elementDomain = split[0];
+            String key = split[1];
+            
+            if (elementDomain.equals(domain)){                
+                //busca cada elemento y lo agrega al array
+                var calculatedJson = getElement(domain, key, fields, onlineCalculations);
+                elementsArray.add(calculatedJson);                                
+            }            
+        }
+                        
+        return elementsArray;
+        
+    }
     
     private void startWebserver() throws IOException, Exception {
 
@@ -401,6 +412,43 @@ public class ##CLASS_NAME## {
     //Base de datos de mentira de jsons
     protected static final HashMap<String, Object> DB = new HashMap<>();
     
+    private static Map<String, Object> getElement(String domain, String key, Map<String, Object> fields, Map<String, Object> onlineCalculations){
+        
+        //ir a buscar el Json guardado en la base de datos para el ID identificado.
+        Object element = DB.get(domain+"_"+key);
+
+        //si existe el elemento en la base de datos
+        if (element!=null){               
+            //devuelve el json en el request
+
+            var jsonFromDB = json((String)element);
+            Map<String, Object> finalJson = new HashMap<>();
+
+            //va creando el json final en base a lo que viene en los fields               
+            for (String field : fields.keySet()) {
+
+                //obtiene el tipo del dato del campo
+                String valueType = (String)fields.get(field);
+                Object valueFromDB = jsonFromDB.get(field);
+
+                //Según sea el value type lo pone en el json final y calcula los campos calculados real time
+                switch (valueType) {
+                    case "Number" -> finalJson.put(field, (Double)valueFromDB);
+                    case "String" -> finalJson.put(field, (String)valueFromDB);
+                    case "Boolean" -> finalJson.put(field, (Boolean)valueFromDB);
+                    case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field, jsonFromDB,(String)onlineCalculations.get(field), fields));
+                    default -> println("Tipo inválido: "+field + "("+valueType+")");
+                }                            
+            }                    
+
+            //Devuelve el json generado en base a los campos y los datos de la DB
+            return finalJson;
+        } else {
+            return null;
+        }
+        
+    }
+    
     private static void generalController(HttpContext context) {
 
         
@@ -431,44 +479,43 @@ public class ##CLASS_NAME## {
         
         if ("GET".equals(method)){
 
-            Integer key= Integer.valueOf(context.getUrlPath(2));            
+            //obtiene el id del
+            String key = context.getUrlPath(2);
+            Integer idKey=null;
+            Map<String, Object> finalJson=null;
             
-            //ir a buscar el Json guardado en la base de datos para el ID identificado.
-            Object element = DB.get(domain+"_"+key);
-            
-            //si existe el elemento en la base de datos
-            if (element!=null){               
-                //devuelve el json en el request
-                
-                var jsonFromDB = json((String)element);
-                Map<String, Object> finalJson = new HashMap<>();
-                
-                //va creando el json final en base a lo que viene en los fields               
-                for (String field : fields.keySet()) {
-                    
-                    //obtiene el tipo del dato del campo
-                    String valueType = (String)fields.get(field);
-                    Object valueFromDB = jsonFromDB.get(field);
-                   
-                    //Según sea el value type lo pone en el json final y calcula los campos calculados real time
-                    switch (valueType) {
-                        case "Number" -> finalJson.put(field, (Double)valueFromDB);
-                        case "String" -> finalJson.put(field, (String)valueFromDB);
-                        case "Boolean" -> finalJson.put(field, (Boolean)valueFromDB);
-                        case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field, jsonFromDB,(String)onlineCalculations.get(field), fields));
-                        default -> println("Tipo inválido: "+field + "("+valueType+")");
-                    }                            
-                }                    
-                
-                //Devuelve el json generado en base a los campos y los datos de la DB
-                context.write(finalJson);                
-                return;
-            } else {
-                //Devuelce not found
-                context.notFound(""+key);
-                return;
+            try {
+                //Chequea si la key es un número, si es así, busca un elemento
+                idKey= Integer.valueOf(key);            
+            } catch(NumberFormatException ex){                
+                //no es un número                
             }
             
+            //si se busca un ID valido, va a buscar el elemento
+            if (idKey!=null){
+                //busca el elemento en la base
+                finalJson = getElement(domain, idKey.toString(), fields, onlineCalculations);                
+                //Si no es null es porque lo encontró
+                if (finalJson!=null){
+                    context.write(finalJson);                
+                } else {
+                    //Devuelce not found
+                    context.notFound(""+key);
+                }               
+            } else if (idKey==null&&key.length()>0){
+                //Verifica si es un comando
+                switch (key){
+                    case "all" -> {
+                        //arma un json con todos los elementos
+                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations);
+                        context.write(finalJsonArray);                
+                    }
+                    default -> {
+                        context.badRequest("Command "+key+" not available");
+                    } 
+                }
+            }
+                                  
         } else if ("DELETE".equals(method)){
 
             Integer key;
@@ -493,11 +540,9 @@ public class ##CLASS_NAME## {
 
                 //Devuelve el json generado en base a los campos y los datos de la DB
                 context.write("Element: "+domain+ " "+key.toString()+ " deleted");                
-                return;
             } else {
                 //Si no existe, devuelve un not_fount                
                 context.notFound(key.toString());
-                return;
             }
                     
         } else if ("POST".equals(method) || "PUT".equals(method)){
@@ -580,15 +625,12 @@ public class ##CLASS_NAME## {
                 context.ok(finalJson);  
             }
             
-            return;
-            
             /*
             TODO: Pensar si tiene sentido hacer un get para que se ejecuten las compilaciones.
             */
                                                     
         }
-        
-        
+                
         //---> Para el caso del POST:
         
             //Obtener solo los campos que están en la estructura, se ignoran los otros.
@@ -597,7 +639,6 @@ public class ##CLASS_NAME## {
 
             //Si los algoritmos se ejecutaron directamente, guardar el JSON en la base de datos (por ahora un hashmap)
        
-
     };
     
     
