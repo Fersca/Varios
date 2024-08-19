@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -384,7 +383,7 @@ public class ##CLASS_NAME## {
                                 case "Number" -> {
                                     //comparacion de Doubles
                                     Double fieldValue = (Double)calculatedJson.get(tupla.field);
-                                    if (!fieldValue.equals(Double.parseDouble(tupla.value))){
+                                    if (!fieldValue.equals(Double.valueOf(tupla.value))){
                                         jsonCorrecto = false;
                                         break;                           
                                     }
@@ -400,7 +399,7 @@ public class ##CLASS_NAME## {
                                 case "Boolean" -> {
                                     //comparacion de Doubles
                                     Boolean fieldValue = (Boolean)calculatedJson.get(tupla.field);
-                                    if (!fieldValue.equals(Boolean.parseBoolean(tupla.value))){
+                                    if (!fieldValue.equals(Boolean.valueOf(tupla.value))){
                                         jsonCorrecto = false;
                                         break;                           
                                     }                                    
@@ -570,7 +569,7 @@ public class ##CLASS_NAME## {
             //obtiene el id del
             String key = context.getUrlPath(2);
             Integer idKey=null;
-            Map<String, Object> finalJson=null;
+            Map<String, Object> finalJson;
             
             try {
                 //Chequea si la key es un número, si es así, busca un elemento
@@ -638,7 +637,7 @@ public class ##CLASS_NAME## {
                 //Arma una descripción del dominio
                 int elements = coutElements(domain);    
                 
-                Map<String, Object> domainInfo = new HashMap<String, Object>();
+                Map<String, Object> domainInfo = new HashMap<>();
                 domainInfo.put("name", domain);
                 domainInfo.put("elements_count", elements);
                 context.write(domainInfo);                
@@ -676,7 +675,7 @@ public class ##CLASS_NAME## {
                     
         } else if ("POST".equals(method) || "PUT".equals(method)){
             
-            Integer key=null;
+            Integer key;
             
             //Si es un post genera un nuevo ID para ese dominio
             if (method.equals("POST")){
@@ -799,7 +798,6 @@ public class ##CLASS_NAME## {
                         println("Error parsing json: ---->");
                         println(content);
                         e.printStackTrace();
-                        continue;
                     }             
                                         
                 }
