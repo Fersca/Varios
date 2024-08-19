@@ -412,7 +412,7 @@ public class ApiTest {
         assertEquals("400", result.statusCode().toString());
                                 
     }
-
+        
     //Hace un get de todos los elementos de una colección y se fija si devuelve un array
     @Test
     public void test_search_for_number_and_boolean_fields() throws Exception {
@@ -462,8 +462,23 @@ public class ApiTest {
         
         
     }
-
     
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_get_domain_info() throws Exception {
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/planes");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var animals =json(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals("planes",animals.get("name"));
+        assertEquals(1.0,animals.get("elements_count"));
+                               
+    }
+        
     //POSTs Use cases    
     
     //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -323,6 +324,20 @@ public class ##CLASS_NAME## {
         return maxKey+1;
     }
 
+    private static int coutElements(String domain) {
+        
+        int count = 0;
+        var elements = DB.keySet();
+        
+        for (var element : elements) {            
+            var split = element.split("_");            
+            if (domain.equals(split[0])) 
+                count++;
+        }
+        
+        return count;
+    }
+
     private record TuplaFieldValue(String field, String value){}
     
     private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
@@ -570,12 +585,15 @@ public class ##CLASS_NAME## {
                 finalJson = getElement(domain, idKey.toString(), fields, onlineCalculations);                
                 //Si no es null es porque lo encontró
                 if (finalJson!=null){
+                    
+                    finalJson.put("fer", "no se. ...?");
+                    
                     context.write(finalJson);                
                 } else {
                     //Devuelce not found
                     context.notFound(""+key);
                 }                               
-            } else if (idKey==null&&key.length()>0){ //No viene una key numerica, pero hay un comando
+            } else if (idKey==null && key!=null && key.length()>0){ //No viene una key numerica, pero hay un comando
                 //Verifica si es un comando
                 switch (key){
                     case "all" -> {
@@ -615,7 +633,17 @@ public class ##CLASS_NAME## {
                         context.badRequest("Command "+key+" not available");
                     } 
                 }
-            } 
+            } else { //no vienen con ningun comando ni ID
+                
+                //Arma una descripción del dominio
+                int elements = coutElements(domain);    
+                
+                Map<String, Object> domainInfo = new HashMap<String, Object>();
+                domainInfo.put("name", domain);
+                domainInfo.put("elements_count", elements);
+                context.write(domainInfo);                
+                                
+            }
                                   
         } else if ("DELETE".equals(method)){
 
