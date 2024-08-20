@@ -1,5 +1,6 @@
 package com.fersca.lib;
 
+import static com.fersca.lib.HttpCli.json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
@@ -39,9 +40,10 @@ public class HttpCli {
     }
     
     public static String jsonString(Map<String, Object> jsonString) {
-
         return gson.toJson(jsonString);
-
+    }
+    public static String jsonString(Json jsonString) {
+        return gson.toJson(jsonString.getMap());
     }
 
     public static Map<String, Object> getJson(String url) throws URISyntaxException, IOException, InterruptedException, ExecutionException{
@@ -172,8 +174,7 @@ public class HttpCli {
         return result;
         
     }
-    
-    
+       
     public static class FutureJson  {
         
         private final long time1;

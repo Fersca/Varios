@@ -20,14 +20,14 @@ import java.util.logging.Logger;
  */
 public class HttpContext {
     
-    public HttpContext (HttpServletRequest request, HttpServletResponse response, Map<String, Object> args){
+    public HttpContext (HttpServletRequest request, HttpServletResponse response, Json args){
         this.request = request;
         this.response = response;
         this.args = args;
     }
     private final HttpServletRequest request;
     private final HttpServletResponse response;
-    private Map<String, Object> args = null;
+    private Json args = null;
 
     public void print(String message){
 
@@ -73,12 +73,32 @@ public class HttpContext {
             println(Level.SEVERE, ex);
         }
     }
-
-    public void write(ArrayList<Map<String, Object>> jsonArray){
+    public void write(Json json){
         try {
 
             // Convertir el mapa a un string JSON
-            String jsonString = gson.toJson(jsonArray);                            
+            String jsonString = gson.toJson(json.getMap());                
+            this.response.getWriter().print(jsonString);
+            this.response.setStatus(200);
+            this.response.setContentType("application/json; utf-8");
+            this.response.setCharacterEncoding("UTF-8");
+
+
+        } catch (IOException ex) {
+            println(Level.SEVERE, ex);
+        }
+    }
+
+    public void write(ArrayList<Json> jsonArray){
+        try {
+
+            ArrayList<Map<String, Object>> list = new ArrayList<>();
+            for (Json j : jsonArray){
+                list.add(j.getMap());
+            }
+            
+            // Convertir el mapa a un string JSON
+            String jsonString = gson.toJson(list);                            
             this.response.getWriter().print(jsonString);
             this.response.setStatus(200);
             this.response.setContentType("application/json; utf-8");
@@ -89,9 +109,8 @@ public class HttpContext {
         }
     }
     
-    
-    public void created(Map<String, Object> json){
-        this.write(json);
+    public void created(Json json){
+        this.write(json.getMap());
         //Overwrite the 200 with 201
         this.response.setStatus(201);                        
     }
@@ -105,7 +124,7 @@ public class HttpContext {
     public HttpServletRequest getRequest(){
         return this.request;
     }
-    public Map<String, Object> getArgs(){
+    public Json getArgs(){
         return this.args;
     }
 
@@ -139,8 +158,8 @@ public class HttpContext {
         this.response.setCharacterEncoding("UTF-8");                                                                   
     }
     
-    public Map<String, Object> getJsonBody(){
-        return json(getBody());
+    public Json getJsonBody(){
+        return new Json(json(getBody()));
     }
     
     public String getBody()  {
@@ -161,8 +180,8 @@ public class HttpContext {
         this.response.setCharacterEncoding("UTF-8");                                                                           
     }
 
-    public void ok(Map<String, Object> json) {
-        this.write(json);
+    public void ok(Json json) {
+        this.write(json.getMap());
         this.response.setStatus(200);                        
 
     }

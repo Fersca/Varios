@@ -12,8 +12,9 @@ import static com.fersca.apicreator.Api.saveJsonFile;
 import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
 import static com.fersca.apicreator.Api.Directory;
-import static com.fersca.apicreator.Api.rootPath;
+import static com.fersca.apicreator.Api.ROOTPATH;
 import static com.fersca.apicreator.Api.deleteAPIDefinition;
+import com.fersca.lib.Json;
 import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -109,7 +109,7 @@ public class ApiTest {
                          """;        
         
         //borra el directorio donde se deja el codigo calculado
-        File directory = new File(rootPath+"apis_calculated_fields_code"); // Reemplaza con la ruta de tu directorio       
+        File directory = new File(ROOTPATH+"apis_calculated_fields_code"); // Reemplaza con la ruta de tu directorio       
         deleteDirectory(directory);
                 
         //grea los diretorio de los dominios
@@ -219,24 +219,20 @@ public class ApiTest {
     public void test_read_files_with_json_content() throws IOException {
     
         Api api = new Api();
-        ArrayList<Map<String, Object>> files = api.readAPIDefinitionFiles(rootPath+"apis/test");
+        ArrayList<Json> files = api.readAPIDefinitionFiles(ROOTPATH+"apis/test");
         
         //debería tener un solo elemento
         assertEquals(files.size(),1);
         
         //obtengo el valor del campo domain
-        for (Map<String, Object> apiDescription : files){
+        for (Json apiDescription : files){
             
-            @SuppressWarnings("unchecked")
-            var apiStructure = (Map<String, Object>) apiDescription.get("structure");
-            String domain = apiStructure.get("domain").toString();                        
+            var apiStructure = apiDescription.j("structure");
+            String domain = apiStructure.s("domain");                        
             assertEquals("users", domain);
-        }
-    
-    
+        }       
     }
-
-
+    
     //GETS Use cases
     
     //Hacer un GET a un recurso que no existe y que devuelva 404 y no exista el archivo.
@@ -270,9 +266,9 @@ public class ApiTest {
     private boolean fileExists(String domain, String key, Directory type){        
         String filePathString;
         if (type.equals(Directory.DOMAIN))
-            filePathString = rootPath+"/db/"+domain+"/"+key+".json"; 
+            filePathString = ROOTPATH+"/db/"+domain+"/"+key+".json"; 
         else
-            filePathString = rootPath+domain+"/"+key+".json"; 
+            filePathString = ROOTPATH+domain+"/"+key+".json"; 
         
         Path filePath = Paths.get(filePathString);
         return Files.exists(filePath);                
@@ -308,7 +304,6 @@ public class ApiTest {
     
    
         String domain = "planes";
-        String key = "1";
 
         String jsonString = """
                             {
@@ -484,22 +479,20 @@ public class ApiTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void test_get_all_domains_info() throws Exception {
         
         //debería devolver 200
         var result = get("http://localhost:8080");                        
         assertEquals("200", result.statusCode().toString());
         
-        var domains =json(result.body());
+        var domains = new Json(result.body());
         
-        @SuppressWarnings("unchecked")
-        var planes =  (Map<String, Object>) domains.get("planes");
-        var animals = (Map<String, Object>) domains.get("animals");
+        var planes =  domains.j("planes");
+        var animals = domains.j("animals");
                         
         //verifica que haya solo un elemento
-        assertEquals("planes",((Map<String, Object>)planes.get("structure")).get("domain"));       
-        assertEquals("Es un numero de 1 a 100",((Map<String, Object>)animals.get("post_validations")).get("age"));
+        assertEquals("planes",planes.j("structure").s("domain"));       
+        assertEquals("Es un numero de 1 a 100",animals.j("post_validations").s("age"));
                                
     }
     
@@ -544,20 +537,17 @@ public class ApiTest {
         result = get("http://localhost:8080/planets");                        
         assertEquals("200", result.statusCode().toString());
         
-        var planets =json(result.body());
+        var planets = new Json(result.body());
         
         //verifica que haya solo un elemento
-        assertEquals("planets",planets.get("name"));
-        assertEquals(0.0,planets.get("elements_count"));
+        assertEquals("planets",planets.s("name"));
+        assertEquals("0.0",planets.d("elements_count").toString());
         
-        @SuppressWarnings("unchecked")
-        var apiDefinition = (Map<String, Object>) planets.get("api_definition");
+        var apiDefinition = planets.j("api_definition");
         
-        @SuppressWarnings("unchecked")
-        var apiStructure = (Map<String, Object>) apiDefinition.get("structure");
+        var apiStructure = apiDefinition.j("structure");
         
-        @SuppressWarnings("unchecked")
-        var apiName = (String) apiStructure.get("domain");
+        var apiName = apiStructure.s("domain");
         assertEquals("planets", apiName);
         
         //hago el post (cosa que noe esta permitida)

@@ -55,7 +55,6 @@ public class Server {
         jettyServer.setHandler(new AbstractHandler()
         {
             @Override
-            @SuppressWarnings("unchecked")
             public void handle(String target, Request jettyRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
             {
                 // Mark the request as handled so that it
@@ -115,7 +114,7 @@ public class Server {
             return "null";
     }
         
-    public static void addController(String name, Consumer<HttpContext> controller, Map<String, Object> args){
+    public static void addController(String name, Consumer<HttpContext> controller, Json args){
         urls.put(name, new Controller(controller, args));
     }
     
@@ -128,7 +127,7 @@ public class Server {
         }
     }
     
-    private record Controller(Consumer<HttpContext> controller, Map<String, Object> args){}
+    private record Controller(Consumer<HttpContext> controller, Json args){}
 
     
 }

@@ -5,6 +5,7 @@ import static com.fersca.apicreator.DynamicJavaRunner.execute;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.jsonString;
 import com.fersca.lib.HttpContext;
+import com.fersca.lib.Json;
 import static com.fersca.lib.Logger.println;
 import com.fersca.lib.Server;
 import java.io.File;
@@ -38,7 +39,7 @@ public class Api {
 
     private static final Set<String> compiledWorkingClasses = new HashSet<>();
     
-    private static Object getCalculatedValue(String api, String field, Map<String, Object> parameters, String description, Map<String, Object> parametersWithTypes) {
+    private static Object getCalculatedValue(String api, String field, Map<String, Object> parameters, String description, Json parametersWithTypes) {
         
         //nombre del código
         String className =api + "_"+ field;
@@ -59,7 +60,7 @@ public class Api {
             String sourceCode = generateSourceCode(api, field, parametersWithTypes, description);
             
             //guarda el código generado
-            File scriptFile = new File(rootPath+"/apis_calculated_fields_code/"+api+"/"+field+"_generated.sc");
+            File scriptFile = new File(ROOTPATH+"/apis_calculated_fields_code/"+api+"/"+field+"_generated.sc");
             Path filePath = Paths.get(scriptFile.getAbsolutePath());
             try {
                 Files.writeString(filePath, sourceCode);
@@ -92,12 +93,12 @@ public class Api {
                     
     }
 
-    protected static final String rootPath;
+    protected static final String ROOTPATH;
 
     static {
-        rootPath = System.getProperty("user.dir")+"/";
+        ROOTPATH = System.getProperty("user.dir")+"/";
     }
-    private static String generateSourceCode(String api, String field, Map<String, Object> parametersWithTypes, String description) {
+    private static String generateSourceCode(String api, String field, Json parametersWithTypes, String description) {
         
         String sourceCode = 
 """
@@ -136,13 +137,13 @@ public class ##CLASS_NAME## {
         
     }
 
-    private static String generateParametersCode(Map<String, Object> parametersWithTypes) {
+    private static String generateParametersCode(Json parametersWithTypes) {
 
         String parametersCode = "";
         for (String field : parametersWithTypes.keySet()) {
 
             //obtiene el tipo del dato del campo
-            String valueType = (String)parametersWithTypes.get(field);
+            String valueType = parametersWithTypes.s(field);
 
             //Según sea el value type lo pone en el json final y calcula los campos calculados real time
             switch (valueType) {
@@ -157,13 +158,13 @@ public class ##CLASS_NAME## {
         
     }
 
-    private static String generateAiCode(Map<String, Object> parametersWithTypes, String description, String apiName, String apiField) {
+    private static String generateAiCode(Json parametersWithTypes, String description, String apiName, String apiField) {
         
         String variablesCode = "";
         for (String field : parametersWithTypes.keySet()) {
 
             //obtiene el tipo del dato del campo
-            String valueType = (String)parametersWithTypes.get(field);
+            String valueType = parametersWithTypes.s(field);
 
             //Según sea el value type lo pone en el json final y calcula los campos calculados real time
             switch (valueType) {
@@ -278,7 +279,7 @@ public class ##CLASS_NAME## {
 
     private static void deleteFile(String domain, String key) {
 
-        Path filePath = Paths.get(rootPath+"db/"+domain+"/"+key+".json");
+        Path filePath = Paths.get(ROOTPATH+"db/"+domain+"/"+key+".json");
         try {
             Files.delete(filePath);
         } catch (IOException ex) {
@@ -292,9 +293,9 @@ public class ##CLASS_NAME## {
         Path filePath;
         
         if (type==Directory.DOMAIN){
-            filePath = Paths.get(rootPath+"db/"+domain+"/"+key+".json");
+            filePath = Paths.get(ROOTPATH+"db/"+domain+"/"+key+".json");
         } else {
-            filePath = Paths.get(rootPath+"apis/"+domain+".api.def");
+            filePath = Paths.get(ROOTPATH+"apis/"+domain+".api.def");
         }
         
         try {
@@ -338,33 +339,30 @@ public class ##CLASS_NAME## {
         return count;
     }
 
-    private static boolean validStructure(Map<String, Object> postedJson) {
+    private static boolean validStructure(Json postedJson) {
         
         //Obligatorio tener el campo structure
-        @SuppressWarnings("unchecked")
-        var structure = (Map<String, Object>)postedJson.get("structure");
+        var structure = postedJson.j("structure");
         if (structure==null)
             return false;
         
         //El campo structure tiene que tener un campo domain, un accept, un una lista de campos dentro de field solo con los tipos de datos permitidos
-        var domain = (String)structure.get("domain");
+        var domain = structure.s("domain");
         if (domain==null)
             return false;
 
-        @SuppressWarnings("unchecked")
-        var methods = (ArrayList<String>) structure.get("accept");
+        var methods = structure.sa("accept");
         //El campo accept tiene que ser un array solo con los metodos permitidos de HTTP        
         for (String method : methods){
             if (!(method.equals("GET")||method.equals("POST")||method.equals("PUT")||method.equals("DELETE")))
                 return false;
         }
                 
-        @SuppressWarnings("unchecked")
-        var fields = (Map<String, Object>)structure.get("fields");
+        var fields = structure.j("fields");
         
         var campos = fields.keySet();
         for (var campo : campos){
-            String valor = (String)fields.get(campo);
+            String valor = fields.s(campo);
             try {
             if (!(valor.equals("String")||valor.equals("Number")||valor.equals("Boolean")||valor.equals("Calculated")))
                 return false;
@@ -375,12 +373,11 @@ public class ##CLASS_NAME## {
         }
                
         //Los campos dentro de post validations tiene que ser todo de tipo string y con el nombre correspondiente a un nombre de campo en fields
-        @SuppressWarnings("unchecked")
-        var postValidations = (Map<String, Object>)postedJson.get("post_validations");        
+        var postValidations = postedJson.j("post_validations");        
         var postValidationsFields = postValidations.keySet();
         for (var fieldName : postValidationsFields){
             try {
-                var value = (String)fields.get(fieldName);
+                var value = fields.s(fieldName);
                 //si es nulo está mal, debería haber campo
                 if (value==null) return false;                
             } catch (Exception e){
@@ -390,12 +387,11 @@ public class ##CLASS_NAME## {
         }
                
         //Lo mismo para online_validations
-        @SuppressWarnings("unchecked")
-        var onlineValidations = (Map<String, Object>)postedJson.get("get_online_calculations");        
+        var onlineValidations = postedJson.j("get_online_calculations");        
         var onlineValidationsFields = onlineValidations.keySet();
         for (var fieldName : onlineValidationsFields){
             try {
-                var value = (String)fields.get(fieldName);
+                var value = fields.s(fieldName);
                 //si es nulo está mal, debería haber campo
                 if (value==null) return false;                
             } catch (Exception e){
@@ -414,10 +410,10 @@ public class ##CLASS_NAME## {
 
     private record TuplaFieldValue(String field, String value){}
     
-    private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
+    private static ArrayList<Json> getAllElements(String domain, Json fields, Json onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
 
         //Lista de elementos a devolver
-        ArrayList<Map<String,Object>> elementsArray = new ArrayList<>();
+        ArrayList<Json> elementsArray = new ArrayList<>();
         
         //recorre todos los elementos
         for (String element : DB.keySet()){
@@ -451,13 +447,13 @@ public class ##CLASS_NAME## {
                         if (calculatedJson.containsKey(tupla.field)){
                                                                                    
                             //voy a buscar el tipo de dato que debería tener el campo al mapa de filtros
-                            String valueType = (String)fields.get(tupla.field);
+                            String valueType = fields.s(tupla.field);
 
                             //Segun el tipo de dato que sea, hago la conversion y la comparación
                             switch (valueType) {
                                 case "Number" -> {
                                     //comparacion de Doubles
-                                    Double fieldValue = (Double)calculatedJson.get(tupla.field);
+                                    Double fieldValue = calculatedJson.d(tupla.field);
                                     if (!fieldValue.equals(Double.valueOf(tupla.value))){
                                         jsonCorrecto = false;
                                         break;                           
@@ -465,7 +461,7 @@ public class ##CLASS_NAME## {
                                 }
                                 case "String" -> {
                                     //comparacion de String
-                                    String fieldValue = (String)calculatedJson.get(tupla.field);
+                                    String fieldValue = calculatedJson.s(tupla.field);
                                     if (!fieldValue.equals(tupla.value)){
                                         jsonCorrecto = false;
                                         break;
@@ -473,7 +469,7 @@ public class ##CLASS_NAME## {
                                 }
                                 case "Boolean" -> {
                                     //comparacion de Doubles
-                                    Boolean fieldValue = (Boolean)calculatedJson.get(tupla.field);
+                                    Boolean fieldValue = calculatedJson.b(tupla.field);
                                     if (!fieldValue.equals(Boolean.valueOf(tupla.value))){
                                         jsonCorrecto = false;
                                         break;                           
@@ -481,7 +477,7 @@ public class ##CLASS_NAME## {
                                 }
                                 case "Calculated" -> {
                                     //comparacion de String
-                                    String fieldValue = (String)calculatedJson.get(tupla.field);
+                                    String fieldValue = calculatedJson.s(tupla.field);
                                     if (!fieldValue.equals(tupla.value)){
                                         jsonCorrecto = false;
                                         break;
@@ -509,24 +505,24 @@ public class ##CLASS_NAME## {
     }
 
     //Crear un método para ese dominio con el nombre del archivo para cada uno de los métodos.
-    private static Map<String, Object> domains = new HashMap<>();
+    private static final Json domains = new Json();
     
     private void startWebserver() throws IOException, Exception {
 
         println("Inicia el webserever");
         
         //Leer cada archivo de configuración de la ruta donde están las apis y por cada uno de ellos hacer:
-        ArrayList<Map<String, Object>> files = readAPIDefinitionFiles(rootPath+"apis");
+        ArrayList<Json> files = readAPIDefinitionFiles(ROOTPATH+"apis");
                 
         //Crear el webserver        
         Server.createHttpServer();
                 
         //Obtengo el valor del campo domain
-        for (Map<String, Object> apiDescription : files){
+        for (Json apiDescription : files){
             
             //crea el dominio en el server
             String domain = loadAPIDescription(apiDescription);
-            domains.put(domain, apiDescription);
+            domains.put(domain, apiDescription.getMap());
         }       
         
         //Agrega el controller general para obtener info de los dominios
@@ -534,11 +530,10 @@ public class ##CLASS_NAME## {
                         
     }
     
-    private static String loadAPIDescription(Map<String, Object> apiDescription) throws IOException{
+    private static String loadAPIDescription(Json apiDescription) throws IOException{
         
-        @SuppressWarnings("unchecked")
-        var apiStructure = (Map<String, Object>) apiDescription.get("structure");
-        String domain = apiStructure.get("domain").toString();                        
+        var apiStructure = apiDescription.j("structure");
+        String domain = apiStructure.s("domain");                        
 
         //Add the request handlers      
         Server.addController("/"+domain, Api::generalController, apiDescription);     
@@ -567,7 +562,7 @@ public class ##CLASS_NAME## {
                 context.write(domains);
             case "POST" -> {
                 //obtener el json
-                var postedJson = (Map<String, Object>)context.getJsonBody();
+                var postedJson = context.getJsonBody();
                 
                 //valider si tiene la estructura correcta
                 if (!validStructure(postedJson)){
@@ -576,8 +571,7 @@ public class ##CLASS_NAME## {
                 }
                 
                 //verificar si el dominio no existe ya
-                @SuppressWarnings("unchecked")
-                String domain = (String)((Map<String, Object>)postedJson.get("structure")).get("domain");
+                String domain = postedJson.j("structure").s("domain");
                 if (existsDomain(domain)){
                     context.badRequest("Domain already exists");
                     return;                    
@@ -585,13 +579,13 @@ public class ##CLASS_NAME## {
                 
                 try {
                     //guardar el archivo del dominio                    
-                    createAPIDefinition(domain, postedJson.toString());
+                    createAPIDefinition(domain, jsonString(postedJson.getMap()));
                     
                     //ejecutar la inicializacion del dominio
                     loadAPIDescription(postedJson);
                     
                     //lo guarda en la lista de domains
-                    domains.put(domain, postedJson);
+                    domains.put(domain, postedJson.getMap());
                     
                 } catch (IOException ex) {
                     context.badRequest("Error creating API definition.");
@@ -609,7 +603,7 @@ public class ##CLASS_NAME## {
     private static void uploadDBDomain(String domain) {
         
         // Especifica el directorio que deseas leer
-        File directory = new File(rootPath+"db/"+domain);
+        File directory = new File(ROOTPATH+"db/"+domain);
         
         //genera la lista de domains                            
         File[] files = directory.listFiles();
@@ -637,7 +631,7 @@ public class ##CLASS_NAME## {
     //Base de datos de mentira de jsons
     protected static final HashMap<String, Object> DB = new HashMap<>();
     
-    private static Map<String, Object> getElement(String domain, String key, Map<String, Object> fields, Map<String, Object> onlineCalculations){
+    private static Json getElement(String domain, String key, Json fields, Json onlineCalculations){
         
         //ir a buscar el Json guardado en la base de datos para el ID identificado.
         Object element = DB.get(domain+"_"+key);
@@ -647,13 +641,13 @@ public class ##CLASS_NAME## {
             //devuelve el json en el request
 
             var jsonFromDB = json((String)element);
-            Map<String, Object> finalJson = new HashMap<>();
+            var finalJson = new Json();
 
             //va creando el json final en base a lo que viene en los fields               
             for (String field : fields.keySet()) {
 
                 //obtiene el tipo del dato del campo
-                String valueType = (String)fields.get(field);
+                String valueType = fields.s(field);
                 Object valueFromDB = jsonFromDB.get(field);
 
                 //Según sea el value type lo pone en el json final y calcula los campos calculados real time
@@ -661,7 +655,7 @@ public class ##CLASS_NAME## {
                     case "Number" -> finalJson.put(field, (Double)valueFromDB);
                     case "String" -> finalJson.put(field, (String)valueFromDB);
                     case "Boolean" -> finalJson.put(field, (Boolean)valueFromDB);
-                    case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field, jsonFromDB,(String)onlineCalculations.get(field), fields));
+                    case "Calculated" -> finalJson.put(field, getCalculatedValue(domain, field, jsonFromDB,onlineCalculations.s(field), fields));
                     default -> println("Tipo inválido: "+field + "("+valueType+")");
                 }                            
             }                    
@@ -678,18 +672,15 @@ public class ##CLASS_NAME## {
 
         
         var arguments = context.getArgs();
-        @SuppressWarnings("unchecked")
-        var structure = (Map<String, Object>) arguments.get("structure");
-        @SuppressWarnings("unchecked")
-        var fields = (Map<String, Object>)structure.get("fields");
-        String domain = (String)structure.get("domain");
+        var structure = arguments.j("structure");
+        var fields = structure.j("fields");
         
-        @SuppressWarnings("unchecked")
-        var onlineCalculations = (Map<String, Object>) arguments.get("get_online_calculations");
+        String domain = structure.s("domain");
         
-        @SuppressWarnings("unchecked")
+        var onlineCalculations =  arguments.j("get_online_calculations");
+        
         //Obtiene los métodos soportados en esta api                
-        ArrayList<String> supportedMethods = (ArrayList<String>) structure.get("accept");
+        var supportedMethods = structure.sa("accept");
         
         //Obtiene el método actual
         String method = context.getRequest().getMethod();
@@ -707,7 +698,7 @@ public class ##CLASS_NAME## {
             //obtiene el id del
             String key = context.getUrlPath(2);
             Integer idKey=null;
-            Map<String, Object> finalJson;
+            Json finalJson;
             
             try {
                 //Chequea si la key es un número, si es así, busca un elemento
@@ -732,7 +723,7 @@ public class ##CLASS_NAME## {
                 switch (key){
                     case "all" -> {
                         //arma un json con todos los elementos
-                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations,null);
+                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations,null);
                         context.write(finalJsonArray);                
                     }
                     case "search" -> {
@@ -760,7 +751,7 @@ public class ##CLASS_NAME## {
                         }                        
                       
                         //arma un json con todos los elementos que corresponden a los filtros
-                        ArrayList<Map<String, Object>> finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros);
+                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros);
                         context.write(finalJsonArray);                
                     }                   
                     default -> {
@@ -772,10 +763,10 @@ public class ##CLASS_NAME## {
                 //Arma una descripción del dominio
                 int elements = coutElements(domain);    
                 
-                Map<String, Object> domainInfo = new HashMap<>();
+                Json domainInfo = new Json();
                 domainInfo.put("name", domain);
                 domainInfo.put("elements_count", elements);
-                domainInfo.put("api_definition", domains.get(domain));
+                domainInfo.put("api_definition", domains.j(domain).getMap());
                 context.write(domainInfo);                
                                 
             }
@@ -845,10 +836,10 @@ public class ##CLASS_NAME## {
             }
                         
             //Obtiene el contenido del body, lo paso a json.
-            var postedJson = (Map<String, Object>)context.getJsonBody();
+            var postedJson = context.getJsonBody();
                                                            
             //Se crea el mapa final que se va a devolver
-            Map<String, Object> finalJson = new HashMap<>();
+            Json finalJson = new Json();
 
             //va creando el json final en base a lo que viene en los fields               
             for (String field : fields.keySet()) {
@@ -858,8 +849,8 @@ public class ##CLASS_NAME## {
                     continue;
 
                 //obtiene el tipo del dato del campo
-                String valueType = (String)fields.get(field);
-                Object valueFromPost = postedJson.get(field);
+                String valueType = fields.s(field);
+                Object valueFromPost = postedJson.getObject(field);
 
                 //Según sea el value type lo pone en el json final y calcula los campos calculados real time
                 switch (valueType) {
@@ -906,12 +897,12 @@ public class ##CLASS_NAME## {
     };
     
     
-    protected ArrayList<Map<String, Object>> readAPIDefinitionFiles(String path) throws IOException {
+    protected ArrayList<Json> readAPIDefinitionFiles(String path) throws IOException {
         
         // Especifica el directorio que deseas leer
         File directory = new File(path);
         
-        ArrayList<Map<String, Object>> fileContents = new ArrayList<>();
+        ArrayList<Json> fileContents = new ArrayList<>();
 
         // Verifica que el objeto File es un directorio
         if (directory.isDirectory()) {
@@ -927,11 +918,12 @@ public class ##CLASS_NAME## {
                     String content = Files.readString(filePath);
                     
                     try {
-                        var jsonContent = json(content);
+                        var jsonContent = new Json(json(content));
                         // Guarda el nombre del archivo y el contenido en el mapa                    
                         fileContents.add(jsonContent);                        
                     } catch (Exception e){
                         println("Error parsing json: ---->");
+                        println("Path: "+file.getAbsolutePath());
                         println(content);
                         e.printStackTrace();
                     }             
@@ -962,7 +954,7 @@ public class ##CLASS_NAME## {
 
     protected static void deleteAPIDefinition(String domain) throws IOException{                
         try {
-            String path = rootPath+"apis/"+domain+".api.def";
+            String path = ROOTPATH+"apis/"+domain+".api.def";
             File file = new File(path);
             Path filePath = Paths.get(file.getAbsolutePath());        
             Files.delete(filePath);
@@ -976,9 +968,9 @@ public class ##CLASS_NAME## {
         String path;
         
         if (type==Directory.DOMAIN){
-            path = rootPath+"db/"+name;
+            path = ROOTPATH+"db/"+name;
         } else {
-            path = rootPath+"apis_calculated_fields_code/"+name;
+            path = ROOTPATH+"apis_calculated_fields_code/"+name;
         }
         
         // Especifica el directorio que deseas leer
