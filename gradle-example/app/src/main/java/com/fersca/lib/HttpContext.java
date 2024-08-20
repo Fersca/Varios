@@ -158,8 +158,8 @@ public class HttpContext {
         this.response.setCharacterEncoding("UTF-8");                                                                   
     }
     
-    public Json getJsonBody(){
-        return new Json(json(getBody()));
+    public Json getJsonBody(){       
+        return new Json(getBody());
     }
     
     public String getBody()  {
@@ -172,11 +172,13 @@ public class HttpContext {
         }
         return reader.lines().collect(Collectors.joining(System.lineSeparator()));
     }
-
+    
     public void badRequest(String message) {
-        this.write(message);
+        String m = """
+{"message":"##MESSAGE##"}""";
+        this.write(m.replaceAll("##MESSAGE##", message));
         this.response.setStatus(400);
-        this.response.setContentType("text/html; charset=UTF-8");
+        this.response.setContentType("application/json; utf-8");
         this.response.setCharacterEncoding("UTF-8");                                                                           
     }
 

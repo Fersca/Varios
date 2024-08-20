@@ -40,9 +40,11 @@ public class Json {
     public void put(String field, Object value){
         json.put(field, value);
     }
+    /*
     public void remove(String field){
         json.remove(field);
-    }    
+    } 
+    */
     public boolean containsKey(String key){
         return json.containsKey(key);
     }
@@ -55,8 +57,14 @@ public class Json {
     
     @SuppressWarnings("unchecked")
     public Json j(String field){
-        return new Json((Map<String, Object>)json.get(field));
-    }                        
+        var j = json.get(field);
+        if (j!=null)
+            return new Json((Map<String, Object>)json.get(field));
+        else 
+            return null;
+    }    
+
+    /*
     public ArrayList<Json> ja(String field){
         
         @SuppressWarnings("unchecked")
@@ -71,7 +79,7 @@ public class Json {
         
         return l;
     }                        
-
+    */
     @SuppressWarnings("unchecked")
     public List<String> sa(String field){        
         return (List<String>)json.get(field);  

@@ -210,11 +210,6 @@ public class ApiTest {
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
     @Test
     public void test_read_files_with_json_content() throws IOException {
     
@@ -495,7 +490,33 @@ public class ApiTest {
         assertEquals("Es un numero de 1 a 100",animals.j("post_validations").s("age"));
                                
     }
-    
+
+    @Test
+    public void test_multiget() throws Exception {
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/animals?ids=1,2,3");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var jsonArray = jsonArray(result.body());
+        
+        boolean fish=false, lion=false, cow=false;
+        
+        for (var jsonMap : jsonArray){
+            Json json = new Json(jsonMap);
+            if (json.s("name").equals("Fish"))
+                fish=true;
+            if (json.s("name").equals("Lion"))
+                lion=true;
+            if (json.s("name").equals("Cow"))
+                cow=true;            
+        }
+        
+        //chequea que hayan estado los 3 animales
+        assertTrue(fish&&cow&&lion&(jsonArray.size()==3));
+                                       
+    }
+   
     //POSTs Use cases    
 
     @Test
@@ -557,8 +578,183 @@ public class ApiTest {
         assertEquals("400", result.statusCode().toString());       
                         
     }
-       
-    //TODO: HACER VARIOS TEST DONDE NO PASEN LA VALIDACION DEL POST DEL JSON AL CREAR UN DOMINIO
+
+    @Test
+    public void test_creation_of_new_domain_with_invalid_json() throws Exception {
+    
+        String planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain": "planets2",
+                            "accept":["GET"],
+                            "fields":{
+                                "type":4
+                            }    
+                        }
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        var j = new Json(result.body());
+        assertEquals("Invalid Json structure: Fields Data Types should be in String format", j.s("message"));
+
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "accept":["GET"],
+                            "fields":{
+                                "type":4
+                            }    
+                        }
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Missing domain field", j.s("message"));
+
+        //Prueba con un metodo mal puesto
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain":"Planets",
+                            "accept":["GETT"],
+                            "fields":{
+                                "type":"String"
+                            }    
+                        }
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Invalid http method: GETT", j.s("message"));
+
+        //prueba sin el campo fields
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain":"Planets",
+                            "accept":["GET"]
+                        }
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Missing fields field", j.s("message"));
+
+        //prueba sin el campo structure
+        planetsAPIDefinition = """
+                        {
+                            "fields":{
+                                "type":"String"
+                            }    
+                        }                                             
+                        """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Missing structure field", j.s("message"));
+        
+        //Tipo de dato invalido en los fields
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain":"Planets",
+                            "accept":["GET"],
+                            "fields":{
+                                "type":"Numerico"
+                            }    
+                        }
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Invalid Data Type: Numerico", j.s("message"));
+
+        //Tipo de dato invalido en los post validations
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain":"Planets",
+                            "accept":["GET"],
+                            "fields":{
+                                "type":"String"
+                            }    
+                        },
+                        "post_validations":{
+                            "type":4
+                        },
+                        "get_online_calculations":{
+                            "type":"bien"
+                        }                                                                                            
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Fields Data Types should be in String format", j.s("message"));
+
+        //Tipo de dato invalido en los online calculations
+        planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain":"Planets",
+                            "accept":["GET"],
+                            "fields":{
+                                "type":"String"
+                            }    
+                        },
+                        "post_validations":{
+                            "type":"bien"
+                        },
+                        "get_online_calculations":{
+                            "type":true
+                        }                                                                                            
+                        }                                             
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());      
+        j = new Json(result.body());
+        assertEquals("Invalid Json structure: Fields Data Types should be in String format", j.s("message"));
+        
+        
+    }       
+    
     
     //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.
     @Test

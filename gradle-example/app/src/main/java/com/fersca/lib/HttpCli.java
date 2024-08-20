@@ -32,7 +32,12 @@ public class HttpCli {
     private static final Gson gson = new Gson();
     
     public static Map<String, Object> json(String jsonString) {
-        return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
+        try {
+            return gson.fromJson(jsonString, new TypeToken<Map<String, Object>>(){}.getType());
+        } catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     public static ArrayList<Map<String, Object>> jsonArray(String jsonString) {

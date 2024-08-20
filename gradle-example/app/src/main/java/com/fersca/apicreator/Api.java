@@ -339,36 +339,39 @@ public class ##CLASS_NAME## {
         return count;
     }
 
-    private static boolean validStructure(Json postedJson) {
+    private static String validStructure(Json postedJson) {
         
         //Obligatorio tener el campo structure
         var structure = postedJson.j("structure");
         if (structure==null)
-            return false;
-        
+            return "Missing structure field";
+       
         //El campo structure tiene que tener un campo domain, un accept, un una lista de campos dentro de field solo con los tipos de datos permitidos
         var domain = structure.s("domain");
         if (domain==null)
-            return false;
+            return "Missing domain field";
 
         var methods = structure.sa("accept");
         //El campo accept tiene que ser un array solo con los metodos permitidos de HTTP        
         for (String method : methods){
             if (!(method.equals("GET")||method.equals("POST")||method.equals("PUT")||method.equals("DELETE")))
-                return false;
+                return "Invalid http method: "+method;
         }
                 
         var fields = structure.j("fields");
+
+        if (fields==null)
+            return "Missing fields field";
         
         var campos = fields.keySet();
         for (var campo : campos){
-            String valor = fields.s(campo);
             try {
-            if (!(valor.equals("String")||valor.equals("Number")||valor.equals("Boolean")||valor.equals("Calculated")))
-                return false;
+                String valor = fields.s(campo);                
+                if (!(valor.equals("String")||valor.equals("Number")||valor.equals("Boolean")||valor.equals("Calculated")))
+                    return "Invalid Data Type: "+valor;
             } catch (Exception e){
                 //agarra la exception si el calor del campo no es string
-                return false;
+                return "Fields Data Types should be in String format";
             }
         }
                
@@ -376,31 +379,38 @@ public class ##CLASS_NAME## {
         var postValidations = postedJson.j("post_validations");        
         var postValidationsFields = postValidations.keySet();
         for (var fieldName : postValidationsFields){
+
+            var value = fields.s(fieldName);
+            //si es nulo está mal, debería haber campo
+            if (value==null) return "Missing "+fieldName+" in fields definition";
+                
             try {
-                var value = fields.s(fieldName);
-                //si es nulo está mal, debería haber campo
-                if (value==null) return false;                
+                //fuerza la conversion a string para ver si el tipo de dato es correcto
+                postValidations.s(fieldName);                
             } catch (Exception e){
                 //agarra la exception si el calor del campo no es string
-                return false;
+                return "Fields Data Types should be in String format";
             }            
         }
                
         //Lo mismo para online_validations
         var onlineValidations = postedJson.j("get_online_calculations");        
         var onlineValidationsFields = onlineValidations.keySet();
-        for (var fieldName : onlineValidationsFields){
+        for (String fieldName : onlineValidationsFields){
+            var value = fields.s(fieldName);
+            //si es nulo está mal, debería haber campo
+            if (value==null) return "Missing "+fieldName+" in fields definition";
+                
             try {
-                var value = fields.s(fieldName);
-                //si es nulo está mal, debería haber campo
-                if (value==null) return false;                
+                //fuerza la conversion a string para ver si el tipo de dato es correcto
+                onlineValidations.s(fieldName);                
             } catch (Exception e){
                 //agarra la exception si el calor del campo no es string
-                return false;
+                return "Fields Data Types should be in String format";
             }            
         }
                
-        return true;
+        return null;
         
     }
 
@@ -565,8 +575,9 @@ public class ##CLASS_NAME## {
                 var postedJson = context.getJsonBody();
                 
                 //valider si tiene la estructura correcta
-                if (!validStructure(postedJson)){
-                    context.badRequest("Invalid Json structure");
+                String message = validStructure(postedJson);
+                if (message!=null){
+                    context.badRequest("Invalid Json structure: "+message);
                     return;
                 }
                 
@@ -760,17 +771,36 @@ public class ##CLASS_NAME## {
                 }
             } else { //no vienen con ningun comando ni ID
                 
-                //Arma una descripción del dominio
-                int elements = coutElements(domain);    
-                
-                Json domainInfo = new Json();
-                domainInfo.put("name", domain);
-                domainInfo.put("elements_count", elements);
-                domainInfo.put("api_definition", domains.j(domain).getMap());
-                context.write(domainInfo);                
-                                
-            }
-                                  
+                //Verifica si se están pidiendo por ID
+                String ids = context.getParameter("ids");
+                if (ids!=null && !ids.equals("")){
+                    String[] split = ids.split(",");
+                    var jsonids = new ArrayList<Json>();
+                    
+                    //recorro los ids y busco los jsons
+                    for (String id : split) {
+                        var jsonID = getElement(domain, id, fields, onlineCalculations);
+                        if (jsonID!=null)
+                            jsonids.add(jsonID);
+                    }
+                    
+                    context.write(jsonids);
+                    
+                } else {
+                    
+                    //Se está pidiendo un dominio solo sin nada
+                    
+                    //Arma una descripción del dominio
+                    int elements = coutElements(domain);    
+
+                    Json domainInfo = new Json();
+                    domainInfo.put("name", domain);
+                    domainInfo.put("elements_count", elements);
+                    domainInfo.put("api_definition", domains.j(domain).getMap());
+                    context.write(domainInfo);                
+                    
+                }                                                
+            }                                  
         } else if ("DELETE".equals(method)){
 
             Integer key;
