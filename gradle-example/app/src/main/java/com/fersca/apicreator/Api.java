@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -337,6 +338,80 @@ public class ##CLASS_NAME## {
         return count;
     }
 
+    private static boolean validStructure(Map<String, Object> postedJson) {
+        
+        //Obligatorio tener el campo structure
+        @SuppressWarnings("unchecked")
+        var structure = (Map<String, Object>)postedJson.get("structure");
+        if (structure==null)
+            return false;
+        
+        //El campo structure tiene que tener un campo domain, un accept, un una lista de campos dentro de field solo con los tipos de datos permitidos
+        var domain = (String)structure.get("domain");
+        if (domain==null)
+            return false;
+
+        @SuppressWarnings("unchecked")
+        var methods = (ArrayList<String>) structure.get("accept");
+        //El campo accept tiene que ser un array solo con los metodos permitidos de HTTP        
+        for (String method : methods){
+            if (!(method.equals("GET")||method.equals("POST")||method.equals("PUT")||method.equals("DELETE")))
+                return false;
+        }
+                
+        @SuppressWarnings("unchecked")
+        var fields = (Map<String, Object>)structure.get("fields");
+        
+        var campos = fields.keySet();
+        for (var campo : campos){
+            String valor = (String)fields.get(campo);
+            try {
+            if (!(valor.equals("String")||valor.equals("Number")||valor.equals("Boolean")||valor.equals("Calculated")))
+                return false;
+            } catch (Exception e){
+                //agarra la exception si el calor del campo no es string
+                return false;
+            }
+        }
+               
+        //Los campos dentro de post validations tiene que ser todo de tipo string y con el nombre correspondiente a un nombre de campo en fields
+        @SuppressWarnings("unchecked")
+        var postValidations = (Map<String, Object>)postedJson.get("post_validations");        
+        var postValidationsFields = postValidations.keySet();
+        for (var fieldName : postValidationsFields){
+            try {
+                var value = (String)fields.get(fieldName);
+                //si es nulo está mal, debería haber campo
+                if (value==null) return false;                
+            } catch (Exception e){
+                //agarra la exception si el calor del campo no es string
+                return false;
+            }            
+        }
+               
+        //Lo mismo para online_validations
+        @SuppressWarnings("unchecked")
+        var onlineValidations = (Map<String, Object>)postedJson.get("get_online_calculations");        
+        var onlineValidationsFields = onlineValidations.keySet();
+        for (var fieldName : onlineValidationsFields){
+            try {
+                var value = (String)fields.get(fieldName);
+                //si es nulo está mal, debería haber campo
+                if (value==null) return false;                
+            } catch (Exception e){
+                //agarra la exception si el calor del campo no es string
+                return false;
+            }            
+        }
+               
+        return true;
+        
+    }
+
+    private static boolean existsDomain(String domain) {
+        return domains.containsKey(domain);        
+    }
+
     private record TuplaFieldValue(String field, String value){}
     
     private static ArrayList<Map<String,Object>> getAllElements(String domain, Map<String, Object> fields, Map<String, Object> onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
@@ -432,6 +507,9 @@ public class ##CLASS_NAME## {
         return elementsArray;
         
     }
+
+    //Crear un método para ese dominio con el nombre del archivo para cada uno de los métodos.
+    private static Map<String, Object> domains = new HashMap<>();
     
     private void startWebserver() throws IOException, Exception {
 
@@ -442,33 +520,90 @@ public class ##CLASS_NAME## {
                 
         //Crear el webserver        
         Server.createHttpServer();
-
-        //Crear un método para ese dominio con el nombre del archivo para cada uno de los métodos.
-        
+                
         //Obtengo el valor del campo domain
         for (Map<String, Object> apiDescription : files){
             
-            @SuppressWarnings("unchecked")
-            var apiStructure = (Map<String, Object>) apiDescription.get("structure");
-            String domain = apiStructure.get("domain").toString();                        
-
-            //Add the request handlers      
-            Server.addController("/"+domain, Api::generalController, apiDescription);     
-             
-            //carga el contenido de los jsons en memoria
-            uploadDBDomain(domain);
-            
-            //Check if the directory exists in the DB, it not create it.
-            assureDirectory(domain,Directory.DOMAIN);
-            
-            //Check if the directory for compiled calculated files, if not create it.
-            assureDirectory(domain,Directory.DEFINITION);
-            
+            //crea el dominio en el server
+            String domain = loadAPIDescription(apiDescription);
+            domains.put(domain, apiDescription);
         }       
-                
+        
+        //Agrega el controller general para obtener info de los dominios
+        Server.addController("/", Api::domainsController, null);     
+                        
     }
     
-    private void uploadDBDomain(String domain) {
+    private static String loadAPIDescription(Map<String, Object> apiDescription) throws IOException{
+        
+        @SuppressWarnings("unchecked")
+        var apiStructure = (Map<String, Object>) apiDescription.get("structure");
+        String domain = apiStructure.get("domain").toString();                        
+
+        //Add the request handlers      
+        Server.addController("/"+domain, Api::generalController, apiDescription);     
+
+        //carga el contenido de los jsons en memoria
+        uploadDBDomain(domain);
+
+        //Check if the directory exists in the DB, it not create it.
+        assureDirectory(domain,Directory.DOMAIN);
+
+        //Check if the directory for compiled calculated files, if not create it.
+        assureDirectory(domain,Directory.DEFINITION);
+        
+        return domain;
+        
+    }
+    
+    private static void domainsController(HttpContext context) {
+        
+        //Obtiene el método actual
+        String method = context.getRequest().getMethod();
+                                     
+        switch (method) {
+            case "GET" -> 
+                //devuelve el json con la lista de los dominios.
+                context.write(domains);
+            case "POST" -> {
+                //obtener el json
+                var postedJson = (Map<String, Object>)context.getJsonBody();
+                
+                //valider si tiene la estructura correcta
+                if (!validStructure(postedJson)){
+                    context.badRequest("Invalid Json structure");
+                    return;
+                }
+                
+                //verificar si el dominio no existe ya
+                @SuppressWarnings("unchecked")
+                String domain = (String)((Map<String, Object>)postedJson.get("structure")).get("domain");
+                if (existsDomain(domain)){
+                    context.badRequest("Domain already exists");
+                    return;                    
+                }
+                
+                try {
+                    //guardar el archivo del dominio                    
+                    createAPIDefinition(domain, postedJson.toString());
+                    
+                    //ejecutar la inicializacion del dominio
+                    loadAPIDescription(postedJson);
+                    
+                } catch (IOException ex) {
+                    context.badRequest("Error creating API definition.");
+                    return;
+                }
+                                             
+                context.created(postedJson);
+            }
+
+            default -> context.notSupported();
+        }          
+       
+    }
+    
+    private static void uploadDBDomain(String domain) {
         
         // Especifica el directorio que deseas leer
         File directory = new File(rootPath+"db/"+domain);
@@ -822,6 +957,17 @@ public class ##CLASS_NAME## {
         
         //guarda el file con la definición de la api
         saveJsonFile(domain, domain, jsonString, Directory.DEFINITION);
+    }
+
+    protected static void deleteAPIDefinition(String domain) throws IOException{                
+        try {
+            String path = rootPath+"apis/"+domain+".api.def";
+            File file = new File(path);
+            Path filePath = Paths.get(file.getAbsolutePath());        
+            Files.delete(filePath);
+        } catch (NoSuchFileException e){
+            //no pasa nada si no encuntra el file.
+        }
     }
     
     protected static void assureDirectory(String name, Directory type) throws IOException {

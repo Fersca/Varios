@@ -61,11 +61,15 @@ public class Server {
                 // Mark the request as handled so that it
                 // will not be processed by other handlers.
                 jettyRequest.setHandled(true);                
-                                                
-                // si pongo /users/12 me pone en la pos 0 nada, en la 1 users en la 2 "12"
-                String[] split = request.getRequestURI().split("/");
-                
-                Controller controlador = urls.get("/"+split[1]);
+                    
+                String domain = "/";
+                if (!request.getRequestURI().equals("/")){                    
+                    // si pongo /users/12 me pone en la pos 0 nada, en la 1 users en la 2 "12"
+                    String[] split = request.getRequestURI().split("/");
+                    domain = "/"+split[1];
+                }
+                                
+                Controller controlador = urls.get(domain);
                 if (controlador==null){
                     String html="""
                                    <html>

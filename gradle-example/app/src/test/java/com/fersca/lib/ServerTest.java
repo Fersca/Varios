@@ -4,7 +4,9 @@ import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
 import static com.fersca.lib.HttpCli.postJson;
 import static com.fersca.lib.HttpCli.getJson;
+import static com.fersca.lib.HttpCli.get;
 import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.HttpResult;
 import static com.fersca.lib.Logger.setLogLevel;
 import static com.fersca.lib.Logger.println;
 import java.util.Map;
@@ -35,6 +37,10 @@ public class ServerTest {
     
     @AfterClass
     public static void tearDownClass() {
+        //shutdown http server
+        Server.shutdownWebserver();
+        String status = Server.serverStatus();
+        assertEquals("STOPPED",status);       
     }
     
     @Before
@@ -173,17 +179,24 @@ public class ServerTest {
         assertEquals("POST",method);                
         assertEquals("fer",name);                        
     }
-    
-    @Test
-    public void test_shutdown_the_werserver(){
-               
-        //shutdown http server
-        Server.shutdownWebserver();
-        String status = Server.serverStatus();
-        assertEquals("STOPPED",status);
-        
-    }
 
+    /*
+    TODO: Este test no lo corro ya que en la API cargo una URL, hay que cambiar el 
+    server para poder modificar las URL y ver si cuando no hay ninguna devuelve 400
+    @Test
+    public void test_to_root_url(){
+
+        try {
+            var json = get("http://localhost:8080");
+            assertEquals("400", String.valueOf(json.statusCode()));
+        } catch (Exception e){
+            e.printStackTrace();
+            fail();
+        }
+                                       
+    }
+    */
+    
     @Test
     public void test_post_to_external_api(){
                

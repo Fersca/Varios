@@ -13,6 +13,7 @@ import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
 import static com.fersca.apicreator.Api.Directory;
 import static com.fersca.apicreator.Api.rootPath;
+import static com.fersca.apicreator.Api.deleteAPIDefinition;
 import com.fersca.lib.Server;
 import java.io.File;
 import java.io.IOException;
@@ -179,6 +180,9 @@ public class ApiTest {
         //crea la definición de la api
         createAPIDefinition(animals, animalsAPIDefinition);
         createAPIDefinition(planes, planesAPIDefinition);
+        
+        //borra la definición de los planetas que se crea con un test
+        deleteAPIDefinition("planets");
 
         //inicia la app y levanta todos los files de las configuraciones
         String[] args = {""};
@@ -465,7 +469,7 @@ public class ApiTest {
     
     //Hace un get de todos los elementos de una colección y se fija si devuelve un array
     @Test
-    public void test_get_domain_info() throws Exception {
+    public void test_get_specific_domain_info() throws Exception {
         
         //debería devolver 200
         var result = get("http://localhost:8080/planes");                        
@@ -478,8 +482,79 @@ public class ApiTest {
         assertEquals(1.0,animals.get("elements_count"));
                                
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void test_get_all_domains_info() throws Exception {
         
+        //debería devolver 200
+        var result = get("http://localhost:8080");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var domains =json(result.body());
+        
+        @SuppressWarnings("unchecked")
+        var planes =  (Map<String, Object>) domains.get("planes");
+        var animals = (Map<String, Object>) domains.get("animals");
+                        
+        //verifica que haya solo un elemento
+        assertEquals("planes",((Map<String, Object>)planes.get("structure")).get("domain"));       
+        assertEquals("Es un numero de 1 a 100",((Map<String, Object>)animals.get("post_validations")).get("age"));
+                               
+    }
+    
     //POSTs Use cases    
+
+    @Test
+    public void test_creation_of_new_domain() throws Exception {
+    
+        String planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain": "planets",
+                            "accept":["GET"],
+                            "fields":{
+                                "id":"Number",
+                                "name":"String",
+                                "moons":"Number",
+                                "age":"Number",
+                                "type":"String",
+                                "habitable":"Boolean",                                      
+                                "orbit":"Calculated"
+                            }    
+                        },
+                        "post_validations":{
+                            "age":"la edad tiene que ser mayor a 1000"
+                        },
+                        "get_online_calculations":{
+                            "orbit":"La orbita se calcula multiplcando el campo age por 23"
+                        }
+                        }                               
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("201", result.statusCode().toString());       
+        
+        //verifica que se haya creado el archivo en el disco
+        
+        //verifica que cuando lo pido lo devueva en la URL (indicio que lo cargó en memoria)
+        result = get("http://localhost:8080/planets");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var planets =json(result.body());
+        
+        //verifica que haya solo un elemento
+        assertEquals("planets",planets.get("name"));
+        assertEquals(0.0,planets.get("elements_count"));
+        
+        //TODO: Agregar en este test que ahora lo cree de nuevo para ver si dice que ya existe.
+                
+    }
+       
+    //TODO: HACER VARIOS TEST DONDE NO PASEN LA VALIDACION DEL POST DEL JSON AL CREAR UN DOMINIO
     
     //Hacer un POST y ver que cuando hago un GET se obtiene y que se haya grabado el archivo, verificar si devuelve el ID en la respuesta.
     @Test
