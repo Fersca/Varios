@@ -550,8 +550,22 @@ public class ApiTest {
         assertEquals("planets",planets.get("name"));
         assertEquals(0.0,planets.get("elements_count"));
         
-        //TODO: Agregar en este test que ahora lo cree de nuevo para ver si dice que ya existe.
-                
+        @SuppressWarnings("unchecked")
+        var apiDefinition = (Map<String, Object>) planets.get("api_definition");
+        
+        @SuppressWarnings("unchecked")
+        var apiStructure = (Map<String, Object>) apiDefinition.get("structure");
+        
+        @SuppressWarnings("unchecked")
+        var apiName = (String) apiStructure.get("domain");
+        assertEquals("planets", apiName);
+        
+        //hago el post (cosa que noe esta permitida)
+        result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        //verifica que se haya creado
+        assertEquals("400", result.statusCode().toString());       
+                        
     }
        
     //TODO: HACER VARIOS TEST DONDE NO PASEN LA VALIDACION DEL POST DEL JSON AL CREAR UN DOMINIO

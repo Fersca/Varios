@@ -590,6 +590,9 @@ public class ##CLASS_NAME## {
                     //ejecutar la inicializacion del dominio
                     loadAPIDescription(postedJson);
                     
+                    //lo guarda en la lista de domains
+                    domains.put(domain, postedJson);
+                    
                 } catch (IOException ex) {
                     context.badRequest("Error creating API definition.");
                     return;
@@ -718,10 +721,7 @@ public class ##CLASS_NAME## {
                 //busca el elemento en la base
                 finalJson = getElement(domain, idKey.toString(), fields, onlineCalculations);                
                 //Si no es null es porque lo encontró
-                if (finalJson!=null){
-                    
-                    finalJson.put("fer", "no se. ...?");
-                    
+                if (finalJson!=null){                                       
                     context.write(finalJson);                
                 } else {
                     //Devuelce not found
@@ -775,6 +775,7 @@ public class ##CLASS_NAME## {
                 Map<String, Object> domainInfo = new HashMap<>();
                 domainInfo.put("name", domain);
                 domainInfo.put("elements_count", elements);
+                domainInfo.put("api_definition", domains.get(domain));
                 context.write(domainInfo);                
                                 
             }
