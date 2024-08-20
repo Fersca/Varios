@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -420,7 +421,7 @@ public class ##CLASS_NAME## {
 
     private record TuplaFieldValue(String field, String value){}
     
-    private static ArrayList<Json> getAllElements(String domain, Json fields, Json onlineCalculations, ArrayList<TuplaFieldValue> filtros) {
+    private static ArrayList<Json> getAllElements(String domain, Json fields, Json onlineCalculations, ArrayList<TuplaFieldValue> filtros, List<String> selection) {
 
         //Lista de elementos a devolver
         ArrayList<Json> elementsArray = new ArrayList<>();
@@ -435,7 +436,7 @@ public class ##CLASS_NAME## {
             
             if (elementDomain.equals(domain)){                
                 //busca cada elemento y lo agrega al array
-                var calculatedJson = getElement(domain, key, fields, onlineCalculations);
+                var calculatedJson = getElement(domain, key, fields, onlineCalculations, selection);
                                 
                 // Chequea si el json tiene que ser agregado a la lista por tener los campos de filtro.
                 // Primero verifico si viene el campo de los filtros con algo dentro.
@@ -642,7 +643,7 @@ public class ##CLASS_NAME## {
     //Base de datos de mentira de jsons
     protected static final HashMap<String, Object> DB = new HashMap<>();
     
-    private static Json getElement(String domain, String key, Json fields, Json onlineCalculations){
+    private static Json getElement(String domain, String key, Json fields, Json onlineCalculations, List<String> selection){
         
         //ir a buscar el Json guardado en la base de datos para el ID identificado.
         Object element = DB.get(domain+"_"+key);
@@ -671,6 +672,17 @@ public class ##CLASS_NAME## {
                 }                            
             }                    
 
+            //si viene con selection, filtro los campos que me pidio
+            if (selection!=null){
+                //obtiene los campos para filtrar
+                for (String field : fields.keySet()){
+                    //verifica si no están en la lista de selection
+                    if (!selection.contains(field)){
+                        finalJson.remove(field);
+                    }                    
+                }                             
+            }
+            
             //Devuelve el json generado en base a los campos y los datos de la DB
             return finalJson;
         } else {
@@ -711,6 +723,19 @@ public class ##CLASS_NAME## {
             Integer idKey=null;
             Json finalJson;
             
+            //Verifica si viene con selection
+            String selection = context.getParameter("attributes");
+            ArrayList<String> selectionFields=null;
+            if (selection!=null && !selection.equals("")){
+                String[] split = selection.split(",");
+                selectionFields = new ArrayList<>();
+
+                //recorro los ids y busco los jsons
+                for (String id : split) {
+                    selectionFields.add(id);
+                }
+            }             
+                        
             try {
                 //Chequea si la key es un número, si es así, busca un elemento
                 idKey= Integer.valueOf(key);            
@@ -721,7 +746,7 @@ public class ##CLASS_NAME## {
             //si se busca un ID valido, va a buscar el elemento
             if (idKey!=null){
                 //busca el elemento en la base
-                finalJson = getElement(domain, idKey.toString(), fields, onlineCalculations);                
+                finalJson = getElement(domain, idKey.toString(), fields, onlineCalculations, selectionFields);                
                 //Si no es null es porque lo encontró
                 if (finalJson!=null){                                       
                     context.write(finalJson);                
@@ -734,7 +759,7 @@ public class ##CLASS_NAME## {
                 switch (key){
                     case "all" -> {
                         //arma un json con todos los elementos
-                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations,null);
+                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations,null,selectionFields);
                         context.write(finalJsonArray);                
                     }
                     case "search" -> {
@@ -762,7 +787,7 @@ public class ##CLASS_NAME## {
                         }                        
                       
                         //arma un json con todos los elementos que corresponden a los filtros
-                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros);
+                        var finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros,selectionFields);
                         context.write(finalJsonArray);                
                     }                   
                     default -> {
@@ -779,7 +804,7 @@ public class ##CLASS_NAME## {
                     
                     //recorro los ids y busco los jsons
                     for (String id : split) {
-                        var jsonID = getElement(domain, id, fields, onlineCalculations);
+                        var jsonID = getElement(domain, id, fields, onlineCalculations,selectionFields);
                         if (jsonID!=null)
                             jsonids.add(jsonID);
                     }
@@ -815,8 +840,7 @@ public class ##CLASS_NAME## {
             Object element = DB.get(domain+"_"+key);
                         
             //si existe lo elimina                
-            if (element!=null){               
-                
+            if (element!=null){                               
                 //Lo elimina del cache
                 DB.remove(domain+"_"+key);
                 

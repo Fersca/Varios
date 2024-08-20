@@ -40,11 +40,9 @@ public class Json {
     public void put(String field, Object value){
         json.put(field, value);
     }
-    /*
     public void remove(String field){
         json.remove(field);
     } 
-    */
     public boolean containsKey(String key){
         return json.containsKey(key);
     }

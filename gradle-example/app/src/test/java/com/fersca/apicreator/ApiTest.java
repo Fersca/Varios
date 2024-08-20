@@ -516,7 +516,24 @@ public class ApiTest {
         assertTrue(fish&&cow&&lion&(jsonArray.size()==3));
                                        
     }
-   
+
+    @Test
+    public void test_selection() throws Exception {
+        
+        //debería devolver 200
+        var result = get("http://localhost:8080/animals/1?attributes=name");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var json = new Json(result.body());
+        
+        System.out.println(result.body());
+        
+        assertEquals("Lion",json.s("name"));
+        assertNull(json.d("age"));
+        assertNull(json.d("id"));
+                                               
+    }
+       
     //POSTs Use cases    
 
     @Test
