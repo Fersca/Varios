@@ -4,10 +4,8 @@ import static com.fersca.apicreator.DynamicJavaRunner.compile;
 import static com.fersca.apicreator.DynamicJavaRunner.execute;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.jsonString;
-import com.fersca.lib.HttpContext;
-import com.fersca.lib.Json;
 import static com.fersca.lib.Logger.println;
-import com.fersca.lib.Server;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +22,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.fersca.lib.HttpContext;
+import com.fersca.lib.Json;
+import com.fersca.lib.Server;
 /**
  *
  * @author fersc
@@ -32,7 +34,7 @@ public class Api {
     
     public static void main(String[] args) throws IOException, Exception {
                 
-        Api api = new Api();
+        Api api = new Api();       
         
         api.startWebserver();        
                      
@@ -47,7 +49,7 @@ public class Api {
         
         /*
         TODO: Ver si se puede detectar al inicio cuáles clases ya están compiladas así no se genera de nuevo el código.
-        Creo que no va a quedar otra que ver los archivos que ya están generados y de alguna manera limpiarlos y listo.
+        Creo que no va a quedar otra que ver los archivos dsdsque ya están generados y de alguna manera limpiarlos y listo.
         */
         
         //Si ya está compilado y funciona, cachea el código.
@@ -516,7 +518,7 @@ public class ##CLASS_NAME## {
     }
 
     //Crear un método para ese dominio con el nombre del archivo para cada uno de los métodos.
-    private static final Json domains = new Json();
+    private static final Map<String, Object> domains = new HashMap<>();
     
     private void startWebserver() throws IOException, Exception {
 
@@ -571,24 +573,34 @@ public class ##CLASS_NAME## {
             case "GET" -> 
                 //devuelve el json con la lista de los dominios.
                 context.write(domains);
-            case "POST" -> {
+            case "POST","PUT" -> {
                 //obtener el json
                 var postedJson = context.getJsonBody();
-                
+                                                
                 //valider si tiene la estructura correcta
                 String message = validStructure(postedJson);
                 if (message!=null){
                     context.badRequest("Invalid Json structure: "+message);
                     return;
                 }
-                
+
+                //Obtiene el dominio, para ver si existe y si es post no dejarlo 
+                //y si es un put, dejarlo.
                 //verificar si el dominio no existe ya
                 String domain = postedJson.j("structure").s("domain");
-                if (existsDomain(domain)){
-                    context.badRequest("Domain already exists");
-                    return;                    
-                }
                 
+                if (existsDomain(domain)){
+                	if (method.equals("POST")){
+    	    			context.badRequest("Domain already exists");
+    	                return;                                    			
+                	}                	
+                } else {
+                	if (method.equals("PUT")){
+    	    			context.badRequest("Domain do not exists");
+    	                return;                                    			
+                	}                	                	
+                }
+                                
                 try {
                     //guardar el archivo del dominio                    
                     createAPIDefinition(domain, jsonString(postedJson.getMap()));
@@ -604,9 +616,12 @@ public class ##CLASS_NAME## {
                     return;
                 }
                                              
-                context.created(postedJson);
+                if (method.equals("POST"))
+                	context.created(postedJson);
+                else 
+                	context.ok(postedJson);
             }
-
+            
             default -> context.notSupported();
         }          
        
@@ -821,7 +836,7 @@ public class ##CLASS_NAME## {
                     Json domainInfo = new Json();
                     domainInfo.put("name", domain);
                     domainInfo.put("elements_count", elements);
-                    domainInfo.put("api_definition", domains.j(domain).getMap());
+                    domainInfo.put("api_definition", domains.get(domain));
                     context.write(domainInfo);                
                     
                 }                                                

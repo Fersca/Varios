@@ -3,11 +3,9 @@
  */
 package gradle.example;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
-import org.junit.Assert;
-import static org.junit.Assert.*;
 
 public class AppTest {
     @Test public void appHasAGreeting() {
@@ -16,18 +14,10 @@ public class AppTest {
     }
     
     @Test
-    public void test_the_running_app_just_for_code_coverage(){
+    public void test_the_running_app_just_for_code_coverage() throws Exception{
         //inicia la app y levanta todos los files de las configuraciones
         String[] args = {""};
-        try {        
-            App.main(args);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Logger.getLogger(AppTest.class.getName()).log(Level.SEVERE, null, ex);            
-            Assert.fail();              
-        }        
-        
+        App.main(args);        
     }
-    
-    
+       
 }

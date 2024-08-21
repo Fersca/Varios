@@ -1,8 +1,7 @@
 package com.fersca.lib;
 
-import static com.fersca.lib.HttpCli.json;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static com.fersca.lib.Logger.println;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,15 +9,17 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import static com.fersca.lib.Logger.println;
-import java.util.HashMap;
-import java.util.ArrayList;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  *

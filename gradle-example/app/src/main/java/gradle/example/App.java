@@ -5,6 +5,13 @@
  */
 package gradle.example;
 
+import static com.fersca.lib.HttpCli.get;
+import static com.fersca.lib.HttpCli.getFutureJson;
+import static com.fersca.lib.HttpCli.getJson;
+import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.Logger.println;
+import static com.fersca.lib.Logger.setLogLevel;
+
 //imports estandars
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -14,18 +21,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
+import com.fersca.lib.HttpCli.FutureJson;
 //Fersca Libs
 import com.fersca.lib.HttpContext;
 import com.fersca.lib.Server;
-import static com.fersca.lib.HttpCli.getJson;
-import static com.fersca.lib.HttpCli.getFutureJson;
-import static com.fersca.lib.HttpCli.FutureJson;
-import static com.fersca.lib.HttpCli.get;
-import static com.fersca.lib.HttpCli.json;
-import static com.fersca.lib.Logger.println;
-import static com.fersca.lib.Logger.setLogLevel;
-import java.util.logging.Level;
 
 /**
  * La idea es probar todo lo necesario para poder hacer una Api rest:

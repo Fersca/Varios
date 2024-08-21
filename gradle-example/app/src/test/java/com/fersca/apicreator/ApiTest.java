@@ -1,21 +1,23 @@
 package com.fersca.apicreator;
 
 
-import static com.fersca.lib.HttpCli.get;
-import static com.fersca.lib.HttpCli.post;
-import static com.fersca.lib.HttpCli.delete;
-import static com.fersca.lib.HttpCli.put;
-import static com.fersca.lib.HttpCli.json;
-import static com.fersca.lib.HttpCli.jsonArray;
 import static com.fersca.apicreator.Api.DB;
-import static com.fersca.apicreator.Api.saveJsonFile;
+import static com.fersca.apicreator.Api.ROOTPATH;
 import static com.fersca.apicreator.Api.assureDirectory;
 import static com.fersca.apicreator.Api.createAPIDefinition;
-import static com.fersca.apicreator.Api.Directory;
-import static com.fersca.apicreator.Api.ROOTPATH;
 import static com.fersca.apicreator.Api.deleteAPIDefinition;
-import com.fersca.lib.Json;
-import com.fersca.lib.Server;
+import static com.fersca.apicreator.Api.saveJsonFile;
+import static com.fersca.lib.HttpCli.delete;
+import static com.fersca.lib.HttpCli.get;
+import static com.fersca.lib.HttpCli.json;
+import static com.fersca.lib.HttpCli.jsonArray;
+import static com.fersca.lib.HttpCli.post;
+import static com.fersca.lib.HttpCli.put;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,13 +26,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import com.fersca.apicreator.Api.Directory;
+import com.fersca.lib.Json;
+import com.fersca.lib.Server;
 
 /**
  *
@@ -525,9 +531,7 @@ public class ApiTest {
         assertEquals("200", result.statusCode().toString());
         
         var json = new Json(result.body());
-        
-        System.out.println(result.body());
-        
+                
         assertEquals("Lion",json.s("name"));
         assertNull(json.d("age"));
         assertNull(json.d("id"));
@@ -596,6 +600,133 @@ public class ApiTest {
                         
     }
 
+    @Test
+    public void test_post_existing_domain_should_fail() throws Exception {
+    
+        String planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain": "planes",
+                            "accept":["GET"],
+                            "fields":{
+                                "id":"Number",
+                                "name":"String",
+                                "moons":"Number",
+                                "age":"Number",
+                                "type":"String",
+                                "habitable":"Boolean",                                      
+                                "orbit":"Calculated"
+                            }    
+                        },
+                        "post_validations":{
+                            "age":"la edad tiene que ser mayor a 1000"
+                        },
+                        "get_online_calculations":{
+                            "orbit":"La orbita se calcula multiplcando el campo age por 23"
+                        }
+                        }                               
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        var result = post("http://localhost:8080/", planetsAPIDefinition);       
+        
+        assertEquals("400", result.statusCode().toString());      
+        var j = new Json(result.body());
+        assertEquals("Domain already exists", j.s("message"));
+                        
+    }
+
+    @Test
+    public void test_update_existing_domain_should_work() throws Exception {
+    
+        String planesAPIDefinition = """
+                {
+                "structure":{
+                    "domain": "planes",
+                    "accept":["GET"],
+                    "fields":{
+                        "id":"Number",
+                        "name":"String",
+                        "seats":"Number",
+                        "age":"Number",
+                        "for_water":"Boolean",
+                        "test_summary":"Calculated",
+                        "test_nickname":"Calculated",
+                        "test_color":"Calculated",
+                        "test_version":"Calculated"
+                    }    
+                },
+                "post_validations":{
+                    "name":"No puede tener mas de 50 caracrteres"
+                },
+                "get_online_calculations":{
+                    "test_summary":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad",
+                    "test_nickname":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad",
+                    "test_color":"obtener el nombre, ponerlo en mayúsculas, luego ponerle un guión, y poner tiene X años, en donde x es la edad"                                                                          
+                }
+                }                               
+                       """;                  
+        //hago el post (cosa que noe esta permitida)
+        var result = put("http://localhost:8080/", planesAPIDefinition);       
+        
+        //verifica que se haya creado
+        System.out.println(result.body());
+        assertEquals("200", result.statusCode().toString());       
+                
+        //verifica que cuando lo pido lo devueva en la URL (indicio que lo cargó en memoria)
+        result = get("http://localhost:8080/planes");                        
+        assertEquals("200", result.statusCode().toString());
+        
+        var api = new Json(result.body());
+               
+        var apiDefinition = api.j("api_definition");
+        
+        var postValidations = apiDefinition.j("post_validations");
+        
+        var nameValidation = postValidations.s("name");
+        
+        assertEquals("No puede tener mas de 50 caracrteres", nameValidation);
+                                
+    }
+    
+    
+    @Test
+    public void test_update_non_existing_domain_should_fail() throws Exception {
+    
+        String planetsAPIDefinition = """
+                        {
+                        "structure":{
+                            "domain": "houses",
+                            "accept":["GET"],
+                            "fields":{
+                                "id":"Number",
+                                "name":"String",
+                                "moons":"Number",
+                                "age":"Number",
+                                "type":"String",
+                                "habitable":"Boolean",                                      
+                                "orbit":"Calculated"
+                            }    
+                        },
+                        "post_validations":{
+                            "age":"la edad tiene que ser mayor a 1000"
+                        },
+                        "get_online_calculations":{
+                            "orbit":"La orbita se calcula multiplcando el campo age por 23"
+                        }
+                        }                               
+                               """;
+                  
+        //hago el post (cosa que noe esta permitida)
+        var result = put("http://localhost:8080/", planetsAPIDefinition);       
+        
+        assertEquals("400", result.statusCode().toString());      
+        var j = new Json(result.body());
+        assertEquals("Domain do not exists", j.s("message"));
+                        
+    }
+    
+    
     @Test
     public void test_creation_of_new_domain_with_invalid_json() throws Exception {
     

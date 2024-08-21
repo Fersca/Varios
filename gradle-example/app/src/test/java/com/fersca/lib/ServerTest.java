@@ -1,25 +1,27 @@
 package com.fersca.lib;
 
-import com.fersca.lib.HttpCli.FutureJson;
 import static com.fersca.lib.HttpCli.getFutureJson;
-import static com.fersca.lib.HttpCli.postJson;
 import static com.fersca.lib.HttpCli.getJson;
-import static com.fersca.lib.HttpCli.get;
 import static com.fersca.lib.HttpCli.json;
-import static com.fersca.lib.HttpCli.HttpResult;
-import static com.fersca.lib.Logger.setLogLevel;
+import static com.fersca.lib.HttpCli.postJson;
 import static com.fersca.lib.Logger.println;
+import static com.fersca.lib.Logger.setLogLevel;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import java.util.Enumeration;
-import java.util.HashMap;
-import static org.junit.Assert.*;
+
+import com.fersca.lib.HttpCli.FutureJson;
 
 
 /**
