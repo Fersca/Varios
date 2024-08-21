@@ -14,50 +14,50 @@ import java.util.Set;
 
 public class Json {
 
-    Map<String, Object> json;
+    Map<String, Object> internalJson;
 
     public Json(){
-        json = new HashMap<>();
+        internalJson = new HashMap<>();
     }
     public Json(Map<String, Object> jsonArg){
-        json = jsonArg;
+        internalJson = jsonArg;
     }
     public Json(String jsonArg){
-        json = json(jsonArg);
+        internalJson = json(jsonArg);
     }        
     public String s(String field){
-        return (String)json.get(field);
+        return (String)internalJson.get(field);
     }
     public Boolean b(String field){
-        return (Boolean)json.get(field);
+        return (Boolean)internalJson.get(field);
     }
     public Double d(String field){
-        return (Double)json.get(field);
+        return (Double)internalJson.get(field);
     }        
     public Set<String> keySet(){
-        return json.keySet();
+        return internalJson.keySet();
     }
     public void put(String field, Object value){
-        json.put(field, value);
+        internalJson.put(field, value);
     }
     public void remove(String field){
-        json.remove(field);
+        internalJson.remove(field);
     } 
     public boolean containsKey(String key){
-        return json.containsKey(key);
+        return internalJson.containsKey(key);
     }
     public Map<String, Object> getMap(){
-        return json;
+        return internalJson;
     }
     public Object getObject(String key){
-        return json.get(key);
+        return internalJson.get(key);
     }
     
     @SuppressWarnings("unchecked")
     public Json j(String field){
-        var j = json.get(field);
+        var j = internalJson.get(field);
         if (j!=null)
-            return new Json((Map<String, Object>)json.get(field));
+            return new Json((Map<String, Object>)internalJson.get(field));
         else 
             return null;
     }    
@@ -80,7 +80,7 @@ public class Json {
     */
     @SuppressWarnings("unchecked")
     public List<String> sa(String field){        
-        return (List<String>)json.get(field);  
+        return (List<String>)internalJson.get(field);  
     }                        
 
 }

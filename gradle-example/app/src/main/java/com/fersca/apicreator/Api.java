@@ -83,7 +83,7 @@ public class Api {
         String methodName = "getMessage";                        
         //Ejecuta el código ya compilado en la JVM
         Object result = execute(className, methodName, parameters);        
-        System.out.println("Resultado del método: " + result);
+        println("Resultado del método: " + result);
         if (result!=null){
             //compilación y ejecución correcta, cachea la compilación así no se hace de nuevo.
             compiledWorkingClasses.add(className);
@@ -132,9 +132,9 @@ public class ##CLASS_NAME## {
         
         String aiCode = generateAiCode(parametersWithTypes, description, api, field);
 
-        sourceCode = sourceCode.replaceAll("##CLASS_NAME##", api+"_"+field);
-        sourceCode = sourceCode.replaceAll("##PARAMETERS##", parametersCode);        
-        sourceCode = sourceCode.replaceAll("##AI_CODE##", aiCode);                        
+        sourceCode = sourceCode.replace("##CLASS_NAME##", api+"_"+field);
+        sourceCode = sourceCode.replace("##PARAMETERS##", parametersCode);        
+        sourceCode = sourceCode.replace("##AI_CODE##", aiCode);                        
                 
         return sourceCode;
         
@@ -203,12 +203,10 @@ public class ##CLASS_NAME## {
     que represente un fragmento de código, el mismo puede tener varias líneas, lo importante es que dejes el cálculo, ya sea un número o un texto, en el objeto result.                             
  
 """;
-        prompt = prompt.replaceAll("##VARIABLES##", variablesCode);
-        prompt = prompt.replaceAll("##DESCRIPTION##", description);
+        prompt = prompt.replace("##VARIABLES##", variablesCode);
+        prompt = prompt.replace("##DESCRIPTION##", description);
         
-        String code = executePrompt(prompt, apiName, apiField);
-        
-        return code;
+        return executePrompt(prompt, apiName, apiField);       
         
     }
 
@@ -805,9 +803,8 @@ public class ##CLASS_NAME## {
                         var finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros,selectionFields);
                         context.write(finalJsonArray);                
                     }                   
-                    default -> {
-                        context.badRequest("Command "+key+" not available");
-                    } 
+                    default -> context.badRequest("Command "+key+" not available");
+                     
                 }
             } else { //no vienen con ningun comando ni ID
                 
@@ -999,15 +996,15 @@ public class ##CLASS_NAME## {
                                         
                 }
             } else {
-                System.out.println("El directorio está vacío o no se pudo leer.");
+                println("El directorio está vacío o no se pudo leer.");
             }
         } else {
-            System.out.println("La ruta especificada no es un directorio.");
+            println("La ruta especificada no es un directorio.");
         }
         return fileContents;
     }
 
-    protected static enum Directory {
+    protected enum Directory {
         DOMAIN,
         DEFINITION
     }

@@ -88,8 +88,8 @@ public class Server {
                     for (String url : urls.keySet()) {
                         apiMessage = apiMessage + "<tr><td>"+url+"</tr></td>";
                     }                    
-                    html = html.replaceAll("##DOMAIN##", request.getRequestURI());
-                    html = html.replaceAll("##APIS##", apiMessage);
+                    html = html.replace("##DOMAIN##", request.getRequestURI());
+                    html = html.replace("##APIS##", apiMessage);
                     
                     response.getWriter().print(html);                
                     response.setStatus(400);

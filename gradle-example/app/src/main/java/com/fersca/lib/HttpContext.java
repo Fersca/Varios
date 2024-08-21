@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +23,11 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class HttpContext {
     
-    public HttpContext (HttpServletRequest request, HttpServletResponse response, Json args){
+    private static final String UTF_8 = "UTF-8";
+	private static final String APPLICATION_JSON_UTF_8 = "application/json; utf-8";
+	private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
+
+	public HttpContext (HttpServletRequest request, HttpServletResponse response, Json args){
         this.request = request;
         this.response = response;
         this.args = args;
@@ -43,8 +48,8 @@ public class HttpContext {
 
     public void write(){            
         this.response.setStatus(200);
-        this.response.setContentType("text/html; charset=UTF-8");
-        this.response.setCharacterEncoding("UTF-8");                                
+        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
+        this.response.setCharacterEncoding(UTF_8);                                
     }    
 
     public void write(String message){
@@ -67,8 +72,8 @@ public class HttpContext {
             String jsonString = gson.toJson(json);                
             this.response.getWriter().print(jsonString);
             this.response.setStatus(200);
-            this.response.setContentType("application/json; utf-8");
-            this.response.setCharacterEncoding("UTF-8");
+            this.response.setContentType(APPLICATION_JSON_UTF_8);
+            this.response.setCharacterEncoding(UTF_8);
 
 
         } catch (IOException ex) {
@@ -82,8 +87,8 @@ public class HttpContext {
             String jsonString = gson.toJson(json.getMap());                
             this.response.getWriter().print(jsonString);
             this.response.setStatus(200);
-            this.response.setContentType("application/json; utf-8");
-            this.response.setCharacterEncoding("UTF-8");
+            this.response.setContentType(APPLICATION_JSON_UTF_8);
+            this.response.setCharacterEncoding(UTF_8);
 
 
         } catch (IOException ex) {
@@ -91,7 +96,7 @@ public class HttpContext {
         }
     }
 
-    public void write(ArrayList<Json> jsonArray){
+    public void write(List<Json> jsonArray){
         try {
 
             ArrayList<Map<String, Object>> list = new ArrayList<>();
@@ -103,8 +108,8 @@ public class HttpContext {
             String jsonString = gson.toJson(list);                            
             this.response.getWriter().print(jsonString);
             this.response.setStatus(200);
-            this.response.setContentType("application/json; utf-8");
-            this.response.setCharacterEncoding("UTF-8");
+            this.response.setContentType(APPLICATION_JSON_UTF_8);
+            this.response.setCharacterEncoding(UTF_8);
 
         } catch (IOException ex) {
             println(Level.SEVERE, ex);
@@ -133,8 +138,8 @@ public class HttpContext {
     public void notSupported() {
         this.write("Method not supported");
         this.response.setStatus(405);
-        this.response.setContentType("text/html; charset=UTF-8");
-        this.response.setCharacterEncoding("UTF-8");                                
+        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
+        this.response.setCharacterEncoding(UTF_8);                                
     }
 
     public String getUrlPath(int i) {
@@ -156,8 +161,8 @@ public class HttpContext {
     public void notFound(String message) {        
         this.write(htmlNotFound.replaceAll("##ELEMENT##", message));
         this.response.setStatus(404);
-        this.response.setContentType("text/html; charset=UTF-8");
-        this.response.setCharacterEncoding("UTF-8");                                                                   
+        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
+        this.response.setCharacterEncoding(UTF_8);                                                                   
     }
     
     public Json getJsonBody(){       
@@ -180,8 +185,8 @@ public class HttpContext {
 {"message":"##MESSAGE##"}""";
         this.write(m.replaceAll("##MESSAGE##", message));
         this.response.setStatus(400);
-        this.response.setContentType("application/json; utf-8");
-        this.response.setCharacterEncoding("UTF-8");                                                                           
+        this.response.setContentType(APPLICATION_JSON_UTF_8);
+        this.response.setCharacterEncoding(UTF_8);                                                                           
     }
 
     public void ok(Json json) {
