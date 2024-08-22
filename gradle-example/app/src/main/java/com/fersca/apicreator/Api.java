@@ -71,7 +71,7 @@ public class Api {
             }
                        
             // Compilar el código fuente
-            boolean isCompiled = compile(sourceCode, className);
+            boolean isCompiled = compile(api,sourceCode, className);
             if (!isCompiled) {
                  return "Script compile for "+api+"/"+field+" error.";
             }
@@ -342,8 +342,11 @@ public class Api {
         //Check if the directory exists in the DB, it not create it.
         assureDirectory(domain,Directory.DOMAIN);
 
-        //Check if the directory for compiled calculated files, if not create it.
+        //Check if the directory for calculated code files, if not create it.
         assureDirectory(domain,Directory.DEFINITION);
+
+        //Check if the directory for compiled files, if not create it.
+        assureDirectory(domain,Directory.COMPILE);
         
         return domain;
         

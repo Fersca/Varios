@@ -1,13 +1,13 @@
 package com.fersca.apicreator;
 
-import static com.fersca.apicreator.Storage.ROOTPATH;
+import static com.fersca.apicreator.Storage.*;
+import static com.fersca.apicreator.Storage.saveCodeFile;
 
 /**
  *
  * @author Fernando.Scasserra
  */
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -21,14 +21,13 @@ public class DynamicJavaRunner {
 
     //constructor privado para evitar el publico por default en una clase static que se usa como utils
     private DynamicJavaRunner(){}
-        
-    public static boolean compile(String sourceCode, String className) {
+    
+    public static boolean compile(String api, String sourceCode, String className) {
                 
         try {
-            // Escribe el código fuente en un archivo .java
-            FileWriter writer = new FileWriter(className + ".java");
-            writer.write(sourceCode);
-            writer.close();
+        	
+        	//graba el código en una clase en el disco
+            saveCodeFile(api, className, sourceCode);
             
             // Obtiene el compilador del sistema
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -37,7 +36,7 @@ public class DynamicJavaRunner {
             }
             
             // Compila el archivo .java
-            int result = compiler.run(null, null, null, className + ".java");
+            int result = compiler.run(null, null, null, getCodeDiretory()+api+"/"+className + ".java");
             
             return result == 0;
         } catch (IOException e) {

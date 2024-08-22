@@ -122,6 +122,7 @@ public class ApiTest {
         //grea los diretorio de los dominios
         assureDirectory(animals, Directory.DOMAIN);
         assureDirectory(planes, Directory.DOMAIN);
+        assureDirectory("", Directory.API_DIR);
         
         //graba los jsons de ejemplo;
         saveJsonFile(animals, "1",animal1, Directory.DOMAIN);
@@ -223,7 +224,7 @@ public class ApiTest {
         ArrayList<Json> files = readAPIDefinitions();
         
         //debería tener un solo elemento
-        assertTrue(files.size()>2);
+        assertTrue(files.size()>=2);
         
         //obtengo el valor del campo domain
         for (Json apiDescription : files){            

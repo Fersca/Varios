@@ -4,6 +4,7 @@ import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.Logger.println;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,6 +23,7 @@ public class Storage {
 
 	//Directories 
     private static final String APIS_CALCULATED_FIELDS_CODE = "apis_calculated_fields_code/";
+    private static final String APIS_COMPILED_FIELDS_CODE = "apis_compiled_fields_code/";
 	private static final String APIS_DIR = "apis/";
 	private static final String DB_DIR = "db/";
 		
@@ -29,6 +31,10 @@ public class Storage {
 
     static {
         ROOTPATH = System.getProperty("user.dir")+"/";
+        try {
+			assureDirectory(ROOTPATH+APIS_DIR, Directory.API_DIR);
+		} catch (IOException e) {
+		}
     }
 	
 	
@@ -96,7 +102,9 @@ public class Storage {
 	
     protected enum Directory {
         DOMAIN,
-        DEFINITION
+        DEFINITION,
+        COMPILE,
+        API_DIR
     }
 
     protected static void createAPIDefinition(String domain, String jsonString) throws IOException{
@@ -125,8 +133,12 @@ public class Storage {
         
         if (type==Directory.DOMAIN){
             path = ROOTPATH+DB_DIR+name;
-        } else {
+        } else if (type==Directory.DEFINITION){
             path = ROOTPATH+APIS_CALCULATED_FIELDS_CODE+name;
+        } else if (type==Directory.COMPILE){
+        	path = ROOTPATH+APIS_COMPILED_FIELDS_CODE+name;
+        } else {
+        	path = ROOTPATH+APIS_DIR;
         }
         
         // Especifica el directorio que deseas leer
@@ -196,5 +208,16 @@ public class Storage {
 		}
 		return null;
 	}
+	
+    protected static void saveCodeFile(String api, String fileName, String sourceCode) throws IOException {
+        // Escribe el código fuente en un archivo .java
+        FileWriter writer = new FileWriter(ROOTPATH+APIS_COMPILED_FIELDS_CODE+api+"/"+fileName + ".java");
+        writer.write(sourceCode);
+        writer.close();    	
+    }
+    
+    protected static String getCodeDiretory() {
+    	return ROOTPATH+APIS_COMPILED_FIELDS_CODE;
+    }
 	
 }
