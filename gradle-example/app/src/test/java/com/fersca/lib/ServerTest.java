@@ -263,10 +263,9 @@ public class ServerTest {
     private static void pong(HttpContext context) {
         String part1 = "{\"status\""; 
         String part2 = ":\"pong\"}"; 
-        context.print(part1);
-        context.write(part2);
+        context.write(part1+part2);
         println(Level.INFO,part1+part2);
-    };
+    }
 
     private static void pongJson(HttpContext context) {
 

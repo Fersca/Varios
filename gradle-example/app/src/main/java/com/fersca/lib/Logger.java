@@ -10,7 +10,7 @@ import java.util.logging.SimpleFormatter;
 
 /**
  *
- * @author fersc
+ * @author Fernando.Scasserra
  */
 public class Logger {
 

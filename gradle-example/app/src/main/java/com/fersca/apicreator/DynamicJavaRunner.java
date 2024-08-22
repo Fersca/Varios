@@ -52,7 +52,6 @@ public class DynamicJavaRunner {
             
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{hardcodedOutDir.toURI().toURL()});
             Class<?> cls = Class.forName(className, true, classLoader);
-            Method[] methods = cls.getMethods();
                         
             // Encuentra y ejecuta el método especificado
             Method method = cls.getMethod(methodName, Map.class);

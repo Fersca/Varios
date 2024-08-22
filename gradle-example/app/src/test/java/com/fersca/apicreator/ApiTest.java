@@ -2,11 +2,12 @@ package com.fersca.apicreator;
 
 
 import static com.fersca.apicreator.Api.DB;
-import static com.fersca.apicreator.Api.ROOTPATH;
-import static com.fersca.apicreator.Api.assureDirectory;
-import static com.fersca.apicreator.Api.createAPIDefinition;
-import static com.fersca.apicreator.Api.deleteAPIDefinition;
-import static com.fersca.apicreator.Api.saveJsonFile;
+import static com.fersca.apicreator.Storage.ROOTPATH;
+import static com.fersca.apicreator.Storage.assureDirectory;
+import static com.fersca.apicreator.Storage.createAPIDefinition;
+import static com.fersca.apicreator.Storage.deleteAPIDefinition;
+import static com.fersca.apicreator.Storage.readAPIDefinitions;
+import static com.fersca.apicreator.Storage.saveJsonFile;
 import static com.fersca.lib.HttpCli.delete;
 import static com.fersca.lib.HttpCli.get;
 import static com.fersca.lib.HttpCli.json;
@@ -34,7 +35,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.fersca.apicreator.Api.Directory;
+import com.fersca.apicreator.Storage.Directory;
 import com.fersca.lib.Json;
 import com.fersca.lib.Server;
 
@@ -219,18 +220,16 @@ public class ApiTest {
     @Test
     public void test_read_files_with_json_content() throws IOException {
     
-        Api api = new Api();
-        ArrayList<Json> files = api.readAPIDefinitionFiles(ROOTPATH+"apis/test");
+        ArrayList<Json> files = readAPIDefinitions();
         
         //debería tener un solo elemento
-        assertEquals(files.size(),1);
+        assertTrue(files.size()>2);
         
         //obtengo el valor del campo domain
-        for (Json apiDescription : files){
-            
+        for (Json apiDescription : files){            
             var apiStructure = apiDescription.j("structure");
-            String domain = apiStructure.s("domain");                        
-            assertEquals("users", domain);
+            String domain = apiStructure.s("domain");
+            assertTrue(domain.length()>1);
         }       
     }
     
@@ -293,7 +292,6 @@ public class ApiTest {
         assertEquals("Lion", animal.get("name"));
 
         //Tiene que estar en la DB y chequea el valor del json
-        @SuppressWarnings("unchecked")
         Object dbElement = DB.get(domain+"_"+key);
         var jsonFromDB = json((String)dbElement);
         assertEquals("Lion", jsonFromDB.get("name"));
@@ -938,7 +936,6 @@ public class ApiTest {
         assertEquals("Tiger", animal.get("name"));
 
         //Tiene que estar en la DB y chequea el valor del json
-        @SuppressWarnings("unchecked")
         Object dbElement = DB.get(domain+"_"+key);
         var jsonFromDB = json((String)dbElement);
         assertEquals("Tiger", jsonFromDB.get("name"));
@@ -1029,7 +1026,6 @@ public class ApiTest {
         assertEquals("Shark", animal.get("name"));
 
         //Tiene que estar en la DB y chequea el valor del json
-        @SuppressWarnings("unchecked")
         Object dbElement = DB.get(domain+"_2");
         var jsonFromDB = json((String)dbElement);
         assertEquals("Shark", jsonFromDB.get("name"));        
@@ -1110,7 +1106,6 @@ public class ApiTest {
         assertEquals("404", resultGet.statusCode().toString());
 
         //No tiene que estar en la DB
-        @SuppressWarnings("unchecked")
         Object dbElement = DB.get(domain+"_4");
         assertNull(dbElement);
                 

@@ -2,37 +2,38 @@ package com.fersca.apicreator;
 
 import static com.fersca.apicreator.DynamicJavaRunner.compile;
 import static com.fersca.apicreator.DynamicJavaRunner.execute;
+import static com.fersca.apicreator.Storage.assureDirectory;
+import static com.fersca.apicreator.Storage.createAPIDefinition;
+import static com.fersca.apicreator.Storage.deleteFile;
+import static com.fersca.apicreator.Storage.readAPIDefinitions;
+import static com.fersca.apicreator.Storage.readDomainContent;
+import static com.fersca.apicreator.Storage.saveGeneratedCode;
+import static com.fersca.apicreator.Storage.saveJsonFile;
 import static com.fersca.lib.HttpCli.json;
 import static com.fersca.lib.HttpCli.jsonString;
 import static com.fersca.lib.Logger.println;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.fersca.apicreator.Storage.Directory;
 import com.fersca.lib.HttpContext;
 import com.fersca.lib.Json;
 import com.fersca.lib.Server;
 /**
  *
- * @author fersc
+ * @author Fernando.Scasserra
  */
 public class Api {
     
-    public static void main(String[] args) throws IOException, Exception {
+    public static void main(String[] args) throws Exception {
                 
         Api api = new Api();       
         
@@ -63,13 +64,9 @@ public class Api {
             String sourceCode = generateSourceCode(api, field, parametersWithTypes, description);
             
             //guarda el código generado
-            File scriptFile = new File(ROOTPATH+"/apis_calculated_fields_code/"+api+"/"+field+"_generated.sc");
-            Path filePath = Paths.get(scriptFile.getAbsolutePath());
-            try {
-                Files.writeString(filePath, sourceCode);
-            } catch (IOException ex) {
-                Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-                return "Error storing code for "+api+"/"+field;
+            var notOK = saveGeneratedCode(api, field, sourceCode);
+            if (notOK!=null) {
+            	return notOK;
             }
                        
             // Compilar el código fuente
@@ -96,11 +93,6 @@ public class Api {
                     
     }
 
-    protected static final String ROOTPATH;
-
-    static {
-        ROOTPATH = System.getProperty("user.dir")+"/";
-    }
     private static String generateSourceCode(String api, String field, Json parametersWithTypes, String description) {
         
         String sourceCode = 
@@ -275,35 +267,6 @@ public class ##CLASS_NAME## {
         */
         
         return code;
-                
-    }
-
-    private static void deleteFile(String domain, String key) {
-
-        Path filePath = Paths.get(ROOTPATH+"db/"+domain+"/"+key+".json");
-        try {
-            Files.delete(filePath);
-        } catch (IOException ex) {
-            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-
-    protected static void saveJsonFile(String domain, String key, String jsonString, Directory type) {
-        
-        Path filePath;
-        
-        if (type==Directory.DOMAIN){
-            filePath = Paths.get(ROOTPATH+"db/"+domain+"/"+key+".json");
-        } else {
-            filePath = Paths.get(ROOTPATH+"apis/"+domain+".api.def");
-        }
-        
-        try {
-            Files.write(filePath, jsonString.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException ex) {
-            Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-        }
                 
     }
     
@@ -523,13 +486,13 @@ public class ##CLASS_NAME## {
         println("Inicia el webserever");
         
         //Leer cada archivo de configuración de la ruta donde están las apis y por cada uno de ellos hacer:
-        ArrayList<Json> files = readAPIDefinitionFiles(ROOTPATH+"apis");
+        ArrayList<Json> definitions = readAPIDefinitions();
                 
         //Crear el webserver        
         Server.createHttpServer();
                 
         //Obtengo el valor del campo domain
-        for (Json apiDescription : files){
+        for (Json apiDescription : definitions){
             
             //crea el dominio en el server
             String domain = loadAPIDescription(apiDescription);
@@ -625,31 +588,8 @@ public class ##CLASS_NAME## {
        
     }
     
-    private static void uploadDBDomain(String domain) {
-        
-        // Especifica el directorio que deseas leer
-        File directory = new File(ROOTPATH+"db/"+domain);
-        
-        //genera la lista de domains                            
-        File[] files = directory.listFiles();
-        // Itera sobre los archivos y directorios encontrados
-        if (files != null) {
-            for (File file : files) {
-                String keyName = domain+"_"+file.getName().split("\\.")[0];
-                Path filePath = Paths.get(file.getAbsolutePath());
-                String content;
-
-                //si hay algun error no lo guarda en la DB.
-                try {
-                    content = Files.readString(filePath);
-                    DB.put(keyName, content);
-                } catch (IOException ex) {
-                    Logger.getLogger(Api.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        }                                                   
-        
+    private static void uploadDBDomain(String domain) {        
+    	DB.putAll(readDomainContent(domain));
     }
     
     
@@ -738,15 +678,10 @@ public class ##CLASS_NAME## {
             
             //Verifica si viene con selection
             String selection = context.getParameter("attributes");
-            ArrayList<String> selectionFields=null;
+            List<String> selectionFields=null;
             if (selection!=null && !selection.equals("")){
                 String[] split = selection.split(",");
-                selectionFields = new ArrayList<>();
-
-                //recorro los ids y busco los jsons
-                for (String id : split) {
-                    selectionFields.add(id);
-                }
+                selectionFields = Arrays.asList(split);               
             }             
                         
             try {
@@ -860,7 +795,9 @@ public class ##CLASS_NAME## {
                 deleteFile(domain, key.toString());
 
                 //Devuelve el json generado en base a los campos y los datos de la DB
-                context.write("Element: "+domain+ " "+key.toString()+ " deleted");                
+                Json j = new Json();
+                j.put("message", "Element: "+domain+ " "+key.toString()+ " deleted");
+                context.write(j);                
             } else {
                 //Si no existe, devuelve un not_fount                
                 context.notFound(key.toString());
@@ -960,96 +897,5 @@ public class ##CLASS_NAME## {
 
             //Si los algoritmos se ejecutaron directamente, guardar el JSON en la base de datos (por ahora un hashmap)
        
-    };
-    
-    
-    protected ArrayList<Json> readAPIDefinitionFiles(String path) throws IOException {
-        
-        // Especifica el directorio que deseas leer
-        File directory = new File(path);
-        
-        ArrayList<Json> fileContents = new ArrayList<>();
-
-        // Verifica que el objeto File es un directorio
-        if (directory.isDirectory()) {
-            // Obtiene la lista de archivos en el directorio
-            File[] files = directory.listFiles();
-
-            // Itera sobre los archivos y directorios encontrados
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) continue;
-                    // Lee el archivo y pasa el contenido a Json
-                    Path filePath = Paths.get(file.getAbsolutePath());
-                    String content = Files.readString(filePath);
-                    
-                    try {
-                        var jsonContent = new Json(json(content));
-                        // Guarda el nombre del archivo y el contenido en el mapa                    
-                        fileContents.add(jsonContent);                        
-                    } catch (Exception e){
-                        println("Error parsing json: ---->");
-                        println("Path: "+file.getAbsolutePath());
-                        println(content);
-                        e.printStackTrace();
-                    }             
-                                        
-                }
-            } else {
-                println("El directorio está vacío o no se pudo leer.");
-            }
-        } else {
-            println("La ruta especificada no es un directorio.");
-        }
-        return fileContents;
-    }
-
-    protected enum Directory {
-        DOMAIN,
-        DEFINITION
-    }
-
-    protected static void createAPIDefinition(String domain, String jsonString) throws IOException{
-        
-        //crea el directorio donde estaran las compilaciones de los campos de la api
-        assureDirectory(domain, Directory.DEFINITION);
-        
-        //guarda el file con la definición de la api
-        saveJsonFile(domain, domain, jsonString, Directory.DEFINITION);
-    }
-
-    protected static void deleteAPIDefinition(String domain) throws IOException{                
-        try {
-            String path = ROOTPATH+"apis/"+domain+".api.def";
-            File file = new File(path);
-            Path filePath = Paths.get(file.getAbsolutePath());        
-            Files.delete(filePath);
-        } catch (NoSuchFileException e){
-            //no pasa nada si no encuntra el file.
-        }
-    }
-    
-    protected static void assureDirectory(String name, Directory type) throws IOException {
-        
-        String path;
-        
-        if (type==Directory.DOMAIN){
-            path = ROOTPATH+"db/"+name;
-        } else {
-            path = ROOTPATH+"apis_calculated_fields_code/"+name;
-        }
-        
-        // Especifica el directorio que deseas leer
-        File directory = new File(path);
-        
-        // Verifica que el objeto File es un directorio
-        if (directory.exists() && directory.isDirectory()) {
-            return;            
-        }
-        
-        //Crea el directorio si no existe
-        Path filePath = Paths.get(directory.getAbsolutePath());        
-        Files.createDirectories(filePath);
-        
-    }
+    }        
 }

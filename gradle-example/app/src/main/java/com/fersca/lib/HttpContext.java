@@ -25,7 +25,6 @@ public class HttpContext {
     
     private static final String UTF_8 = "UTF-8";
 	private static final String APPLICATION_JSON_UTF_8 = "application/json; utf-8";
-	private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
 	public HttpContext (HttpServletRequest request, HttpServletResponse response, Json args){
         this.request = request;
@@ -46,10 +45,8 @@ public class HttpContext {
         }
     }
 
-    public void write(){            
-        this.response.setStatus(200);
-        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
-        this.response.setCharacterEncoding(UTF_8);                                
+    public void write(){       
+    	setHttpStatus(200);
     }    
 
     public void write(String message){
@@ -71,10 +68,7 @@ public class HttpContext {
             // Convertir el mapa a un string JSON
             String jsonString = gson.toJson(json);                
             this.response.getWriter().print(jsonString);
-            this.response.setStatus(200);
-            this.response.setContentType(APPLICATION_JSON_UTF_8);
-            this.response.setCharacterEncoding(UTF_8);
-
+            setHttpStatus(200);
 
         } catch (IOException ex) {
             println(Level.SEVERE, ex);
@@ -86,10 +80,7 @@ public class HttpContext {
             // Convertir el mapa a un string JSON
             String jsonString = gson.toJson(json.getMap());                
             this.response.getWriter().print(jsonString);
-            this.response.setStatus(200);
-            this.response.setContentType(APPLICATION_JSON_UTF_8);
-            this.response.setCharacterEncoding(UTF_8);
-
+            setHttpStatus(200);
 
         } catch (IOException ex) {
             println(Level.SEVERE, ex);
@@ -107,10 +98,7 @@ public class HttpContext {
             // Convertir el mapa a un string JSON
             String jsonString = gson.toJson(list);                            
             this.response.getWriter().print(jsonString);
-            this.response.setStatus(200);
-            this.response.setContentType(APPLICATION_JSON_UTF_8);
-            this.response.setCharacterEncoding(UTF_8);
-
+            setHttpStatus(200);
         } catch (IOException ex) {
             println(Level.SEVERE, ex);
         }
@@ -118,8 +106,7 @@ public class HttpContext {
     
     public void created(Json json){
         this.write(json.getMap());
-        //Overwrite the 200 with 201
-        this.response.setStatus(201);                        
+        setHttpStatus(201);                        
     }
        
     public String getParameter(String param){
@@ -136,10 +123,8 @@ public class HttpContext {
     }
 
     public void notSupported() {
-        this.write("Method not supported");
-        this.response.setStatus(405);
-        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
-        this.response.setCharacterEncoding(UTF_8);                                
+        setErrorMessage("Method not supported");
+        setHttpStatus(405);
     }
 
     public String getUrlPath(int i) {
@@ -152,17 +137,9 @@ public class HttpContext {
 
     }
 
-    private static final String htmlNotFound="""
-                       <html>
-                       <h2> 404 Element not found: ##ELEMENT## </h2>
-                       </html>
-                       """;
-
     public void notFound(String message) {        
-        this.write(htmlNotFound.replaceAll("##ELEMENT##", message));
-        this.response.setStatus(404);
-        this.response.setContentType(TEXT_HTML_CHARSET_UTF_8);
-        this.response.setCharacterEncoding(UTF_8);                                                                   
+    	setErrorMessage(message);
+    	setHttpStatus(404);
     }
     
     public Json getJsonBody(){       
@@ -181,18 +158,25 @@ public class HttpContext {
     }
     
     public void badRequest(String message) {
-        String m = """
+        setErrorMessage(message);
+        setHttpStatus(400);                                                                           
+    }
+
+	private void setHttpStatus(int statusCode) {
+		this.response.setStatus(statusCode);
+        this.response.setContentType(APPLICATION_JSON_UTF_8);
+        this.response.setCharacterEncoding(UTF_8);
+	}
+
+	private void setErrorMessage(String message) {
+		String m = """
 {"message":"##MESSAGE##"}""";
         this.write(m.replaceAll("##MESSAGE##", message));
-        this.response.setStatus(400);
-        this.response.setContentType(APPLICATION_JSON_UTF_8);
-        this.response.setCharacterEncoding(UTF_8);                                                                           
-    }
+	}
 
     public void ok(Json json) {
         this.write(json.getMap());
-        this.response.setStatus(200);                        
-
+        setHttpStatus(200);                        
     }
 
 }
