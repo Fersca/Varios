@@ -1,5 +1,7 @@
 package com.fersca.apicreator;
 
+import static com.fersca.apicreator.Storage.ROOTPATH;
+
 /**
  *
  * @author Fernando.Scasserra
@@ -48,7 +50,7 @@ public class DynamicJavaRunner {
         try {
             
             // Directorio hardcodeado donde se espera que estén las clases compiladas
-            File hardcodedOutDir = new File("/Users/Fernando.Scasserra/code/Varios/gradle-example/app");
+            File hardcodedOutDir = new File(ROOTPATH);
             
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{hardcodedOutDir.toURI().toURL()});
             Class<?> cls = Class.forName(className, true, classLoader);
