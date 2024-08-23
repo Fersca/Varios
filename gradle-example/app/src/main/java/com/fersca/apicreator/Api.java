@@ -80,7 +80,7 @@ public class Api {
 
         String methodName = "getMessage";                        
         //Ejecuta el código ya compilado en la JVM
-        Object result = execute(className, methodName, parameters);        
+        Object result = execute(api, className, methodName, parameters);        
         println("Resultado del método: " + result);
         if (result!=null){
             //compilación y ejecución correcta, cachea la compilación así no se hace de nuevo.

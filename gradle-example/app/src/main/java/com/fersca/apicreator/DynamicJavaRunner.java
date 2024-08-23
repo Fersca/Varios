@@ -45,11 +45,11 @@ public class DynamicJavaRunner {
         }
     }
 
-    public static Object execute(String className, String methodName, Map<String, Object> parameters) {
+    public static Object execute(String api, String className, String methodName, Map<String, Object> parameters) {
         try {
             
             // Directorio hardcodeado donde se espera que estén las clases compiladas
-            File hardcodedOutDir = new File(ROOTPATH);
+            File hardcodedOutDir = new File(getCodeDiretory()+api);
             
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{hardcodedOutDir.toURI().toURL()});
             Class<?> cls = Class.forName(className, true, classLoader);
