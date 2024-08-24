@@ -24,10 +24,10 @@ public class Storage {
 	//Directories 
     private static final String APIS_CALCULATED_FIELDS_CODE = "apis_calculated_fields_code/";
     private static final String APIS_COMPILED_FIELDS_CODE = "apis_compiled_fields_code/";
-	private static final String APIS_DIR = "apis/";
-	private static final String DB_DIR = "db/";
+    private static final String APIS_DIR = "apis/";
+    protected static final String DB_DIR = "db/";
 		
-	protected static final String ROOTPATH;
+    protected static final String ROOTPATH;
 
     static {
         ROOTPATH = System.getProperty("user.dir")+"/";

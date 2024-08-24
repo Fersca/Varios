@@ -3,6 +3,7 @@ package com.fersca.apicreator;
 
 import static com.fersca.apicreator.Api.DB;
 import static com.fersca.apicreator.Storage.ROOTPATH;
+import static com.fersca.apicreator.Storage.DB_DIR;
 import static com.fersca.apicreator.Storage.assureDirectory;
 import static com.fersca.apicreator.Storage.createAPIDefinition;
 import static com.fersca.apicreator.Storage.deleteAPIDefinition;
@@ -62,9 +63,8 @@ public class ApiTest {
     public ApiTest() {
     }
     
-    @BeforeClass
-    public static void setUpClass() throws IOException {                                        
-        
+    private static void creaElementos(){
+
         //Crea los jsons de ejemplo
         String animals = "animals";
         String planes = "planes";
@@ -104,7 +104,16 @@ public class ApiTest {
                          "age":2
                          }
                          """;
-        
+
+        String animal5 = """
+                 {
+                 "id":5,
+                 "name":"Monkey",
+                 "mamal":true,
+                 "age":5
+                 }
+                 """;
+
         String plane1 = """
                          {
                          "id":1,
@@ -114,23 +123,41 @@ public class ApiTest {
                          "for_water":false
                          }
                          """;        
-        
-        //borra el directorio donde se deja el codigo calculado
-        File directory = new File(ROOTPATH+"apis_calculated_fields_code"); // Reemplaza con la ruta de tu directorio       
-        deleteDirectory(directory);
-                
-        //grea los diretorio de los dominios
-        assureDirectory(animals, Directory.DOMAIN);
-        assureDirectory(planes, Directory.DOMAIN);
-        assureDirectory("", Directory.API_DIR);
-        
+
         //graba los jsons de ejemplo;
         saveJsonFile(animals, "1",animal1, Directory.DOMAIN);
         saveJsonFile(animals, "2",animal2, Directory.DOMAIN);
         saveJsonFile(animals, "3",animal3, Directory.DOMAIN);
         saveJsonFile(animals, "4",animal4, Directory.DOMAIN);
-        
+        saveJsonFile(animals, "5",animal5, Directory.DOMAIN);        
         saveJsonFile(planes, "1",plane1, Directory.DOMAIN);
+        
+        
+    }
+    
+    @BeforeClass
+    public static void setUpClass() throws IOException {                                        
+        
+        
+        //borra el directorio donde se deja el codigo calculado
+        File directory = new File(ROOTPATH+"apis_calculated_fields_code"); // Reemplaza con la ruta de tu directorio       
+        deleteDirectory(directory);
+
+        //borra los archivos previos de la DB
+        directory = new File(ROOTPATH+DB_DIR+"animals"); // Reemplaza con la ruta de tu directorio       
+        deleteDirectory(directory);
+        directory = new File(ROOTPATH+DB_DIR+"planes"); // Reemplaza con la ruta de tu directorio       
+        deleteDirectory(directory);
+        directory = new File(ROOTPATH+DB_DIR+"planets"); // Reemplaza con la ruta de tu directorio       
+        deleteDirectory(directory);        
+        
+        //grea los diretorio de los dominios
+        assureDirectory("animals", Directory.DOMAIN);
+        assureDirectory("planes", Directory.DOMAIN);
+        assureDirectory("", Directory.API_DIR);
+                        
+        //crea los jsons
+        creaElementos();
         
         //guarda el archivo con la parametrización de la api de animals
         String animalsAPIDefinition = """
@@ -159,7 +186,7 @@ public class ApiTest {
                         {
                         "structure":{
                             "domain": "planes",
-                            "accept":["GET"],
+                            "accept":["GET", "POST"],
                             "fields":{
                                 "id":"Number",
                                 "name":"String",
@@ -186,8 +213,8 @@ public class ApiTest {
         
 
         //crea la definición de la api
-        createAPIDefinition(animals, animalsAPIDefinition);
-        createAPIDefinition(planes, planesAPIDefinition);
+        createAPIDefinition("animals", animalsAPIDefinition);
+        createAPIDefinition("planes", planesAPIDefinition);
         
         //borra la definición de los planetas que se crea con un test
         deleteAPIDefinition("planets");
@@ -313,7 +340,7 @@ public class ApiTest {
                             """;
         
         //hago el post (cosa que noe esta permitida)
-        var result = post("http://localhost:8080/"+domain, jsonString);                        
+        var result = put("http://localhost:8080/"+domain, jsonString);                        
         
         //debería devolveme 405
         assertEquals("405", result.statusCode().toString());
@@ -361,6 +388,64 @@ public class ApiTest {
                         
     }
 
+    //Hace un get de todos los elementos de una colección y se fija si devuelve un array
+    @Test
+    public void test_get_all_elements_paginated() throws Exception {
+                
+        String domain = "animals";
+
+        //debería devolver 200
+        var result = get("http://localhost:8080/"+domain+"/all?page=1&offset=2");                        
+        assertEquals("200", result.statusCode().toString());
+
+        var animals =jsonArray(result.body());
+
+        assert(animals.size()==2);
+        var animal1 = new Json(animals.get(0));
+        var animal2 = new Json(animals.get(1));
+        
+        var id1 = animal1.d("id");
+        var id2 = animal2.d("id");
+        
+        assertEquals("1.0", id1.toString());
+        assertEquals("2.0", id2.toString());
+        
+        //pongo una pagina menor a 0 debería devolver un array vacio
+        result = get("http://localhost:8080/"+domain+"/all?page=0&offset=2");                        
+        assertEquals("200", result.statusCode().toString());
+        animals =jsonArray(result.body());
+        assert(animals.isEmpty());
+
+        //pongo una pagina mayor al tramaño total debería devolver vacio
+        result = get("http://localhost:8080/"+domain+"/all?page=10&offset=2");                        
+        assertEquals("200", result.statusCode().toString());
+        animals =jsonArray(result.body());
+        assert(animals.isEmpty());
+        
+        //pongo una pagina intermadia (hay 5 elementos, devuelve el 3 y 4)
+        result = get("http://localhost:8080/"+domain+"/all?page=2&offset=2");                        
+        assertEquals("200", result.statusCode().toString());
+        animals =jsonArray(result.body());
+        assertEquals(animals.size(),2);
+        animal1 = new Json(animals.get(0));
+        animal2 = new Json(animals.get(1));        
+        id1 = animal1.d("id");
+        id2 = animal2.d("id");        
+        assertEquals("3.0", id1.toString());
+        assertEquals("4.0", id2.toString());
+
+        //pongo una pagina final (hay 5 elementos, el ultimo solo con offset 2 porque se llego al final)
+        result = get("http://localhost:8080/"+domain+"/all?page=3&offset=2");                        
+        assertEquals("200", result.statusCode().toString());
+        animals =jsonArray(result.body());
+        assertEquals(1,animals.size());
+        animal1 = new Json(animals.get(0));
+        id1 = animal1.d("id");
+        assertEquals("5.0", id1.toString());
+
+    }
+    
+    
     //Hace un get de todos los elementos de una colección y se fija si devuelve un array
     @Test
     public void test_an_invalid_command() throws Exception {
@@ -642,7 +727,7 @@ public class ApiTest {
                 {
                 "structure":{
                     "domain": "planes",
-                    "accept":["GET"],
+                    "accept":["GET","POST"],
                     "fields":{
                         "id":"Number",
                         "name":"String",
@@ -908,15 +993,17 @@ public class ApiTest {
     public void test_creation_of_new_element_in_a_domain() throws Exception {
     
    
-        String domain = "animals";
+        String domain = "planes";
 
         String jsonString = """
-                            {
-                            "name":"Tiger",
-                            "age":3,
-                            "mamal":true
-                            }
-                            """;
+                         {
+                         "id":2,
+                         "name":"Boing 737",
+                         "seats":150,
+                         "age":25,
+                         "for_water":false
+                         }
+                         """;        
         
         //hago el post (cosa que noe esta permitida)
         var result = post("http://localhost:8080/"+domain, jsonString);                        
@@ -924,22 +1011,22 @@ public class ApiTest {
         //debería devolveme 201 created
         assertEquals("201", result.statusCode().toString());
         
-        var tigerJson = json(result.body());
+        var planeJson = json(result.body());
         
-        Integer key = ((Double)tigerJson.get("id")).intValue();
+        Integer key = ((Double)planeJson.get("id")).intValue();
         
         //debería devolver 200
         var resultGet = get("http://localhost:8080/"+domain+"/"+key);                        
         assertEquals("200", resultGet.statusCode().toString());
 
-        var animal =json(resultGet.body());
+        var plane =json(resultGet.body());
 
-        assertEquals("Tiger", animal.get("name"));
+        assertEquals("Boing 737", plane.get("name"));
 
         //Tiene que estar en la DB y chequea el valor del json
         Object dbElement = DB.get(domain+"_"+key);
         var jsonFromDB = json((String)dbElement);
-        assertEquals("Tiger", jsonFromDB.get("name"));
+        assertEquals("Boing 737", jsonFromDB.get("name"));
         
         assertTrue(fileExists(domain, key.toString(),Directory.DOMAIN));
                                                       

@@ -471,6 +471,32 @@ public class Api {
         
     }
     
+    record Pagination(int page, int offset){}
+       
+    private static ArrayList<Json> getPaginatedSubgroup(ArrayList<Json> jsonArray, Pagination pagination){
+
+        //si no hay paginación devuelve el mismo array.
+        if (pagination==null) return jsonArray;
+        
+        //crea el array para guardar los elementos
+        var paginatedArray = new ArrayList<Json>();
+        
+        //si la pagina es menor a 1 devuelve vacion
+        if (pagination.page<1) return paginatedArray;
+        
+        //primero ordena el array según el ID
+        jsonArray.sort((j1,j2) -> Double.compare(j1.d("id"),j2.d("id")));
+              
+        //busca el la posicion de inicio        
+        int init = (pagination.page*pagination.offset)-pagination.offset;
+                
+        //empieza desde el init y cuenta hasta el offset
+        for (int i=init;(i<(init+pagination.offset))&&(i<jsonArray.size());i++) 
+            paginatedArray.add(jsonArray.get(i));
+                
+        return paginatedArray;
+    }
+    
     private static void generalController(HttpContext context) {
 
         
@@ -510,7 +536,7 @@ public class Api {
                 String[] split = selection.split(",");
                 selectionFields = Arrays.asList(split);               
             }             
-                        
+                                    
             try {
                 //Chequea si la key es un número, si es así, busca un elemento
                 idKey= Integer.valueOf(key);            
@@ -530,12 +556,32 @@ public class Api {
                     context.notFound(""+key);
                 }                               
             } else if (idKey==null && key!=null && key.length()>0){ //No viene una key numerica, pero hay un comando
+                
+                //Chequea si viene la paginación
+                String pageStr = context.getParameter("page");
+                String offsetStr = context.getParameter("offset");
+
+                int page;
+                int offset;
+                Pagination paginationSetting;
+
+                try {
+                    page = Integer.parseInt(pageStr);
+                    offset = Integer.parseInt(offsetStr);
+                    paginationSetting = new Pagination(page, offset);
+                } catch (NumberFormatException e){
+                    //no puede convertir la paginación
+                    paginationSetting = null;
+                }
+                                               
                 //Verifica si es un comando
                 switch (key){
+                                                            
                     case "all" -> {
                         //arma un json con todos los elementos
                         var finalJsonArray = getAllElements(domain, fields, onlineCalculations,null,selectionFields);
-                        context.write(finalJsonArray);                
+                        var paginatedfinalJsonArray = getPaginatedSubgroup(finalJsonArray, paginationSetting);
+                        context.write(paginatedfinalJsonArray);                
                     }
                     case "search" -> {
                         
@@ -563,7 +609,8 @@ public class Api {
                       
                         //arma un json con todos los elementos que corresponden a los filtros
                         var finalJsonArray = getAllElements(domain, fields, onlineCalculations, filtros,selectionFields);
-                        context.write(finalJsonArray);                
+                        var paginatedfinalJsonArray = getPaginatedSubgroup(finalJsonArray, paginationSetting);
+                        context.write(paginatedfinalJsonArray);                                        
                     }                   
                     default -> context.badRequest("Command "+key+" not available");
                      
