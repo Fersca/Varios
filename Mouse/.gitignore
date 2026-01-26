@@ -1,0 +1,11 @@
+# Compiled classes
+bin/
+
+# Test coverage reports
+coverage/
+
+# Dependencies (downloaded automatically by test.sh)
+lib/
+
+# JaCoCo execution data
+*.exec
